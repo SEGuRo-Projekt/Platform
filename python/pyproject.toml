@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "seguro-platform"
+version = "0.0.1"
+authors = [
+  { name="Steffen Vogel", email="steffen.vogel@opal-rt.com" },
+  { name="Felix Wege", email="felix.wege@eonerc.rwth-aachen.de" },
+]
+description = "Common Python helpers for accessing the SEGuRo platform"
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/SEGuRo-Projekt/Plattform"
+"Bug Tracker" = "https://github.com/SEGuRo-Projekt/Plattform/issues"
