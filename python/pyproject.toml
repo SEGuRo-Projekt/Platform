@@ -4,7 +4,6 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "seguro-platform"
-version = "0.0.1"
 authors = [
   { name="Steffen Vogel", email="steffen.vogel@opal-rt.com" },
   { name="Felix Wege", email="felix.wege@eonerc.rwth-aachen.de" },
@@ -18,6 +17,17 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
+dynamic = ["dependencies"]
+
+
 [project.urls]
 "Homepage" = "https://github.com/SEGuRo-Projekt/Plattform"
 "Bug Tracker" = "https://github.com/SEGuRo-Projekt/Plattform/issues"
+
+[tool.setuptools]
+packages = ["seguro.platform"]
+
+[tool.setuptools.dynamic]
+version = {attr = "seguro.platform.__version__"}
+readme = {file = ["README.rst", "USAGE.rst"]}
+dependencies = {file = ["requirements.txt"]}
