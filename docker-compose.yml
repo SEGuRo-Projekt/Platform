@@ -1,4 +1,5 @@
 ---
+version: "3.9"
 
 services:
   minio:
@@ -6,7 +7,15 @@ services:
     command: server
       --address ":9000"
       --console-address ":9001"
+      --ftp="address=:2021"
+      --ftp="passive-port-range=30000-40000"
+      --sftp="address=:2022"
+      --sftp="ssh-private-key=/keys/ssh_host_rsa_key"
       /data
+
+      # --ftp="tls-private-key=path/to/private.key"
+      # --ftp="tls-public-cert=path/to/public.crt"
+
     environment:
     - MINIO_ROOT_USER=${S3_USER}
     - MINIO_ROOT_PASSWORD=${S3_PASSWORD}
@@ -19,6 +28,14 @@ services:
       published: 9001
       protocol: tcp
       mode: host
+    - target: 2021
+      published: 2021
+      protocol: tcp
+      mode: host
+    - target: 2022
+      published: 2022
+      protocol: tcp
+      mode: host
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 10s
@@ -29,6 +46,9 @@ services:
     - type: bind
       source: ./data/minio/
       target: /data/
+    - type: bind
+      source: ./data/keys
+      target: /keys
 
   minio-setup:
     build:
@@ -45,6 +65,9 @@ services:
     - type: bind
       source: ./etc/minio/setup.py
       target: /setup.py
+    - type: bind
+      source: ./data/keys
+      target: /keys
 
   mosquitto:
     image: eclipse-mosquitto:2
