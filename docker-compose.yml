@@ -30,6 +30,22 @@ services:
       source: ./data/minio/
       target: /data/
 
+  minio-setup:
+    build:
+      context: ./images/minio-setup
+    depends_on:
+    - minio
+    env_file:
+    - .env
+    entrypoint: python /setup.py
+    environment:
+    - MINIO_ROOT_USER=${S3_USER}
+    - MINIO_ROOT_PASSWORD=${S3_PASSWORD}
+    volumes:
+    - type: bind
+      source: ./etc/minio/setup.py
+      target: /setup.py
+
   mosquitto:
     image: eclipse-mosquitto:2
     volumes:
@@ -53,18 +69,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-
-  configure-minio:
-    image: minio/mc:RELEASE.2023-05-04T18-10-16Z
-    depends_on:
-    - minio
-    env_file:
-    - .env
-    entrypoint: /bin/sh /setup.sh
-    volumes:
-    - type: bind
-      source: ./etc/minio/setup.sh
-      target: /setup.sh
 
   yacht:
     image: selfhostedpro/yacht
