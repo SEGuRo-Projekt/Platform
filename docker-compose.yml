@@ -65,3 +65,17 @@ services:
     - type: bind
       source: ./etc/minio/setup.sh
       target: /setup.sh
+
+  yacht:
+    image: selfhostedpro/yacht
+    container_name: yacht
+    restart: unless-stopped
+    ports:
+      - 8000:8000
+    volumes:
+      - ./data/yacht:/config
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - PUID=0
+      - PGID=0
+      - COMPOSE_DIR=/compose
