@@ -5,6 +5,8 @@ import logging
 import minio
 from pprint import pformat
 
+BUCKETS = ['seguro', 'registry']
+
 def main():
     logging.basicConfig(format='%(asctime)s %(name)s %(levelname)s: %(message)s', level=logging.INFO)
 
@@ -24,11 +26,12 @@ def main():
 
     logging.info('Server info: %s', pformat(mca.info()))
 
-    if mc.bucket_exists('seguro'):
-        logging.info('Bucket already exists')
-    else:
-        logging.info('Creating bucket:')
-        mc.make_bucket('seguro')
+    for bucket in BUCKETS:
+        if mc.bucket_exists(bucket):
+            logging.info(f'Bucket {bucket} already exists')
+        else:
+            logging.info(f'Creating bucket {bucket}:')
+            mc.make_bucket(bucket)
 
 if __name__ == '__main__':
     main()

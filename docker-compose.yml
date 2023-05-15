@@ -106,3 +106,38 @@ services:
       - PUID=0
       - PGID=0
       - COMPOSE_DIR=/compose
+
+  registry:
+    restart: always
+    image: registry:2
+    ports:
+    - protocol: tcp
+      mode: host
+      published: 5001
+      target: 5001
+    volumes:
+    - type: bind
+      source: ./data/registry
+      target: /var/lib/registry
+    - type: bind
+      source: ./etc/registry
+      target: /etc/docker/registry
+    - type: bind
+      source: ./data/keys
+      target: /keys
+
+  registry-ui:
+    image: joxit/docker-registry-ui:latest
+    ports:
+    - protocol: tcp
+      target: 80
+      published: 8080
+    environment:
+    - REGISTRY_TITLE=SEGuRo Private Docker Registry
+    - REGISTRY_URL=http://localhost:5001
+    - SINGLE_REGISTRY=true
+    - DELETE_IMAGES=true
+    - SHOW_CONTENT_DIGEST=true
+    - THEME=light
+    depends_on:
+    - registry
