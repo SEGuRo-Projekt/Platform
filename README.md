@@ -24,7 +24,14 @@ docker compose up -d
   - **Passwort:** pass
 
 
+## Entwicklung
+
+1. Install Docker
+2. Install Git
+3. Install Visual Studio Code
+4. Clone Repo: `git clone git@github.com:SEGuRo-Projekt/Plattform.git`
+
 ## Lizenz
 
-SPDX-FileCopyrightText: 2023 SEGuRo Project Consortium
+SPDX-FileCopyrightText: 2023 Steffen Vogel <steffen.vogel@opal-rt.com>, OPAL-RT Germany GmbH
 SPDX-License-Identifier: Apache-2.0

@@ -9,7 +9,11 @@ FROM python:3.11
 
 COPY --from=builder /go/bin/mc /usr/bin/mc
 
-RUN pip install minio==7.1.14
+RUN pip install --no-cache-dir \
+    minio==7.1.14
 
 RUN apt-get update && \
-    apt-get install --yes openssh-client
+    apt-get install --yes --no-install-recommends \
+        openssh-client=1:8.4 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*

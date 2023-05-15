@@ -1,31 +1,28 @@
 """
-SPDX-FileCopyrightText: 2023 SEGuRo Project Consortium
+SPDX-FileCopyrightText: 2023 Steffen Vogel <steffen.vogel@opal-rt.com>, OPAL-RT Germany GmbH
 SPDX-License-Identifier: Apache-2.0
 """
 
-import environ
 import os
 
-env = environ.Env(
-    DEBUG=(bool, False),
-    S3_PORT=(int, 9001),
-    MQTT_PORT=(int, 1883)
-)
+import environ
+
+env = environ.Env()
 
 # Take environment variables from .env file
-environ.Env.read_env(os.path.join(os.getcwd(), '.env'))
+environ.Env.read_env(os.path.join(os.getcwd(), ".env"))
 
-DEBUG = env('DEBUG')
+DEBUG = env.bool("DEBUG", False)
 
 # Object storage
-S3_HOST = env('S3_HOST')
-S3_PORT = env('S3_PORT')
-S3_REGION = env('S3_REGION')
-S3_USER = env('S3_USER')
-S3_PASSWORD = env('S3_PASSWORD')
+S3_HOST = env.str("S3_HOST", "minio")
+S3_PORT = env.int("S3_PORT", 9001)
+S3_REGION = env.str("S3_REGION", "us-east-1")
+S3_USER = env.str("S3_USER", None)
+S3_PASSWORD = env.str("S3_PASSWORD", None)
 
 # Message broker
-MQTT_HOST = env('MQTT_HOST')
-MQTT_PORT = env('MQTT_PORT')
-MQTT_USER = env('MQTT_USER')
-MQTT_PASSWORD = env('MQTT_PASSWORD')
+MQTT_HOST = env.str("MQTT_HOST", "mosquitto")
+MQTT_PORT = env.int("MQTT_PORT", 1883)
+MQTT_USER = env.str("MQTT_USER", None)
+MQTT_PASSWORD = env.str("MQTT_PASSWORD", None)
