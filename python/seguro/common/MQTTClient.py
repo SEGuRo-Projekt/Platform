@@ -1,5 +1,7 @@
-# SPDX-FileCopyrightText: 2023 Felix Wege, EONERC-ACS, RWTH Aachen University
-# SPDX-License-Identifier: Apache-2.0
+"""
+SPDX-FileCopyrightText: 2023 Felix Wege, EONERC-ACS, RWTH Aachen University
+SPDX-License-Identifier: Apache-2.0
+"""
 
 import paho.mqtt.client as mqtt
 from queue import Queue
