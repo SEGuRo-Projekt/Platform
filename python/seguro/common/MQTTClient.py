@@ -1,7 +1,9 @@
 import paho.mqtt.client as mqtt
 from queue import Queue
 
-class MQTTclient:
+
+class MQTTClient:
+
     def __init__(self):
         self.client = self.__mqtt_create_client()
         self.messageQueue = Queue()
@@ -14,9 +16,6 @@ class MQTTclient:
     def __on_message(self, client, userdata, msg):
         print(msg.topic+" "+str(msg.payload))
         self.messageQueue.put(msg)
-
-        # return msg
-
 
     def __mqtt_create_client(self):
         client = mqtt.Client()

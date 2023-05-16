@@ -1,12 +1,11 @@
 #########################################################################
 ### MQTT Example
 #########################################################################
-
-from MQTTclient import MQTTclient
+from MQTTClient import MQTTClient
 import time
 
-# Create MQTTclient and connect to mosquitto broker
-mqtt = MQTTclient()
+# Create MQTTClient and connect to mosquitto broker
+mqtt = MQTTClient()
 mqtt.connect("localhost", 1884)
 
 # Subscribe to topic "mytopic" and start listening for messages in another thread
@@ -79,11 +78,3 @@ content = f.read()
 
 assert content == "!egarotS3S olleH"
 print(content)
-
-
-
-
-
-
-
-
