@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023 Steffen Vogel <steffen.vogel@opal-rt.com>, OPAL-RT Germany GmbH
+# SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
 # SPDX-License-Identifier: Apache-2.0
 
 FROM golang:1.20-alpine as builder
