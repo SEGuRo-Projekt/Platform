@@ -1,15 +1,17 @@
 from minio import Minio
 import io
+
+
 class S3Storage:
+
     def __init__(self, server, port, access_key, secret_key):
         self.tracked_files = {}
         self.client = self.__connect(server, port, access_key, secret_key)
 
-
-    def __connect(self, SERVER, PORT, ACCESS_KEY, SECRET_KEY):
-        client = Minio(endpoint=SERVER+":"+str(PORT),
-                    access_key=ACCESS_KEY,
-                    secret_key=SECRET_KEY,
+    def __connect(self, server, port, access_key, secret_key):
+        client = Minio(endpoint=server+":"+str(port),
+                    access_key=access_key,
+                    secret_key=secret_key,
                     secure=False)
         return client
 
@@ -21,7 +23,6 @@ class S3Storage:
         self.client.fget_object(
             bucket, file, filename
         )
-
 
     def put_file(self, filename, file, bucket="seguro"):
         if not self.client.bucket_exists(bucket):
