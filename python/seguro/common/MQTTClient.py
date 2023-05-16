@@ -20,14 +20,14 @@ class MQTTClient:
             Create a paho.mqtt.client object and initialize the message queue.
         """
         self.client = self.__mqtt_create_client()
-        self.messageQueue = Queue()
+        self.message_queue = Queue()
 
     def __on_connect(self, client, userdata, flags, rc):
         print(f"Connected with result code {rc}")
 
     def __on_message(self, client, userdata, msg):
         print(msg.topic+" "+str(msg.payload))
-        self.messageQueue.put(msg)
+        self.message_queue.put(msg)
 
     def __mqtt_create_client(self):
         client = mqtt.Client()
