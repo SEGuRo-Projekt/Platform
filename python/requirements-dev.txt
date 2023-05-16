@@ -1,0 +1,6 @@
+# SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+pytest==7.3.1
+flake8==6.0.0
+pre-commit==3.3.1

@@ -26,10 +26,17 @@ docker compose up -d
 
 ## Entwicklung
 
-1. Install Docker
-2. Install Git
-3. Install Visual Studio Code
-4. Clone Repo: `git clone git@github.com:SEGuRo-Projekt/Plattform.git`
+1. Install Docker, Git & Visual Studio Code
+2. Clone Repo: `git clone git@github.com:SEGuRo-Projekt/Plattform.git`
+3. Setup environment:
+
+```bash
+python -m venv .venv
+. .venv/scripts/activate
+pip install -r python/requirements.txt
+pip install -r python/requirements-dev.txt
+pre-commit install
+```
 
 ## Lizenz
 
