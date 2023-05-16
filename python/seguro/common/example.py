@@ -27,15 +27,15 @@ mqtt.publish("mytopic", "Aaaand another one...")
 time.sleep(1)
 
 # Read messages are stored in a messageQueue of the client
-assert mqtt.messageQueue.empty() is False
+assert mqtt.message_queue.empty() is False
 
 # Read messages directly from client message queue
-while not mqtt.messageQueue.empty():
-    msg = mqtt.messageQueue.get()
+while not mqtt.message_queue.empty():
+    msg = mqtt.message_queue.get()
     print(f"{msg.topic} : {msg.payload}")
 
 # Note that queue.get() removes messages from queue
-assert mqtt.messageQueue.empty() is True
+assert mqtt.message_queue.empty() is True
 
 # Stop listening for new messages
 mqtt.stop_listening()
@@ -43,7 +43,7 @@ mqtt.stop_listening()
 # Note that messsages send after listening has stopped,
 # are not put into message queue
 mqtt.publish("mytopic", "Hello again!")
-assert mqtt.messageQueue.empty() is True
+assert mqtt.message_queue.empty() is True
 
 
 #########################################################################
