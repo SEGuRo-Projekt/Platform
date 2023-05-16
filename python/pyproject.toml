@@ -34,3 +34,6 @@ packages = ["seguro.platform"]
 version = {attr = "seguro.platform.__version__"}
 readme = {file = ["README.rst", "USAGE.rst"]}
 dependencies = {file = ["requirements.txt"]}
+
+[tool.black]
+line-length = 79

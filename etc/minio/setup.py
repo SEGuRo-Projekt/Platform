@@ -13,7 +13,8 @@ BUCKETS = ["seguro", "registry"]
 
 def main():
     logging.basicConfig(
-        format="%(asctime)s %(name)s %(levelname)s: %(message)s", level=logging.INFO
+        format="%(asctime)s %(name)s %(levelname)s: %(message)s",
+        level=logging.INFO,
     )
 
     minio_user = os.environ.get("MINIO_ROOT_USER")
@@ -25,7 +26,9 @@ def main():
     os.system("ssh-keygen -q -N " " -t rsa -b 4096 -f /keys/ssh_host_rsa_key")
 
     logging.info("Create host alias")
-    os.system(f"mc config host add minio {minio_url} {minio_user} {minio_pass}")
+    os.system(
+        f"mc config host add minio {minio_url} {minio_user} {minio_pass}"
+    )
 
     mc = minio.Minio(minio_endpoint, minio_user, minio_pass, secure=False)
     mca = minio.MinioAdmin(target="minio")
