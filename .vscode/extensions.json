@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "ms-python.python",
+    "ms-python.isort",
+    "ms-python.vscode-pylance",
+    "ms-azuretools.vscode-docker",
+    "ms-toolsai.jupyter",
+    "p1c2u.docker-compose",
+    "redhat.vscode-yaml",
+    "elagil.pre-commit-helper"
+  ]
+}
