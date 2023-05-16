@@ -1,0 +1,29 @@
+---
+# SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+name: Test Docker Compose
+
+on:
+  pull_request:
+  push:
+    branches:
+    - main
+
+jobs:
+  docker-compose:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - uses: docker/setup-buildx-action@v2
+
+    - name: Start containers
+      run: docker compose up --detach --build
+
+    - name: Stop containers
+      if: always()
+      run: docker-compose down
