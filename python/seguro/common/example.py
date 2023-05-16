@@ -1,5 +1,10 @@
+# SPDX-FileCopyrightText: 2023 Felix Wege, EONERC-ACS, RWTH Aachen University
+# SPDX-License-Identifier: Apache-2.0
+
+"""This script includes example code for the SEGuRo helper classes."""
+
 #########################################################################
-### MQTT Example
+# MQTTClient Example
 #########################################################################
 from MQTTClient import MQTTClient
 import time
@@ -8,7 +13,7 @@ import time
 mqtt = MQTTClient()
 mqtt.connect("localhost", 1884)
 
-# Subscribe to topic "mytopic" and start listening for messages in another thread
+# Subscribe to topic "mytopic" and start listening in another thread
 mqtt.subscribe("mytopic")
 mqtt.start_listening()
 
@@ -20,7 +25,7 @@ mqtt.publish("mytopic", "Aaaand another one...")
 time.sleep(1)
 
 # Read messages are stored in a messageQueue of the client
-assert mqtt.messageQueue.empty() == False
+assert mqtt.messageQueue.empty() is False
 
 # Read messages directly from client message queue
 while not mqtt.messageQueue.empty():
@@ -28,24 +33,28 @@ while not mqtt.messageQueue.empty():
     print(f"{msg.topic} : {msg.payload}")
 
 # Note that queue.get() removes messages from queue
-assert mqtt.messageQueue.empty() == True
+assert mqtt.messageQueue.empty() is True
 
 # Stop listening for new messages
 mqtt.stop_listening()
 
-# Note that messsages send after listening has stopped, are not put into message queue
+# Note that messsages send after listening has stopped,
+# are not put into message queue
 mqtt.publish("mytopic", "Hello again!")
-assert mqtt.messageQueue.empty() == True
+assert mqtt.messageQueue.empty() is True
 
 
 #########################################################################
-### S3Storage Example
+# S3Storage Example
 #########################################################################
 
 from S3Storage import S3Storage
 import os
 
-storage = S3Storage("localhost", 9000 , os.environ["S3_ACCESS_KEY"], os.environ["S3_SECRET_KEY"])
+storage = S3Storage("localhost",
+                    9000,
+                    os.environ["S3_ACCESS_KEY"],
+                    os.environ["S3_SECRET_KEY"])
 
 # Create new file and fill with content
 if not os.path.isfile("myfile.txt"):
@@ -61,17 +70,22 @@ storage.put_file("myStorageFile.txt", "myfile.txt", bucket="testbucket")
 # Check if file has changed...
 # Note: As the storage client cannot know if the file changed on the first call
 #       file_changed() will always return True on first call
-assert storage.file_changed("myStorageFile.txt", bucket="testbucket") == True
-assert storage.file_changed("myStorageFile.txt", bucket="testbucket") == False
+assert storage.file_changed("myStorageFile.txt", bucket="testbucket") is True
+assert storage.file_changed("myStorageFile.txt", bucket="testbucket") is False
 
 # Write new content to file
-time.sleep(1) # FIXME: last_modified attribute of S3Storage only retruns second resolution...
-storage.write_to_file("myStorageFile.txt", "!egarotS3S olleH", bucket="testbucket")
+# FIXME: last_modified attribute of S3Storage only retruns second resolution...
+time.sleep(1)
+storage.write_to_file("myStorageFile.txt",
+                      "!egarotS3S olleH",
+                      bucket="testbucket")
 
 # If file has changed (which it should at this point), download it...
 if storage.file_changed("myStorageFile.txt", bucket="testbucket"):
     print("Info: myStorageFile.txt has changed - downloading it again...")
-    storage.get_file("myLocalStorageFile.txt", "myStorageFile.txt", bucket="testbucket")
+    storage.get_file("myLocalStorageFile.txt",
+                     "myStorageFile.txt",
+                     bucket="testbucket")
 
 f = open("myLocalStorageFile.txt", "r")
 content = f.read()
