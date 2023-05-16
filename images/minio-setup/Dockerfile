@@ -14,6 +14,6 @@ RUN pip install --no-cache-dir \
 
 RUN apt-get update && \
     apt-get install --yes --no-install-recommends \
-        openssh-client=1:8.4 && \
+        openssh-client=1:8.4p1-5+deb11u1 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*

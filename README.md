@@ -9,7 +9,7 @@ Siehe [.env](./.env).
 ## Nutzung
 
 ```bash
-docker compose up -d
+docker compose up --detach --build
 ```
 
 - **Object Store Frontend:**
