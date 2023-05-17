@@ -33,6 +33,7 @@ docker compose up --detach --build
 ```bash
 python -m venv .venv
 . .venv/scripts/activate
+#. .venv/bin/activate (on Linux)
 pip install -r python/requirements.txt
 pip install -r python/requirements-dev.txt
 pre-commit install
@@ -40,5 +41,6 @@ pre-commit install
 
 ## Lizenz
 
-SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
+SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH\
+SPDX-FileCopyrightText: 2023 Felix Wege, EONERC-ACS, RWTH Aachen  University\
 SPDX-License-Identifier: Apache-2.0
