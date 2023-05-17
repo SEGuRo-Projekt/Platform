@@ -5,11 +5,15 @@ SPDX-License-Identifier: Apache-2.0
 This script includes example code for the SEGuRo helper classes.
 """
 
+import os
+import time
+
+from MQTTClient import MQTTClient
+from S3Storage import S3Storage
+
 #########################################################################
 # MQTTClient Example
 #########################################################################
-from MQTTClient import MQTTClient
-import time
 
 # Create MQTTClient and connect to mosquitto broker
 mqtt = MQTTClient()
@@ -49,14 +53,9 @@ assert mqtt.message_queue.empty() is True
 #########################################################################
 # S3Storage Example
 #########################################################################
-
-from S3Storage import S3Storage
-import os
-
-storage = S3Storage("localhost",
-                    9000,
-                    os.environ["S3_ACCESS_KEY"],
-                    os.environ["S3_SECRET_KEY"])
+storage = S3Storage(
+    "localhost", 9000, os.environ["S3_ACCESS_KEY"], os.environ["S3_SECRET_KEY"]
+)
 
 # Create new file and fill with content
 if not os.path.isfile("myfile.txt"):
@@ -78,16 +77,16 @@ assert storage.file_changed("myStorageFile.txt", bucket="testbucket") is False
 # Write new content to file
 # FIXME: last_modified attribute of S3Storage only retruns second resolution...
 time.sleep(1)
-storage.write_to_file("myStorageFile.txt",
-                      "!egarotS3S olleH",
-                      bucket="testbucket")
+storage.write_to_file(
+    "myStorageFile.txt", "!egarotS3S olleH", bucket="testbucket"
+)
 
 # If file has changed (which it should at this point), download it...
 if storage.file_changed("myStorageFile.txt", bucket="testbucket"):
     print("Info: myStorageFile.txt has changed - downloading it again...")
-    storage.get_file("myLocalStorageFile.txt",
-                     "myStorageFile.txt",
-                     bucket="testbucket")
+    storage.get_file(
+        "myLocalStorageFile.txt", "myStorageFile.txt", bucket="testbucket"
+    )
 
 f = open("myLocalStorageFile.txt", "r")
 content = f.read()
