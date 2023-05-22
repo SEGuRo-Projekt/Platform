@@ -2,6 +2,10 @@
 
 Dieses ist das Git Repository der SEGuRo Plattform.
 
+## Architektur
+
+![](./docs/images/Platform%20Architektur.jpg)
+
 ## Konfiguration
 
 Siehe [.env](./.env).
