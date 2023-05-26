@@ -20,7 +20,7 @@ def test_broker():
     broker.publish("mytopic", "Aaaand another one...")
 
     #  Make sure messages are completely sent...
-    time.sleep(1000)
+    time.sleep(1)
 
     # Read messages are stored in a messageQueue of the client
     assert broker.message_queue.empty() is False
