@@ -22,9 +22,6 @@ def test_broker():
     #  Make sure messages are completely sent...
     time.sleep(1)
 
-    # Disabled for now
-    return
-
     # Read messages are stored in a messageQueue of the client
     assert broker.message_queue.empty() is False
 
