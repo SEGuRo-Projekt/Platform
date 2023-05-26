@@ -81,7 +81,7 @@ services:
     build:
       context: .
       target: minio-setup
-    command: sh -c "if ! [ -f /keys/ssh_host_rsa_key ]; then ssh-keygen -q -N "" -t rsa -b 4096 -f /keys/ssh_host_rsa_key; fi"
+    command: sh -c "if ! [ -f /keys/ssh_host_rsa_key ]; then ssh-keygen -N '' -t rsa -b 4096 -f /keys/ssh_host_rsa_key; fi"
     volumes:
     - type: bind
       source: ./data/keys
