@@ -4,6 +4,7 @@ SPDX-License-Identifier: Apache-2.0
 """
 
 import os
+import logging
 
 import environ
 
@@ -13,6 +14,9 @@ env = environ.Env()
 environ.Env.read_env(os.path.join(os.getcwd(), ".env"))
 
 DEBUG = env.bool("DEBUG", False)
+
+# Logging
+LOG_LEVEL = logging.DEBUG
 
 # Object storage
 S3_HOST = env.str("S3_HOST", "minio")
