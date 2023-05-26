@@ -4,7 +4,7 @@ SPDX-License-Identifier: Apache-2.0
 """
 
 
-from seguro.platform.config import S3_HOST
+from seguro.common.config import S3_HOST
 
 
 def test_default_config():
