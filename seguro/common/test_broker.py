@@ -5,11 +5,11 @@ SPDX-License-Identifier: Apache-2.0
 
 import time
 
-from seguro.common.broker import Broker
+from seguro.common.broker import BrokerClient
 
 
 def test_broker():
-    broker = Broker()
+    broker = BrokerClient()
 
     # Subscribe to topic "mytopic" and start listening in another thread
     broker.subscribe("mytopic")

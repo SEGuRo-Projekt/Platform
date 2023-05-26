@@ -6,11 +6,11 @@ SPDX-License-Identifier: Apache-2.0
 import os
 import time
 
-from seguro.common.store import Store
+from seguro.common.store import StoreClient
 
 
 def test_store():
-    storage = Store()
+    storage = StoreClient()
 
     # Create new file and fill with content
     if not os.path.isfile("myfile.txt"):
