@@ -6,24 +6,47 @@ SPDX-License-Identifier: Apache-2.0
 from queue import Queue
 
 import paho.mqtt.client as mqtt
+from seguro.common.config import (
+    MQTT_HOST,
+    MQTT_PASSWORD,
+    MQTT_PORT,
+    MQTT_USERNAME,
+)
 
 
-class MQTTClient:
+class Broker:
     """Helper class for MQTT interaction with the SEGuRo platform.
 
     This class provides an abstraction layer for MQTT based communication
     between the SEGuRo platform and the MQTT broker.
     """
 
-    def __init__(self, uid=""):
-        """MQTTClient Constructor
+    def __init__(
+        self,
+        uid="",
+        host=MQTT_HOST,
+        port=MQTT_PORT,
+        username=MQTT_USERNAME,
+        password=MQTT_PASSWORD,
+        keepalive=60,
+    ):
+        """Broker Constructor
 
         Create a paho.mqtt.client object and initialize the message queue.
 
         Arguments:
             uid -- Unique id/name of the client (default empty string "")
         """
-        self.client = self.__mqtt_create_client(uid)
+        self.client = client = mqtt.Client(client_id=uid)
+
+        client.on_connect = self.__on_connect
+        client.on_message = self.__on_message
+
+        if username is not None or password is not None:
+            self.client.username_pw_set(username, password)
+
+        self.client.connect(host, port, keepalive)
+
         self.message_queue = Queue()
 
     def __on_connect(self, client, userdata, flags, rc):
@@ -32,28 +55,6 @@ class MQTTClient:
     def __on_message(self, client, userdata, msg):
         print(msg.topic + " " + str(msg.payload))
         self.message_queue.put(msg)
-
-    def __mqtt_create_client(self, uid):
-        client = mqtt.Client(client_id=uid)
-        client.on_connect = self.__on_connect
-        client.on_message = self.__on_message
-        return client
-
-    def connect(self, broker, port, username=None, passwd=None, keepalive=60):
-        """Connect MQTT client to broker.
-
-        Arguments:
-            broker  -- Hostname of IP address of the MQTT broker
-            port    -- Network port of the MQTT broker
-
-        Keyword arguments:
-            username   -- Username for broker authentication (default None)
-            passwd     -- Password for broker authentication (default None)
-            keepalive  -- Set keepalive interval of connection (default 60s)
-        """
-        if username is not None or passwd is not None:
-            self.client.username_pw_set(username, passwd)
-        self.client.connect(broker, port, keepalive)
 
     def subscribe(self, topic):
         """Subscribe client to given topic."""

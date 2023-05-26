@@ -24,8 +24,8 @@ services:
         condition: service_completed_successfully
         restart: true
     environment:
-    - MINIO_ROOT_USER=${S3_USER}
-    - MINIO_ROOT_PASSWORD=${S3_PASSWORD}
+    - MINIO_ROOT_USER=${S3_ACCESS_KEY}
+    - MINIO_ROOT_PASSWORD=${S3_SECRET_KEY}
     ports:
     - target: 9000
       published: 9000
@@ -66,8 +66,8 @@ services:
     - .env
     entrypoint: python /setup.py
     environment:
-    - MINIO_ROOT_USER=${S3_USER}
-    - MINIO_ROOT_PASSWORD=${S3_PASSWORD}
+    - MINIO_ROOT_USER=${S3_ACCESS_KEY}
+    - MINIO_ROOT_PASSWORD=${S3_SECRET_KEY}
     volumes:
     - type: bind
       source: ./etc/minio/setup.py

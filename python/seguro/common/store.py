@@ -6,19 +6,35 @@ SPDX-License-Identifier: Apache-2.0
 import io
 
 from minio import Minio
+from seguro.common.config import (
+    S3_ACCESS_KEY,
+    S3_HOST,
+    S3_PORT,
+    S3_REGION,
+    S3_SECRET_KEY,
+    S3_SECURE,
+)
 
 
-class S3Storage:
-    """Helper class for S3Storage interaction with the SEGuRo platform
+class Store:
+    """Helper class for S3 object store interaction with the SEGuRo platform
 
-    This class provides an abstraction layer for interactions btween
-    the S3Storage and the SEGuRo platform.
+    This class provides an abstraction layer for interactions between
+    the S3 data store and the SEGuRo platform.
     """
 
-    def __init__(self, server, port, access_key, secret_key):
-        """S3Storage Constructor
+    def __init__(
+        self,
+        host=S3_HOST,
+        port=S3_PORT,
+        access_key=S3_ACCESS_KEY,
+        secret_key=S3_SECRET_KEY,
+        secure=S3_SECURE,
+        region=S3_REGION,
+    ):
+        """Store Constructor
 
-        Connect to an S3Storage using the given credentials and store the
+        Connect to an S3 object store using the given credentials and store the
         returned client handle.
 
         Arguments:
@@ -28,19 +44,16 @@ class S3Storage:
             secret_key  -- Secret key (password) for authentication
         """
         self.tracked_files = {}
-        self.client = self.__connect(server, port, access_key, secret_key)
-
-    def __connect(self, server, port, access_key, secret_key):
-        client = Minio(
-            endpoint=server + ":" + str(port),
+        self.client = Minio(
+            endpoint=f"{host}:{port}",
             access_key=access_key,
             secret_key=secret_key,
-            secure=False,
+            secure=secure,
+            region=region,
         )
-        return client
 
     def get_file(self, filename, file, bucket="seguro"):
-        """Download file from the S3Storage and store it locally.
+        """Download file from the S3 object store and store it locally.
 
         Arguments:
             filename -- Local filename that is used
