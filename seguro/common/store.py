@@ -4,6 +4,7 @@ SPDX-License-Identifier: Apache-2.0
 """
 
 import io
+import os
 import threading
 import enum
 
@@ -172,6 +173,7 @@ class Client:
 
 class Watcher(threading.Thread):
     """Helper class for asynchronous watching of of S3 objects"""
+
     def __init__(
         self, client: Client, prefix: str, cb: callable, events: EventType
     ):
