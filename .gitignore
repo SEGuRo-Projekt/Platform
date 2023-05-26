@@ -6,3 +6,4 @@ log/
 .venv/
 
 *.pyc
+*.egg-info/
