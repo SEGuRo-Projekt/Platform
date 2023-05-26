@@ -1,21 +1,23 @@
 """
 SPDX-FileCopyrightText: 2023 Felix Wege, EONERC-ACS, RWTH Aachen University
+SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
 SPDX-License-Identifier: Apache-2.0
 """
 
 from queue import Queue
 import os
 
-import logging
-from logging.handlers import RotatingFileHandler
-
 import paho.mqtt.client as mqtt
+
+import seguro.common.logger
 from seguro.common.config import (
     MQTT_HOST,
     MQTT_PASSWORD,
     MQTT_PORT,
     MQTT_USERNAME,
     LOG_LEVEL,
+    MAX_BYTES,
+    BACKUP_COUNT,
 )
 
 
@@ -35,6 +37,8 @@ class BrokerClient:
         password=MQTT_PASSWORD,
         keepalive=60,
         log_level=LOG_LEVEL,
+        log_max_bytes=MAX_BYTES,
+        log_backup_count=BACKUP_COUNT,
     ):
         """Broker Constructor
 
@@ -55,23 +59,15 @@ class BrokerClient:
 
         self.message_queue = Queue()
 
-        self.logger = logger = logging.getLogger("brokerClient_logger")
-        logger.setLevel(log_level)
-
-        handler = RotatingFileHandler(
+        self.logger = seguro.common.logger.init_logger(
+            log_level,
             os.path.join(
                 os.path.dirname(__file__),
                 "../../log/brokerclient/brokerclient.log",
             ),
-            maxBytes=20000,
-            backupCount=5,
+            max_bytes=log_max_bytes,
+            backup_count=log_backup_count,
         )
-        logger.addHandler(handler)
-
-        formatter = logging.Formatter(
-            "%(asctime)s - %(levelname)s - %(message)s"
-        )
-        handler.setFormatter(formatter)
 
     def __on_connect(self, client, userdata, flags, rc):
         self.logger.info("Connected with result code %i", rc)
