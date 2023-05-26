@@ -13,6 +13,7 @@ from seguro.common.config import (
     S3_REGION,
     S3_SECRET_KEY,
     S3_SECURE,
+    S3_BUCKET,
 )
 
 
@@ -52,7 +53,7 @@ class Store:
             region=region,
         )
 
-    def get_file(self, filename, file, bucket="seguro"):
+    def get_file(self, filename, file, bucket=S3_BUCKET):
         """Download file from the S3 object store and store it locally.
 
         Arguments:
@@ -68,7 +69,7 @@ class Store:
 
         self.client.fget_object(bucket, file, filename)
 
-    def put_file(self, filename, file, bucket="seguro"):
+    def put_file(self, filename, file, bucket=S3_BUCKET):
         """Upload local file and store it in the S3Storage.
 
         Arguments:
@@ -84,7 +85,7 @@ class Store:
 
         self.client.fput_object(bucket, filename, file)
 
-    def write_to_file(self, filename, content, bucket="seguro"):
+    def write_to_file(self, filename, content, bucket=S3_BUCKET):
         """Write to file stored it in the S3Storage.
 
         Arguments:
@@ -105,7 +106,7 @@ class Store:
             len(content),
         )
 
-    def file_changed(self, filename, bucket="seguro"):
+    def file_changed(self, filename, bucket=S3_BUCKET):
         """Check if file has changed since last call.
 
         Arguments:
