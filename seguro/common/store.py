@@ -9,6 +9,7 @@ import enum
 
 from minio import Minio
 
+import seguro.common.logger
 from seguro.common.config import (
     S3_ACCESS_KEY,
     S3_HOST,
@@ -17,6 +18,9 @@ from seguro.common.config import (
     S3_SECRET_KEY,
     S3_SECURE,
     S3_BUCKET,
+    LOG_LEVEL,
+    MAX_BYTES,
+    BACKUP_COUNT,
 )
 
 
@@ -61,6 +65,9 @@ class Client:
         secure=S3_SECURE,
         region=S3_REGION,
         bucket=S3_BUCKET,
+        log_level=LOG_LEVEL,
+        log_max_bytes=MAX_BYTES,
+        log_backup_count=BACKUP_COUNT,
     ):
         """Store Constructor
 
@@ -86,6 +93,16 @@ class Client:
         if not self.client.bucket_exists(self.bucket):
             raise Exception(f"Error: Bucket {self.bucket} does not exist...")
 
+        self.logger = seguro.common.logger.init_logger(
+            log_level,
+            os.path.join(
+                os.path.dirname(__file__),
+                "../../log/storeclient/storeclient.log",
+            ),
+            max_bytes=log_max_bytes,
+            backup_count=log_backup_count,
+        )
+
     def get_file(self, filename, file):
         """Download file from the S3 object store and store it locally.
 
@@ -105,6 +122,11 @@ class Client:
         return self.client.fput_object(self.bucket, filename, file)
 
     def remove_file(self, filename):
+        """Remove a local file from the S3Storage.
+
+        Arguments:
+            filename -- Name of removed file in storage
+        """
         return self.client.remove_object(self.bucket, filename)
 
     def put_file_contents(self, filename, content):
@@ -114,6 +136,8 @@ class Client:
             filename -- Name of file in storage
             content  -- Content that is written to file
         """
+        if not self.client.bucket_exists(self.bucket):
+            raise Exception(f"Error: Bucket {self.bucket} does not exist...")
 
         return self.client.put_object(
             self.bucket,
@@ -147,6 +171,7 @@ class Client:
 
 
 class Watcher(threading.Thread):
+    """Helper class for asynchronous watching of of S3 objects"""
     def __init__(
         self, client: Client, prefix: str, cb: callable, events: EventType
     ):

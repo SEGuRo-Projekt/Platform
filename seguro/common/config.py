@@ -17,6 +17,8 @@ DEBUG = env.bool("DEBUG", False)
 
 # Logging
 LOG_LEVEL = logging.DEBUG
+MAX_BYTES = 20000
+BACKUP_COUNT = 5
 
 # Object storage
 S3_HOST = env.str("S3_HOST", "minio")
