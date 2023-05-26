@@ -18,16 +18,21 @@ RUN mkdir -p /usr/local/bin && \
     curl -fsSL https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose && \
     chmod +x /usr/local/bin/docker-compose
 
+
 FROM golang:1.20-alpine as go-builder
 RUN  go install github.com/minio/mc@latest
+
 
 FROM python AS minio-setup
 
 COPY --from=go-builder /go/bin/mc /usr/bin/mc
 
+FROM debian:bookworm AS setup
+
 RUN apt-get update && \
     apt-get install --yes --no-install-recommends \
-    openssh-client && \
+    openssh-client \
+    openssl && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

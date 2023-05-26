@@ -19,12 +19,20 @@ services:
       # --ftp="tls-private-key=path/to/private.key"
       # --ftp="tls-public-cert=path/to/public.crt"
 
-    restart: unless-stopped
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.store-s3.rule=Host(`store.localhost`)
+    - traefik.http.routers.store-s3.service=store-s3
+    - traefik.http.routers.store-s3.tls=true
+    - traefik.http.services.store-s3.loadbalancer.server.port=9000
+    - traefik.http.routers.store-ui.rule=Host(`ui.store.localhost`)
+    - traefik.http.routers.store-ui.service=store-ui
+    - traefik.http.routers.store-ui.tls=true
+    - traefik.http.services.store-ui.loadbalancer.server.port=9001
 
     depends_on:
-      minio-setup-keys:
+      setup:
         condition: service_completed_successfully
-        # restart: true
 
     environment:
     - MINIO_ROOT_USER=${S3_ACCESS_KEY}
@@ -75,6 +83,7 @@ services:
     environment:
     - MINIO_ROOT_USER=${S3_ACCESS_KEY}
     - MINIO_ROOT_PASSWORD=${S3_SECRET_KEY}
+
     volumes:
     - type: bind
       source: ./etc/minio/setup.py
@@ -83,11 +92,26 @@ services:
       source: ./data/keys
       target: /keys
 
-  minio-setup-keys:
+  setup:
     build:
       context: .
-      target: minio-setup
-    command: sh -c "if ! [ -f /keys/ssh_host_rsa_key ]; then ssh-keygen -N '' -t rsa -b 4096 -f /keys/ssh_host_rsa_key; fi"
+      target: setup
+    command:
+    - sh
+    - -c
+    - if ! [ -f /keys/ssh_host_rsa_key ]; then
+        ssh-keygen -N '' -t rsa -b 4096 -f /keys/ssh_host_rsa_key;
+      fi
+
+      if ! [ -f /keys/server.crt ] || ! [ -f /keys/server.key ]; then
+        openssl req -nodes -x509 -sha256 -newkey rsa:4096
+          -keyout /keys/server.key
+          -out /keys/server.crt
+          -days 356
+          -subj "/C=DE/ST=NRW/L=Aachen/O=OPAL-RT/OU=RnD/CN=localhost"
+          -addext "subjectAltName = DNS:*.localhost,DNS:localhost" 2> /dev/null
+      fi
+
     volumes:
     - type: bind
       source: ./data/keys
@@ -95,7 +119,7 @@ services:
 
   mosquitto:
     image: eclipse-mosquitto:2
-
+    container_name: mosquitto
     restart: unless-stopped
 
     volumes:
@@ -127,22 +151,36 @@ services:
     container_name: yacht
     restart: unless-stopped
 
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.yacht.rule=Host(`ui.localhost`)
+    - traefik.http.routers.yacht.tls=true
+
     ports:
-      - 8000:8000
+    - 8000:8000
 
     volumes:
-      - ./data/yacht:/config
-      - /var/run/docker.sock:/var/run/docker.sock
+    - type: bind
+      source: ./data/yacht
+      target: /config
+    - type: bind
+      source: /var/run/docker.sock
+      target: /var/run/docker.sock
 
     environment:
-      - PUID=0
-      - PGID=0
-      - COMPOSE_DIR=/compose
+    - PUID=0
+    - PGID=0
+    - COMPOSE_DIR=/compose
 
   registry:
     image: registry:2
-
+    container_name: registry
     restart: unless-stopped
+
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.registry.rule=Host(`registry.localhost`)
+    - traefik.http.routers.registry.tls=true
 
     ports:
     - protocol: tcp
@@ -163,8 +201,13 @@ services:
 
   registry-ui:
     image: joxit/docker-registry-ui:latest
-
+    container_name: registry_ui
     restart: unless-stopped
+
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.registry-ui.rule=Host(`ui.registry.localhost`)
+    - traefik.http.routers.registry-ui.tls=true
 
     ports:
     - protocol: tcp
@@ -181,3 +224,29 @@ services:
 
     depends_on:
     - registry
+
+  traefik:
+    image: "traefik:v2.10"
+    container_name: "traefik"
+    ports:
+    - "80:80"
+    - "443:443"
+
+    volumes:
+    - type: bind
+      source: /var/run/docker.sock
+      target: /var/run/docker.sock
+      read_only: true
+
+    - type: bind
+      source: ./etc/traefik/
+      target: /etc/traefik/
+      read_only: true
+
+    - type: bind
+      source: ./data/keys
+      target: /keys
+
+    depends_on:
+      setup:
+        condition: service_completed_successfully
