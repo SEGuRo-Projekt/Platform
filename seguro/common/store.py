@@ -6,6 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 import io
 
 from minio import Minio
+
 from seguro.common.config import (
     S3_ACCESS_KEY,
     S3_HOST,
@@ -17,7 +18,7 @@ from seguro.common.config import (
 )
 
 
-class Store:
+class StoreClient:
     """Helper class for S3 object store interaction with the SEGuRo platform
 
     This class provides an abstraction layer for interactions between

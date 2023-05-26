@@ -14,7 +14,7 @@ from seguro.common.config import (
 )
 
 
-class Broker:
+class BrokerClient:
     """Helper class for MQTT interaction with the SEGuRo platform.
 
     This class provides an abstraction layer for MQTT based communication
