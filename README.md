@@ -41,6 +41,7 @@ python -m venv .venv
 pip install -r python/requirements.txt
 pip install -r python/requirements-dev.txt
 pre-commit install
+pip install --editable .
 ```
 
 ## Lizenz
