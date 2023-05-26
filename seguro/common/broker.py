@@ -4,6 +4,10 @@ SPDX-License-Identifier: Apache-2.0
 """
 
 from queue import Queue
+import os
+
+import logging
+from logging.handlers import RotatingFileHandler
 
 import paho.mqtt.client as mqtt
 from seguro.common.config import (
@@ -11,6 +15,7 @@ from seguro.common.config import (
     MQTT_PASSWORD,
     MQTT_PORT,
     MQTT_USERNAME,
+    LOG_LEVEL,
 )
 
 
@@ -29,6 +34,7 @@ class BrokerClient:
         username=MQTT_USERNAME,
         password=MQTT_PASSWORD,
         keepalive=60,
+        log_level=LOG_LEVEL,
     ):
         """Broker Constructor
 
@@ -49,16 +55,35 @@ class BrokerClient:
 
         self.message_queue = Queue()
 
+        self.logger = logger = logging.getLogger("brokerClient_logger")
+        logger.setLevel(log_level)
+
+        handler = RotatingFileHandler(
+            os.path.join(
+                os.path.dirname(__file__),
+                "../../log/brokerclient/brokerclient.log",
+            ),
+            maxBytes=20000,
+            backupCount=5,
+        )
+        logger.addHandler(handler)
+
+        formatter = logging.Formatter(
+            "%(asctime)s - %(levelname)s - %(message)s"
+        )
+        handler.setFormatter(formatter)
+
     def __on_connect(self, client, userdata, flags, rc):
-        print(f"Connected with result code {rc}")
+        self.logger.info("Connected with result code %i", rc)
 
     def __on_message(self, client, userdata, msg):
-        print(msg.topic + " " + str(msg.payload))
+        self.logger.debug("Receive msg: %s - %s", msg.topic, str(msg.payload))
         self.message_queue.put(msg)
 
     def subscribe(self, topic):
         """Subscribe client to given topic."""
         self.client.subscribe(topic)
+        self.logger.info("Subscribed to %s", topic)
 
     def start_listening(self):
         """Start async listening on subscribed topics."""
@@ -70,4 +95,5 @@ class BrokerClient:
 
     def publish(self, topic, message):
         """Publish message to given topic."""
+        self.logger.debug("Send msg: %s - %s", topic, message)
         self.client.publish(topic, message)
