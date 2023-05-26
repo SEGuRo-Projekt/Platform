@@ -31,7 +31,7 @@ dynamic = ["dependencies"]
 packages = ["seguro.platform"]
 
 [tool.setuptools.dynamic]
-version = {attr = "seguro.platform.__version__"}
+version = {attr = "seguro.common.__version__"}
 readme = {file = ["README.rst", "USAGE.rst"]}
 dependencies = {file = ["requirements.txt"]}
 
