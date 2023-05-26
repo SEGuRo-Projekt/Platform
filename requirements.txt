@@ -2,5 +2,5 @@
 # SPDX-License-Identifier: Apache-2.0
 
 django-environ==0.10.0
-minio==7.1.0
+minio==7.1.14
 paho-mqtt==1.6.1

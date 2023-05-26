@@ -12,7 +12,6 @@ authors = [
   { name="Felix Wege", email="felix.wege@eonerc.rwth-aachen.de" },
 ]
 description = "Common Python helpers for accessing the SEGuRo platform"
-readme = "README.md"
 requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -20,19 +19,21 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
-dynamic = ["dependencies"]
+dynamic = ["dependencies","version","readme"]
 
+[project.scripts]
+minio-setup = "seguro.setup.minio:main"
 
 [project.urls]
 "Homepage" = "https://github.com/SEGuRo-Projekt/Plattform"
 "Bug Tracker" = "https://github.com/SEGuRo-Projekt/Plattform/issues"
 
 [tool.setuptools]
-packages = ["seguro.platform"]
+packages = ["seguro", "seguro.common", "seguro.setup"]
 
 [tool.setuptools.dynamic]
-version = {attr = "seguro.common.__version__"}
-readme = {file = ["README.rst", "USAGE.rst"]}
+version = {attr = "seguro.__version__"}
+readme = {file = ["README.md"], content-type = "text/markdown"}
 dependencies = {file = ["requirements.txt"]}
 
 [tool.black]

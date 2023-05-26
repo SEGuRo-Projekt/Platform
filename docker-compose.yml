@@ -59,12 +59,13 @@ services:
 
   minio-setup:
     build:
-      context: ./images/minio-setup
+      context: .
+      target: minio-setup
     depends_on:
     - minio
     env_file:
     - .env
-    entrypoint: python /setup.py
+    entrypoint: minio-setup
     environment:
     - MINIO_ROOT_USER=${S3_ACCESS_KEY}
     - MINIO_ROOT_PASSWORD=${S3_SECRET_KEY}
@@ -78,7 +79,8 @@ services:
 
   minio-setup-keys:
     build:
-      context: ./images/minio-setup
+      context: .
+      target: minio-setup
     entrypoint: ssh-keygen -q -N "" -t rsa -b 4096 -f /keys/ssh_host_rsa_key
     volumes:
     - type: bind
