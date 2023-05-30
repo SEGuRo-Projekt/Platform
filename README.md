@@ -16,15 +16,15 @@ flowchart LR
     player --> broker
 
     ms[Messstellen] --> broker
-    
 
-    
+
+
     scheduler([Scheduler])
     worker[Streaming\nWorker]
-    
+
     alarm[Alarmierung]
     dashboard[Web\nDashboard]
-    
+
     repo[Docker Repo]
 
     worker <--> broker
@@ -41,7 +41,7 @@ flowchart LR
 
     pki[CloudPKI]
     ids[IDS]
-    
+
 
     classDef custom fill:lightblue
     class player,recorder,worker,scheduler,alarm custom
