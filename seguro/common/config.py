@@ -21,7 +21,7 @@ S3_ACCESS_KEY = env.str("S3_ACCESS_KEY", None)
 S3_SECRET_KEY = env.str("S3_SECRET_KEY", None)
 S3_SECURE = env.bool("S3_SECURE", False)
 S3_REGION = env.str("S3_REGION", "us-east-1")
-S3_BUCKET = env.str("SE_BUCKET", "seguro")
+S3_BUCKET = env.str("S3_BUCKET", "seguro")
 
 # Message broker
 MQTT_HOST = env.str("MQTT_HOST", "mosquitto")
