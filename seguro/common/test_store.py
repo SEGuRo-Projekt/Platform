@@ -85,8 +85,6 @@ def test_watch_async():
     store.remove_file(filename)
     watcher = store.watch_async("some/prefix/", callback)
 
-    watcher.start()
-
     store.put_file_contents(filename, "this is a test2")
     store.remove_file(filename)
 
