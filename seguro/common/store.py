@@ -156,6 +156,8 @@ class Watcher(threading.Thread):
         self.cb = cb
         self._stopflag = threading.Event()
 
+        self.start()
+
     def run(self):
         for event in self.events:
             if self._stopflag.is_set():
