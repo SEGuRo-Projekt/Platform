@@ -59,7 +59,7 @@ class BrokerClient:
 
         self.message_queue = Queue()
 
-        self.logger = seguro.common.logger.init_logger(
+        self.logger = seguro.common.logger.file_logger(
             log_level,
             os.path.join(
                 os.path.dirname(__file__),
