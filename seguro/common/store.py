@@ -76,7 +76,7 @@ class Client:
         returned client handle.
 
         Arguments:
-            server      -- Hostname or IP address of the storage server
+            host        -- Hostname or IP address of the storage server
             port        -- Network port of the storage server
             access_key  -- Access key (UID) for authentication
             secret_key  -- Secret key (password) for authentication
@@ -94,7 +94,7 @@ class Client:
         if not self.client.bucket_exists(self.bucket):
             raise Exception(f"Error: Bucket {self.bucket} does not exist...")
 
-        self.logger = seguro.common.logger.init_logger(
+        self.logger = seguro.common.logger.file_logger(
             log_level,
             os.path.join(
                 os.path.dirname(__file__),
