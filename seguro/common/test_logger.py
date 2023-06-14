@@ -9,7 +9,6 @@ import os
 
 
 def test_file_logger(capsys):
-
     filepath = os.path.join(
         os.path.dirname(__file__),
         "../../log/test_logger.log",
@@ -33,3 +32,11 @@ def test_file_logger(capsys):
     # Cleanup after test
     if os.path.isfile(filepath):
         os.remove(filepath)
+
+
+def test_store_logger(capsys):
+    store_logger = seguro.common.logger.store_logger(logging.DEBUG, "test.log")
+    store_logger.error("Test-Error")
+
+    # captured = capsys.readouterr()
+    # assert captured.err == "\033[31;1mERROR:\033[0m Test-Error\n"

@@ -7,6 +7,14 @@ import logging
 from logging.handlers import RotatingFileHandler
 from aws_logging_handlers.S3 import S3Handler
 
+from seguro.common.config import (
+    S3_ACCESS_KEY,
+    S3_HOST,
+    S3_PORT,
+    S3_SECRET_KEY,
+    S3_BUCKET,
+)
+
 
 def file_logger(log_level, logfile, max_bytes=20000, backup_count=5):
     """Return logger object that logs into local files.
@@ -15,7 +23,7 @@ def file_logger(log_level, logfile, max_bytes=20000, backup_count=5):
         log_level   -- Log level for logfiles
         logfile     -- Path to logfile
     """
-    logger = logging.getLogger("brokerClient_logger")
+    logger = logging.getLogger("test_logger")
     logger.setLevel(log_level)
 
     # Log specified log level to file
@@ -37,7 +45,7 @@ def file_logger(log_level, logfile, max_bytes=20000, backup_count=5):
     return logger
 
 
-def store_logger(log_level, logfile, bucket):
+def store_logger(log_level, logfile, bucket=S3_BUCKET):
     """Return logger object that logs into s3 storage.
 
     Arguments:
@@ -46,14 +54,19 @@ def store_logger(log_level, logfile, bucket):
         bucket      -- Bucket name for logfiles
     """
 
-    logger = logging.getLogger("brokerClient_logger")
+    logger = logging.getLogger("test_logger")
     logger.setLevel(log_level)
 
     # Log specified log level to file
     storehandler = S3Handler(
         logfile,
         bucket=bucket,
+        endpoint_url=f"http://{S3_HOST}:{S3_PORT}",
+        aws_access_key_id=S3_ACCESS_KEY,
+        aws_secret_access_key=S3_SECRET_KEY,
+        encryption_options={},
     )
+
     storeformatter = logging.Formatter(
         "%(asctime)s - %(levelname)s - %(message)s"
     )
