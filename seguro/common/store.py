@@ -7,6 +7,7 @@ import io
 import os
 import threading
 import enum
+import uuid
 
 from minio import Minio
 
@@ -59,6 +60,7 @@ class Client:
 
     def __init__(
         self,
+        uid="",
         host=S3_HOST,
         port=S3_PORT,
         access_key=S3_ACCESS_KEY,
@@ -76,11 +78,19 @@ class Client:
         returned client handle.
 
         Arguments:
+            uid         -- Unique id/name of the store client
             host        -- Hostname or IP address of the storage server
             port        -- Network port of the storage server
             access_key  -- Access key (UID) for authentication
             secret_key  -- Secret key (password) for authentication
         """
+        if not uid:
+            # If no uid is passed, a random one is created using
+            # MAC address and time component
+            self.uid = str(uuid.uuid1())
+        else:
+            self.uid = uid
+
         self.bucket = bucket
 
         self.client = Minio(
@@ -98,7 +108,7 @@ class Client:
             log_level,
             os.path.join(
                 os.path.dirname(__file__),
-                "../../log/storeclient/storeclient.log",
+                f"../../log/storeclient/{self.uid}.log",
             ),
             max_bytes=log_max_bytes,
             backup_count=log_backup_count,

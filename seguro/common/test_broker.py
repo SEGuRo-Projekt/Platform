@@ -10,7 +10,7 @@ from seguro.common.broker import BrokerClient
 
 
 def test_broker():
-    broker = BrokerClient()
+    broker = BrokerClient("pytest-broker")
 
     # Subscribe to topic "mytopic" and start listening in another thread
     broker.subscribe("mytopic")
