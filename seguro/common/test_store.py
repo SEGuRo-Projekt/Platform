@@ -10,7 +10,7 @@ from seguro.common.store import Client, Event, EventType
 
 
 def test_store():
-    store = Client()
+    store = Client("pytest-client")
 
     # Create new file and fill with content
     if not os.path.isfile("myfile.txt"):

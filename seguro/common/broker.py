@@ -6,6 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 from queue import Queue
 import os
+import uuid
 
 import paho.mqtt.client as mqtt
 
@@ -45,9 +46,16 @@ class BrokerClient:
         Create a paho.mqtt.client object and initialize the message queue.
 
         Arguments:
-            uid -- Unique id/name of the client (default empty string "")
+            uid -- Unique id/name of the client
         """
-        self.client = client = mqtt.Client(client_id=uid)
+        if not uid:
+            # If no uid is passed, a random one is created using
+            # MAC address and time component
+            self.uid = str(uuid.uuid1())
+        else:
+            self.uid = uid
+
+        self.client = client = mqtt.Client(client_id=self.uid)
 
         client.on_connect = self.__on_connect
         client.on_message = self.__on_message
@@ -63,7 +71,7 @@ class BrokerClient:
             log_level,
             os.path.join(
                 os.path.dirname(__file__),
-                "../../log/brokerclient/brokerclient.log",
+                f"../../log/brokerclient/{self.uid}.log",
             ),
             max_bytes=log_max_bytes,
             backup_count=log_backup_count,
