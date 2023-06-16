@@ -34,6 +34,10 @@ def test_store():
     assert content == "!egarotS3S olleH"
     print(content)
 
+    # Clean up files after test
+    os.remove("myLocalStorageFile.txt")
+    os.remove("myfile.txt")
+
 
 def test_watch():
     store = Client()
