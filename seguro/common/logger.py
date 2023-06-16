@@ -23,7 +23,7 @@ def file_logger(log_level, logfile, max_bytes=20000, backup_count=5):
         log_level   -- Log level for logfiles
         logfile     -- Path to logfile
     """
-    logger = logging.getLogger("test_logger")
+    logger = logging.getLogger("file_logger")
     logger.setLevel(log_level)
 
     # Log specified log level to file
@@ -54,7 +54,7 @@ def store_logger(log_level, logfile, bucket=S3_BUCKET):
         bucket      -- Bucket name for logfiles
     """
 
-    logger = logging.getLogger("test_logger")
+    logger = logging.getLogger("store_logger")
     logger.setLevel(log_level)
 
     # Log specified log level to file
