@@ -49,8 +49,7 @@ class BrokerClient:
             uid -- Unique id/name of the client
         """
         if not uid:
-            # If no uid is passed, a random one is created using
-            # MAC address and time component
+            # Create uid based onMAC address and time component
             self.uid = str(uuid.uuid1())
         else:
             self.uid = uid

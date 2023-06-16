@@ -59,7 +59,7 @@ def store_logger(log_level, logfile, bucket=S3_BUCKET):
 
     # Log specified log level to file
     storehandler = S3Handler(
-        logfile,
+        f"logs/{logfile}",
         bucket=bucket,
         endpoint_url=f"http://{S3_HOST}:{S3_PORT}",
         aws_access_key_id=S3_ACCESS_KEY,
