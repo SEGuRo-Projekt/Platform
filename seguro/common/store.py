@@ -85,8 +85,7 @@ class Client:
             secret_key  -- Secret key (password) for authentication
         """
         if not uid:
-            # If no uid is passed, a random one is created using
-            # MAC address and time component
+            # Create uid based onMAC address and time component
             self.uid = str(uuid.uuid1())
         else:
             self.uid = uid
