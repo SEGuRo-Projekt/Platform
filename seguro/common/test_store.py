@@ -40,7 +40,7 @@ def test_store():
 
 
 def test_watch():
-    store = Client()
+    store = Client("pytest-client")
 
     filename = "some/prefix/test"
 
@@ -65,7 +65,7 @@ def test_watch():
 
 
 def test_watch_async():
-    store = Client()
+    store = Client("pytest-client")
 
     i = 0
 
