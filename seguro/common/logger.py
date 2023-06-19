@@ -81,10 +81,12 @@ def store_logger(log_level, logfile, bucket=S3_BUCKET):
 
 
 def error_handler():
-    """Return a streaming handler logging errors to stderr."""
+    """Return a streaming handler logging warnings and errors to stderr."""
     streamhandler = logging.StreamHandler()
-    streamformatter = logging.Formatter("\033[31;1mERROR:\033[0m %(message)s")
+    streamformatter = logging.Formatter(
+        "\033[31;1m%(levelname)s:\033[0m %(message)s"
+    )
     streamhandler.setFormatter(streamformatter)
-    streamhandler.setLevel(logging.ERROR)
+    streamhandler.setLevel(logging.WARNING)
 
     return streamhandler

@@ -103,15 +103,25 @@ class Client:
         if not self.client.bucket_exists(self.bucket):
             raise Exception(f"Error: Bucket {self.bucket} does not exist...")
 
-        self.logger = seguro.common.logger.file_logger(
-            log_level,
-            os.path.join(
-                os.path.dirname(__file__),
-                f"../../log/storeclient/{self.uid}.log",
-            ),
-            max_bytes=log_max_bytes,
-            backup_count=log_backup_count,
-        )
+        try:
+            self.store_logger = seguro.common.logger.store_logger(
+                log_level, f"{self.uid}.log"
+            )
+        except Exception as exc:
+            self.logger = seguro.common.logger.file_logger(
+                log_level,
+                os.path.join(
+                    os.path.dirname(__file__),
+                    f"../../log/storeclient/{self.uid}.log",
+                ),
+                max_bytes=log_max_bytes,
+                backup_count=log_backup_count,
+            )
+            self.logger.warning(
+                "Exception %s raised when creating store_logger, \
+                    falling back to file_logger...",
+                exc,
+            )
 
     def get_file(self, filename, file):
         """Download file from the S3 object store and store it locally.

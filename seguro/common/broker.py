@@ -66,15 +66,25 @@ class BrokerClient:
 
         self.message_queue = Queue()
 
-        self.logger = seguro.common.logger.file_logger(
-            log_level,
-            os.path.join(
-                os.path.dirname(__file__),
-                f"../../log/brokerclient/{self.uid}.log",
-            ),
-            max_bytes=log_max_bytes,
-            backup_count=log_backup_count,
-        )
+        try:
+            self.logger = seguro.common.logger.store_logger(
+                log_level, f"{self.uid}.log"
+            )
+        except Exception as exc:
+            self.logger = seguro.common.logger.file_logger(
+                log_level,
+                os.path.join(
+                    os.path.dirname(__file__),
+                    f"../../log/brokerclient/{self.uid}.log",
+                ),
+                max_bytes=log_max_bytes,
+                backup_count=log_backup_count,
+            )
+            self.logger.warning(
+                "Exception %s raised when creating store_logger, \
+                    falling back to file_logger...",
+                exc,
+            )
 
     def __on_connect(self, client, userdata, flags, rc):
         self.logger.info("Connected with result code %i", rc)
