@@ -98,7 +98,7 @@ class BrokerClient:
         self.logger.debug("Receive msg: %s - %s", msg.topic, str(msg.payload))
         self.message_queue.put(msg)
 
-    def subscribe(self, topic, callback=""):
+    def subscribe(self, topic, callback=None):
         """Subscribe client to given topic and registering callback (optional).
 
         Arguments:
