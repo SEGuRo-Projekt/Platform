@@ -1,0 +1,15 @@
+// SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
+// SPDX-License-Identifier: Apache-2.0
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Sync S3 objects",
+      "type": "shell",
+      "command": "mc --quiet alias set minio http://${env:S3_HOST}:${env:S3_PORT} ${env:S3_ACCESS_KEY} ${env:S3_SECRET_KEY} && mc --quiet mirror --overwrite ${workspaceFolder}/s3 minio/seguro",
+      "problemMatcher": []
+    }
+  ]
+}
