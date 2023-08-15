@@ -35,7 +35,8 @@ ARG USER_GID=$USER_UID
 
 RUN apt-get update && \
     apt-get install --yes --no-install-recommends \
-        sudo=1.9.13p3-1 && \
+        sudo=1.9.13p3-1 \
+        bash-completion=1:2.11-6 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
