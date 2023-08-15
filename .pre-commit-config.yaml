@@ -8,8 +8,10 @@ repos:
   hooks:
   - id: check-yaml
   - id: check-json
+    exclude: ^\.(vscode|devcontainer)
   - id: pretty-format-json
     args: [ --autofix ]
+    exclude: ^\.(vscode|devcontainer)
   - id: end-of-file-fixer
   - id: trailing-whitespace
   - id: check-added-large-files
