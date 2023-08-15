@@ -7,7 +7,7 @@
   "service": "dev",
   "workspaceFolder": "/workspace",
 
-  "postCreateCommand": "pip install -e . && pre-commit install",
+  "postCreateCommand": "pip install -r requirements-dev.txt && pip install -e . && pre-commit install",
   "shutdownAction": "stopCompose",
 
   "customizations": {
@@ -16,13 +16,15 @@
 			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [
         "ms-python.python",
-        "ms-python.isort",
         "ms-python.flake8",
+        "ms-python.isort",
         "ms-python.vscode-pylance",
         "ms-azuretools.vscode-docker",
         "ms-toolsai.jupyter",
         "redhat.vscode-yaml",
-        "elagil.pre-commit-helper"
+        "elagil.pre-commit-helper",
+        "editorconfig.editorconfig",
+        "gruntfuggly.triggertaskonsave"
 			]
 		}
 	}
