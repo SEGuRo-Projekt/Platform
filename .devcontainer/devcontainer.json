@@ -1,0 +1,29 @@
+// SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
+// SPDX-License-Identifier: Apache-2.0
+{
+  // The order of the files is important since later files override previous ones
+  "dockerComposeFile": ["../docker-compose.yml", "docker-compose.extend.yml"],
+
+  "service": "dev",
+  "workspaceFolder": "/workspace",
+
+  "postCreateCommand": "pip install -e . && pre-commit install",
+  "shutdownAction": "stopCompose",
+
+  "customizations": {
+		// Configure properties specific to VS Code.
+		"vscode": {
+			// Add the IDs of extensions you want installed when the container is created.
+			"extensions": [
+        "ms-python.python",
+        "ms-python.isort",
+        "ms-python.flake8",
+        "ms-python.vscode-pylance",
+        "ms-azuretools.vscode-docker",
+        "ms-toolsai.jupyter",
+        "redhat.vscode-yaml",
+        "elagil.pre-commit-helper"
+			]
+		}
+	}
+}
