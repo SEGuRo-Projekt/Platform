@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 {
   // The order of the files is important since later files override previous ones
-  "dockerComposeFile": ["../docker-compose.yml", "docker-compose.extend.yml"],
+  "dockerComposeFile": ["../docker-compose.yaml", "../docker-compose.platform.yaml", "docker-compose.extend.yaml"],
 
   "service": "dev",
   "workspaceFolder": "/workspace",
