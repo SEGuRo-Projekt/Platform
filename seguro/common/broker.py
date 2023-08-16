@@ -4,22 +4,21 @@ SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
 SPDX-License-Identifier: Apache-2.0
 """
 
-from queue import Queue
-import os
 import uuid
+import logging
+
+from typing import Optional, Callable
 
 import paho.mqtt.client as mqtt
 
-import seguro.common.logger
 from seguro.common.config import (
     MQTT_HOST,
     MQTT_PASSWORD,
     MQTT_PORT,
     MQTT_USERNAME,
-    LOG_LEVEL,
-    MAX_BYTES,
-    BACKUP_COUNT,
 )
+
+Message = mqtt.MQTTMessage
 
 
 class BrokerClient:
@@ -37,9 +36,6 @@ class BrokerClient:
         username=MQTT_USERNAME,
         password=MQTT_PASSWORD,
         keepalive=60,
-        log_level=LOG_LEVEL,
-        log_max_bytes=MAX_BYTES,
-        log_backup_count=BACKUP_COUNT,
     ):
         """Broker Constructor
 
@@ -50,55 +46,28 @@ class BrokerClient:
         """
         if not uid:
             # Create uid based onMAC address and time component
-            self.uid = str(uuid.uuid1())
+            uid = str(uuid.uuid1())
         else:
-            self.uid = uid
+            uid = uid
 
-        self.client = client = mqtt.Client(client_id=self.uid)
-
-        client.on_connect = self.__on_connect
-        client.on_message = self.__on_message
+        self.logger = logging.getLogger(__name__)
+        self.client = mqtt.Client(client_id=uid)
 
         if username is not None or password is not None:
             self.client.username_pw_set(username, password)
 
         self.client.connect(host, port, keepalive)
 
-        self.message_queue = Queue()
-
-        try:
-            self.logger = seguro.common.logger.store_logger(
-                log_level, f"{self.uid}.log"
-            )
-        except Exception as exc:
-            self.logger = seguro.common.logger.file_logger(
-                log_level,
-                os.path.join(
-                    os.path.dirname(__file__),
-                    f"../../log/brokerclient/{self.uid}.log",
-                ),
-                max_bytes=log_max_bytes,
-                backup_count=log_backup_count,
-            )
-            self.logger.warning(
-                "Exception %s raised when creating store_logger, \
-                    falling back to file_logger...",
-                exc,
-            )
-
         self.start_listening()
 
     def __del__(self):
         self.stop_listening()
 
-    def __on_connect(self, client, userdata, flags, rc):
-        self.logger.info("Connected with result code %i", rc)
-
-    def __on_message(self, client, userdata, msg):
-        self.logger.debug("Receive msg: %s - %s", msg.topic, str(msg.payload))
-        self.message_queue.put(msg)
-
-    def subscribe(self, topic, callback=None):
+    def subscribe(
+        self,
+        topic,
+        cb: Optional[Callable["BrokerClient", mqtt.MQTTMessage]] = None,
+    ):
         """Subscribe client to given topic and registering callback (optional).
 
         Arguments:
@@ -110,10 +79,14 @@ class BrokerClient:
         """
         self.client.subscribe(topic)
 
-        if callback:
+        if cb:
+
+            def callback(_client, _ctx, msg):
+                cb(self, msg)
+
             self.client.message_callback_add(topic, callback)
             self.logger.info(
-                "Subscribed to %s with callback-func %s", topic, callback
+                "Subscribed to %s with callback-func %s", topic, cb
             )
 
     def start_listening(self):
