@@ -8,7 +8,7 @@ import os
 import threading
 import pytest
 
-from seguro.common.store import Client, Event, EventType
+from seguro.common.store import Client, Event
 
 
 @pytest.mark.store
@@ -59,13 +59,13 @@ def test_watch():
 
     events = store.watch("some/prefix/")
 
-    event = next(events)
-    assert event.type == EventType.CREATED
-    assert event.filename == filename
+    typ, filename = next(events)
+    assert typ == Event.CREATED
+    assert filename == filename
 
-    event = next(events)
-    assert event.type == EventType.REMOVED
-    assert event.filename == filename
+    typ, filename = next(events)
+    assert typ == Event.REMOVED
+    assert filename == filename
 
 
 @pytest.mark.store
@@ -74,15 +74,15 @@ def test_watch_async():
 
     i = 0
 
-    def callback(event: Event):
+    def callback(typ: Event, filename: str):
         nonlocal i
 
         if i == 0:
-            assert event.type == EventType.CREATED
-            assert event.filename == filename
+            assert typ == Event.CREATED
+            assert filename == filename
         elif i == 1:
-            assert event.type == EventType.REMOVED
-            assert event.filename == filename
+            assert typ == Event.REMOVED
+            assert filename == filename
 
             # Raise a StopIteration exception to stop processing events
             raise StopIteration()

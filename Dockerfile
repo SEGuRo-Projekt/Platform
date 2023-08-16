@@ -11,6 +11,11 @@ COPY pyproject.toml /
 COPY seguro /seguro
 RUN pip install --no-cache-dir /
 
+# Install Docker Compose
+ARG DOCKER_COMPOSE_VERSION=v2.20.0
+RUN mkdir -p /usr/local/bin && \
+    curl -fsSL https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose && \
+    chmod +x /usr/local/bin/docker-compose
 
 FROM golang:1.20-alpine as go-builder
 RUN  go install github.com/minio/mc@latest
