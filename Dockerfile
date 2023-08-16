@@ -21,7 +21,7 @@ COPY --from=go-builder /go/bin/mc /usr/bin/mc
 
 RUN apt-get update && \
     apt-get install --yes --no-install-recommends \
-        openssh-client=1:9.2p1-2 && \
+        openssh-client && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -35,8 +35,8 @@ ARG USER_GID=$USER_UID
 
 RUN apt-get update && \
     apt-get install --yes --no-install-recommends \
-        sudo=1.9.13p3-1 \
-        bash-completion=1:2.11-6 && \
+        sudo \
+        bash-completion && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
