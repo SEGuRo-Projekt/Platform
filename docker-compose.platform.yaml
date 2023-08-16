@@ -8,3 +8,9 @@ services:
       context: .
 
     command: ["scheduler"]
+
+  demo-data:
+    build:
+      context: .
+
+    command: ["demo-data"]
