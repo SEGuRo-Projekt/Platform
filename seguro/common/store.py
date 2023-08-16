@@ -4,14 +4,14 @@ SPDX-License-Identifier: Apache-2.0
 """
 
 import io
-import os
 import threading
 import enum
-import uuid
+import logging
+import http.client
+import minio
 
-from minio import Minio
+from typing import Callable
 
-import seguro.common.logger
 from seguro.common.config import (
     S3_ACCESS_KEY,
     S3_HOST,
@@ -20,35 +20,13 @@ from seguro.common.config import (
     S3_SECRET_KEY,
     S3_SECURE,
     S3_BUCKET,
-    LOG_LEVEL,
-    MAX_BYTES,
-    BACKUP_COUNT,
 )
 
 
-class EventType(enum.Flag):
+class Event(enum.Flag):
+    UNKNOWN = enum.auto()
     CREATED = enum.auto()
     REMOVED = enum.auto()
-
-
-class Event:
-    def __init__(self, event):
-        records = event.get("Records")
-        record = records[0]
-
-        event_name: str = record.get("eventName")
-        s3: dict = record.get("s3", {})
-        obj: str = s3.get("object", {})
-
-        self.filename: str = obj.get("key")
-
-        if event_name.startswith("s3:ObjectCreated"):
-            self.type = EventType.CREATED
-        elif event_name.startswith("s3:ObjectRemoved"):
-            self.type = EventType.REMOVED
-
-    def __str__(self) -> str:
-        return f"{self.filename} {self.type.name}"
 
 
 class Client:
@@ -60,7 +38,6 @@ class Client:
 
     def __init__(
         self,
-        uid="",
         host=S3_HOST,
         port=S3_PORT,
         access_key=S3_ACCESS_KEY,
@@ -68,9 +45,6 @@ class Client:
         secure=S3_SECURE,
         region=S3_REGION,
         bucket=S3_BUCKET,
-        log_level=LOG_LEVEL,
-        log_max_bytes=MAX_BYTES,
-        log_backup_count=BACKUP_COUNT,
     ):
         """Store Constructor
 
@@ -84,15 +58,10 @@ class Client:
             access_key  -- Access key (UID) for authentication
             secret_key  -- Secret key (password) for authentication
         """
-        if not uid:
-            # Create uid based onMAC address and time component
-            self.uid = str(uuid.uuid1())
-        else:
-            self.uid = uid
 
+        self.logger = logging.getLogger(__name__)
         self.bucket = bucket
-
-        self.client = Minio(
+        self.client = minio.Minio(
             endpoint=f"{host}:{port}",
             access_key=access_key,
             secret_key=secret_key,
@@ -103,27 +72,7 @@ class Client:
         if not self.client.bucket_exists(self.bucket):
             raise Exception(f"Error: Bucket {self.bucket} does not exist...")
 
-        try:
-            self.store_logger = seguro.common.logger.store_logger(
-                log_level, f"{self.uid}.log"
-            )
-        except Exception as exc:
-            self.logger = seguro.common.logger.file_logger(
-                log_level,
-                os.path.join(
-                    os.path.dirname(__file__),
-                    f"../../log/storeclient/{self.uid}.log",
-                ),
-                max_bytes=log_max_bytes,
-                backup_count=log_backup_count,
-            )
-            self.logger.warning(
-                "Exception %s raised when creating store_logger, \
-                    falling back to file_logger...",
-                exc,
-            )
-
-    def get_file(self, filename, file):
+    def get_file(self, filename: str, file: str):
         """Download file from the S3 object store and store it locally.
 
         Arguments:
@@ -132,7 +81,7 @@ class Client:
         """
         return self.client.fget_object(self.bucket, file, filename)
 
-    def put_file(self, filename, file):
+    def put_file(self, filename: str, file: str):
         """Upload local file and store it in the S3Storage.
 
         Arguments:
@@ -141,7 +90,7 @@ class Client:
         """
         return self.client.fput_object(self.bucket, filename, file)
 
-    def remove_file(self, filename):
+    def remove_file(self, filename: str):
         """Remove a local file from the S3Storage.
 
         Arguments:
@@ -149,7 +98,7 @@ class Client:
         """
         return self.client.remove_object(self.bucket, filename)
 
-    def put_file_contents(self, filename, content):
+    def put_file_contents(self, filename: str, content: str):
         """Write to file stored it in the S3Storage.
 
         Arguments:
@@ -166,11 +115,25 @@ class Client:
             len(content),
         )
 
-    def watch(self, prefix: str, events=EventType.CREATED | EventType.REMOVED):
+    def get_file_contents(self, filename: str) -> http.client.HTTPResponse:
+        """Write to file stored it in the S3Storage.
+
+        Arguments:
+            filename -- Name of file in storage
+            content  -- Content that is written to file
+        """
+        if not self.client.bucket_exists(self.bucket):
+            raise Exception(f"Error: Bucket {self.bucket} does not exist...")
+
+        return self.client.get_object(self.bucket, filename)
+
+    def watch(
+        self, prefix: str, events: Event = Event.CREATED | Event.REMOVED
+    ):
         s3_events = []
-        if EventType.CREATED in events:
+        if Event.CREATED in events:
             s3_events.append("s3:ObjectCreated:*")
-        if EventType.REMOVED in events:
+        if Event.REMOVED in events:
             s3_events.append("s3:ObjectRemoved:*")
 
         with self.client.listen_bucket_notification(
@@ -179,13 +142,13 @@ class Client:
             events=s3_events,
         ) as events:
             for event in events:
-                yield Event(event)
+                yield _decode_event(event)
 
     def watch_async(
         self,
         prefix: str,
-        cb: callable,
-        events=EventType.CREATED | EventType.REMOVED,
+        cb: Callable[[Event, str], None],
+        events=Event.CREATED | Event.REMOVED,
     ):
         return Watcher(self, prefix, cb, events)
 
@@ -194,25 +157,71 @@ class Watcher(threading.Thread):
     """Helper class for asynchronous watching of of S3 objects"""
 
     def __init__(
-        self, client: Client, prefix: str, cb: callable, events: EventType
+        self,
+        client: Client,
+        prefix: str,
+        cb: Callable[[Event], None],
+        events: Event,
     ):
         super().__init__()
 
-        self.events = client.watch(prefix, events)
         self.cb = cb
         self._stopflag = threading.Event()
+
+        s3_events = []
+        if Event.CREATED in events:
+            s3_events.append("s3:ObjectCreated:*")
+        if Event.REMOVED in events:
+            s3_events.append("s3:ObjectRemoved:*")
+
+        self.events = client.client.listen_bucket_notification(
+            client.bucket,
+            prefix=prefix,
+            events=s3_events,
+        )
 
         self.start()
 
     def run(self):
-        for event in self.events:
+        while True:
+            try:
+                event = next(self.events)
+
+            # AttributeError is raised because we
+            # set self.events._response to None in Watcher.stop()
+            except AttributeError:
+                break
+
             if self._stopflag.is_set():
                 break
 
             try:
-                self.cb(event)
+                typ, filename = _decode_event(event)
+                self.cb(typ, filename)
             except StopIteration:
                 break
 
     def stop(self):
         self._stopflag.set()
+        self.events._close_response()
+        self.join()
+
+
+def _decode_event(event) -> (Event, str):
+    records = event.get("Records")
+    record = records[0]
+
+    event_name: str = record.get("eventName")
+    s3: dict = record.get("s3", {})
+    obj: str = s3.get("object", {})
+
+    filename: str = obj.get("key")
+
+    if event_name.startswith("s3:ObjectCreated"):
+        typ = Event.CREATED
+    elif event_name.startswith("s3:ObjectRemoved"):
+        typ = Event.REMOVED
+    else:
+        typ = Event.UNKNOWN
+
+    return typ, filename

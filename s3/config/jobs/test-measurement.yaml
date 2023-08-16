@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
+# SPDX-License-Identifier: Apache-2.0
+---
+triggers:
+- type: created
+  prefix: measurements
+
+- type: removed
+  prefix: measurements
+
+scale: 1
+
+container:
+  image: ubuntu
+  command: /bin/sh -c "sleep 2"
+  # Docker-compose compatible service definition

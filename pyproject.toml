@@ -23,13 +23,14 @@ dynamic = ["dependencies","version","readme"]
 
 [project.scripts]
 minio-setup = "seguro.setup.minio:main"
+scheduler = "seguro.scheduler.main:main"
 
 [project.urls]
 "Homepage" = "https://github.com/SEGuRo-Projekt/Plattform"
 "Bug Tracker" = "https://github.com/SEGuRo-Projekt/Plattform/issues"
 
 [tool.setuptools]
-packages = ["seguro", "seguro.common", "seguro.setup"]
+packages = ["seguro", "seguro.common", "seguro.setup", "seguro.scheduler"]
 
 [tool.setuptools.dynamic]
 version = {attr = "seguro.__version__"}
