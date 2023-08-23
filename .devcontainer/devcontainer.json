@@ -2,19 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 {
   // The order of the files is important since later files override previous ones
-  "dockerComposeFile": ["../docker-compose.yaml", "../docker-compose.platform.yaml", "docker-compose.extend.yaml"],
-
+  "dockerComposeFile": [
+    "../docker-compose.yaml",
+    "../docker-compose.platform.yaml",
+    "docker-compose.extend.yaml"
+  ],
   "service": "dev",
   "workspaceFolder": "/workspace",
-
   "postCreateCommand": "pip install -r requirements-dev.txt && pip install -e . && pre-commit install",
   "shutdownAction": "stopCompose",
-
   "customizations": {
-		// Configure properties specific to VS Code.
-		"vscode": {
-			// Add the IDs of extensions you want installed when the container is created.
-			"extensions": [
+    // Configure properties specific to VS Code.
+    "vscode": {
+      // Add the IDs of extensions you want installed when the container is created.
+      "extensions": [
         "ms-python.python",
         "ms-python.flake8",
         "ms-python.black-formatter",
@@ -26,7 +27,7 @@
         "elagil.pre-commit-helper",
         "editorconfig.editorconfig",
         "gruntfuggly.triggertaskonsave"
-			]
-		}
-	}
+      ]
+    }
+  }
 }
