@@ -13,7 +13,7 @@ from seguro.common.store import Client, Event
 
 @pytest.mark.store
 def test_store():
-    store = Client("pytest-client")
+    store = Client()
 
     # Create new file and fill with content
     if not os.path.isfile("myfile.txt"):
@@ -44,7 +44,7 @@ def test_store():
 
 @pytest.mark.store
 def test_watch():
-    store = Client("pytest-client")
+    store = Client()
 
     filename = "some/prefix/test"
 
@@ -70,7 +70,7 @@ def test_watch():
 
 @pytest.mark.store
 def test_watch_async():
-    store = Client("pytest-client")
+    store = Client()
 
     i = 0
 
