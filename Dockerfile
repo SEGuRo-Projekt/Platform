@@ -3,13 +3,14 @@
 
 FROM python:3.11-bookworm AS python
 
-COPY requirements.txt /
+RUN mkdir /platform
+COPY requirements.txt /platform
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r /platform/requirements.txt
 
-COPY pyproject.toml /
-COPY seguro /seguro
-RUN pip install --no-cache-dir /
+COPY pyproject.toml /platform
+COPY seguro /platform/seguro
+RUN pip install -v --no-cache-dir /platform
 
 # Install Docker Compose
 ARG DOCKER_COMPOSE_VERSION=v2.20.0
@@ -26,7 +27,7 @@ COPY --from=go-builder /go/bin/mc /usr/bin/mc
 
 RUN apt-get update && \
     apt-get install --yes --no-install-recommends \
-        openssh-client && \
+    openssh-client && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -40,17 +41,18 @@ ARG USER_GID=$USER_UID
 
 RUN apt-get update && \
     apt-get install --yes --no-install-recommends \
-        sudo \
-        bash-completion && \
+    sudo \
+    bash-completion \
+    mosquitto-clients && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Docker CLI
 ARG DOCKER_VERSION=24.0.2
 RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz \
-  && tar xzvf docker-${DOCKER_VERSION}.tgz --strip 1 \
-                 -C /usr/local/bin docker/docker \
-  && rm docker-${DOCKER_VERSION}.tgz
+    && tar xzvf docker-${DOCKER_VERSION}.tgz --strip 1 \
+    -C /usr/local/bin docker/docker \
+    && rm docker-${DOCKER_VERSION}.tgz
 
 # Install Minio CLI
 COPY --from=go-builder /go/bin/mc /usr/bin/mc
