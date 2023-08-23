@@ -46,6 +46,9 @@ jobs:
           pip install -r requirements-dev.txt
 
       - name: Test with pytest
+        env:
+          S3_HOST: localhost
+          MQTT_HOST: localhost
         run: |
           pytest
 
