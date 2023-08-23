@@ -14,3 +14,9 @@ services:
       context: .
 
     command: ["demo-data"]
+
+  recorder:
+    build:
+      context: .
+
+    command: ["recorder"]
