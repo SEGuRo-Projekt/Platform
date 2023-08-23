@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 import uuid
 import logging
 
-from typing import Optional, Callable
+from typing import Callable
 
 import paho.mqtt.client as mqtt
 
@@ -66,28 +66,21 @@ class BrokerClient:
     def subscribe(
         self,
         topic,
-        cb: Optional[Callable["BrokerClient", mqtt.MQTTMessage]] = None,
+        cb: Callable["BrokerClient", mqtt.MQTTMessage],
     ):
         """Subscribe client to given topic and registering callback (optional).
 
         Arguments:
             topic -- topic that is subscribed
-
-        Optional:
             callback -- callback func that is called on message reception.
-                        If no callback set, the default __on_message is called
         """
         self.client.subscribe(topic)
 
-        if cb:
+        def callback(_client, _ctx, msg):
+            cb(self, msg)
 
-            def callback(_client, _ctx, msg):
-                cb(self, msg)
-
-            self.client.message_callback_add(topic, callback)
-            self.logger.info(
-                "Subscribed to %s with callback-func %s", topic, cb
-            )
+        self.client.message_callback_add(topic, callback)
+        self.logger.info("Subscribed to %s with callback-func %s", topic, cb)
 
     def start_listening(self):
         """Start async listening on subscribed topics."""
