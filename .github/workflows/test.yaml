@@ -8,7 +8,7 @@ on:
   pull_request:
   push:
     branches:
-    - main
+      - main
 
 jobs:
   docker-compose:
@@ -16,39 +16,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-    - uses: docker/setup-buildx-action@v2
+      - uses: docker/setup-buildx-action@v2
 
-    - name: Cache Docker layers
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
 
-    - name: Start containers
-      run: docker compose up
-        --detach
-        --build
+      - name: Start containers
+        run: docker compose up
+          --detach
+          --build
 
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.11
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -r requirements-dev.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
 
-    - name: Test with pytest
-      run: |
-        pytest
+      - name: Test with pytest
+        run: |
+          pytest
 
-    - name: Stop containers
-      if: always()
-      run: docker-compose down
+      - name: Stop containers
+        if: always()
+        run: docker-compose down
