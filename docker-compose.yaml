@@ -117,13 +117,13 @@ services:
         ssh-keygen -N '' -t rsa -b 4096 -f /keys/ssh_host_rsa_key;
       fi
 
-      if ! [ -f /keys/server.crt ] || ! [ -f /keys/server.key ]; then
+      if ! [ -f /keys/server.crt -a -f /keys/server.key ]; then
         openssl req -nodes -x509 -sha256 -newkey rsa:4096
           -keyout /keys/server.key
           -out /keys/server.crt
           -days 356
           -subj "/C=DE/ST=NRW/L=Aachen/O=OPAL-RT/OU=RnD/CN=localhost"
-          -addext "subjectAltName = DNS:*.localhost,DNS:localhost" 2> /dev/null
+          -addext "subjectAltName = DNS:*.localhost,DNS:localhost" 2> /dev/null;
       fi
 
     volumes:
