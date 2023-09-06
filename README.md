@@ -4,48 +4,17 @@ Dieses ist das Git Repository der SEGuRo Plattform.
 
 ## Architektur
 
-![](./docs/images/Platform%20Architektur.jpg)
+### Übersicht
 
-```mermaid
+![overview](./docs/platform_architecture.png)
 
-flowchart LR
-    broker[Message\nBroker] --> recorder{{Recorder}}
-    recorder -->  store[(Data\nStore)]
+### Daten Integrität
 
-    store --> player{{Player}}
-    player --> broker
+![data_integrity](./docs/data_integrity.png)
 
-    ms[Messstellen] --> broker
+### Daten Signierung
 
-
-
-    scheduler([Scheduler])
-    worker[Streaming\nWorker]
-
-    alarm[Alarmierung]
-    dashboard[Web\nDashboard]
-
-    repo[Docker Repo]
-
-    worker <--> broker
-    dt[DT] <--> broker
-    dt <--> store
-    job[Job] <--> store
-    alarm <--> broker
-    broker --> dashboard
-    store --> dashboard
-
-    store -->|config| scheduler
-    scheduler -->|starts| job
-    repo <--> store
-
-    pki[CloudPKI]
-    ids[IDS]
-
-
-    classDef custom fill:lightblue
-    class player,recorder,worker,scheduler,alarm custom
-```
+![data_signing](./docs/data_signing.png)
 
 ## Konfiguration
 
