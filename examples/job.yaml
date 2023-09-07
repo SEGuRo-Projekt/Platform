@@ -25,11 +25,11 @@ triggers:
   prefix: data/measurements/ms_1/
 
 - id: removed-data
-  event: removed
+  type: removed
   prefix: data/ba/
 
 - id: schedule-every-5-seconds
-  event: schedule
+  type: schedule
 
   # Run the job every 'interval' of 'units'
   #
