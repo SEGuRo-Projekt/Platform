@@ -4,7 +4,6 @@
   // The order of the files is important since later files override previous ones
   "dockerComposeFile": [
     "../docker-compose.yaml",
-    "../docker-compose.platform.yaml",
     "docker-compose.extend.yaml"
   ],
   "service": "dev",
