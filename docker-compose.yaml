@@ -242,6 +242,7 @@ services:
   traefik:
     image: "traefik:v2.10"
     container_name: "traefik"
+    restart: unless-stopped
     ports:
     - "80:80"
     - "443:443"
@@ -264,3 +265,11 @@ services:
     depends_on:
       setup:
         condition: service_completed_successfully
+
+  scheduler:
+    container_name: scheduler
+    restart: unless-stopped
+    build:
+      context: .
+
+    command: ["scheduler"]
