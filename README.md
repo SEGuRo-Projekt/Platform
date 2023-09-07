@@ -1,61 +1,47 @@
-# Plattform
+# Platform
 
-Dieses ist das Git Repository der SEGuRo Plattform.
+This is the Git repository of the SEGuRo platform.
 
-## Architektur
+## Architecture
 
-### Übersicht
+### Platform Architecture
 
 ![overview](./docs/platform_architecture.png)
 
-### Daten Integrität
+### Data Integrity
 
 ![data_integrity](./docs/data_integrity.png)
 
-### Daten Signierung
+### Signing Chain
 
 ![data_signing](./docs/data_signing.png)
 
-## Konfiguration
+## Configuration
 
-Siehe [.env](./.env).
+See [.env](./.env).
 
-## Nutzung
+## Usage
 
+1. Start platform via Docker Compose
 ```bash
 docker compose up --detach --build
 ```
 
-- **Object Store Frontend:**
-  - **URL:** http://localhost:9001/
-  - **Nutzername:** seguro
-  - **Passwort:** stwh4herne
-- **Docker Registry Frontend:**
-  - **URL:** http://localhost:8080
-- **Docker Dashboard:**
-  - **URL:** http://localhost:8000
-  - **Nutzername:** admin@yacht.local
-  - **Passwort:** pass
+2. Open [landing page](https://localhost)
 
 
-## Entwicklung
+## Development
 
 1. Install Docker, Git & Visual Studio Code
 2. Clone Repo: `git clone git@github.com:SEGuRo-Projekt/Plattform.git`
-3. Setup environment:
+3. Open Repo as [Devcontainer in Visual Studio Code](https://code.visualstudio.com/docs/devcontainers/containers)
+  - Press:  Ctrl + Shift + P
+  - Type: `Dev Containers: Reopen in container`
+  - Press Enter
+  - Wait (the initial setup can take a couple of minutes)
 
-```bash
-python -m venv .venv
-. .venv/scripts/activate
-#. .venv/bin/activate (on Linux)
-pip install -r python/requirements.txt
-pip install -r python/requirements-dev.txt
-pre-commit install
-pip install --editable .
-```
+## License
 
-## Lizenz
-
-SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH\
-SPDX-FileCopyrightText: 2023 Felix Wege, EONERC-ACS, RWTH Aachen  University\
-SPDX-License-Identifier: Apache-2.0
+- SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH\
+- SPDX-FileCopyrightText: 2023 Felix Wege, EONERC-ACS, RWTH Aachen  University\
+- SPDX-License-Identifier: Apache-2.0
