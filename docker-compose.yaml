@@ -280,3 +280,16 @@ services:
     - .env
 
     command: ["scheduler"]
+
+    working_dir: /workspace
+
+    volumes:
+    - type: bind
+      source: .
+      target: /workspace
+      read_only: true
+
+    - type: bind
+      source: /var/run/docker.sock
+      target: /var/run/docker.sock
+      read_only: true
