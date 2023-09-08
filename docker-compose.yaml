@@ -88,7 +88,6 @@ services:
   minio-setup:
     build:
       context: .
-      target: minio-setup
 
     depends_on:
     - minio
