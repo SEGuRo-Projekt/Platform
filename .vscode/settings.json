@@ -3,13 +3,13 @@
 {
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter"
+    "editor.formatOnSave": true,
   },
-  "editor.formatOnSave": true,
   "python.testing.pytestEnabled": true,
   "python.testing.unittestEnabled": false,
   "triggerTaskOnSave.tasks": {
-    "Sync S3 objects": [
-      "${workspaceFolder}/s3/**"
+    "Sync datastore objects": [
+      "${workspaceFolder}/store/**"
     ]
   }
 }
