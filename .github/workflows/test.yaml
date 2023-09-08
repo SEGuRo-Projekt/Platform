@@ -49,6 +49,7 @@ jobs:
           S3_HOST: localhost
           MQTT_HOST: localhost
         run: |
+          minio-setup # Ensure that buckets exist
           pytest
 
       - name: Stop containers
