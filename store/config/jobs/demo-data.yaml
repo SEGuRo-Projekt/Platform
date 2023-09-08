@@ -3,6 +3,8 @@
 ---
 
 container:
-  image: seguro
+  image: seguro/platform
 
   command: ["demo-data"]
+  env_file:
+  - .env

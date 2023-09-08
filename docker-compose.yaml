@@ -273,6 +273,9 @@ services:
     restart: unless-stopped
     build:
       context: .
+      tags:
+      - seguro/platform
+
     env_file:
     - .env
 
