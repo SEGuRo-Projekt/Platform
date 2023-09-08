@@ -4,10 +4,6 @@
 FROM python:3.11-bookworm AS python
 
 RUN mkdir /platform
-COPY requirements.txt /platform
-
-RUN pip install --no-cache-dir -r /platform/requirements.txt
-
 COPY pyproject.toml /platform
 COPY seguro /platform/seguro
 RUN pip install -v --no-cache-dir /platform
