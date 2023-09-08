@@ -15,20 +15,20 @@ class Job(compose.Service):
     def __init__(
         self, name: str, spec: dict, scheduler: "scheduler.Scheduler"
     ):
-        self.spec = spec
+        self.job_spec = spec
         self.logger = logging.getLogger(__name__)
 
         super().__init__(
             scheduler,
             name,
-            self.spec.get("container", {}),
-            self.spec.get("scale", 1),
-            self.spec.get("recreate", False),
+            self.job_spec.get("container", {}),
+            self.job_spec.get("scale", 1),
+            self.job_spec.get("recreate", False),
         )
 
         self.scheduler = scheduler
         self.watchers = []
-        self.triggers = self.spec.get("triggers", [])
+        self.triggers = self.job_spec.get("triggers", [])
 
         for trigger in self.triggers:
             self._setup_trigger(trigger)

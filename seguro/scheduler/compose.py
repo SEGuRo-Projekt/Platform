@@ -3,11 +3,13 @@ SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
 SPDX-License-Identifier: Apache-2.0
 """
 
+import copy
+import json
+import logging
+import os
 import subprocess
 import tempfile
 import yaml
-import json
-import logging
 
 from contextlib import contextmanager
 
@@ -46,6 +48,28 @@ class Service:
     def stop(self):
         self.composer.compose("down", "--remove-orphans", self.name)
 
+    @property
+    def spec(self):
+        spec = copy.deepcopy(self.service_spec)
+
+        # Ensure that all env_file's are passed as absolute
+        # paths, as docker-compose would otherwise resolve them
+        # relatively to the docker-compose.yml which in our case
+        # is /self/proc/fd/X. So env_file's would be resolved as
+        # /self/proc/fd/some_env_file
+        if env_files := spec.get("env_file"):
+            if isinstance(env_files, str):
+                env_files = [env_files]
+            elif isinstance(env_files, list):
+                env_files = [
+                    f if os.path.isabs(f) else os.path.abspath(f)
+                    for f in env_files
+                ]
+
+            spec["env_file"] = env_files
+
+        return spec
+
 
 class Composer:
     def __init__(self, name: str = "composer"):
@@ -77,7 +101,7 @@ class Composer:
     def spec(self) -> dict:
         return {
             "name": self.name,
-            "services": {svc.name: svc.service_spec for svc in self.services},
+            "services": {svc.name: svc.spec for svc in self.services},
         }
 
     @contextmanager
