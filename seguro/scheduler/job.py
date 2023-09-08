@@ -28,8 +28,9 @@ class Job(compose.Service):
 
         self.scheduler = scheduler
         self.watchers = []
+        self.triggers = self.spec.get("triggers", [])
 
-        for trigger in self.spec.get("triggers", []):
+        for trigger in self.triggers:
             self._setup_trigger(trigger)
 
     def _setup_trigger(self, trigger: dict):

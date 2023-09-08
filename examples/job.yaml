@@ -7,6 +7,9 @@
 # A list of triggers which cause the job to be executed if
 # an object is created or removed from the data store at the
 # given prefix
+#
+# Note: Jobs without any configured triggers will be started
+#       immediately.
 triggers:
 
   # Each triggers ID is passed in the TRIGGER_ID environment variable

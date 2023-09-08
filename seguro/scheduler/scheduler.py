@@ -70,9 +70,11 @@ class Scheduler(compose.Composer):
             self.jobs[name].stop()
             del self.jobs[name]
 
-        self.jobs[name] = job.Job(name, spec, self)
-
+        self.jobs[name] = new_job = job.Job(name, spec, self)
         self.logger.info(f"Added new job: {name}")
+
+        if len(new_job.triggers) == 0:
+            new_job.start()
 
     def _on_job_removed(self, name: str):
         try:
