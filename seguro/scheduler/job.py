@@ -23,6 +23,7 @@ class Job(compose.Service):
             name,
             self.spec.get("container", {}),
             self.spec.get("scale", 1),
+            self.spec.get("recreate", False),
         )
 
         self.scheduler = scheduler
