@@ -14,23 +14,37 @@ from contextlib import contextmanager
 
 class Service:
     def __init__(
-        self, composer: "Composer", name: str, spec: dict, scale: int = 1
+        self,
+        composer: "Composer",
+        name: str,
+        spec: dict,
+        scale: int = 1,
+        force_recreate: bool = False,
     ):
         self.composer = composer
         self.name = name
         self.service_spec = spec
         self.scale = scale
+        self.force_recreate = force_recreate
 
     def start(self):
         if self.composer.watch_proc is not None:
             self.composer.watch_proc.terminate()
 
-        self.composer.compose(
-            "up", "--scale", f"{self.name}={self.scale}", "--detach", self.name
-        )
+        args = ["up", "--detach", "--remove-orphans", "--quiet-pull"]
+
+        if self.scale > 1:
+            args += ["--scale", f"{self.name}={self.scale}"]
+
+        if self.force_recreate:
+            args += ["--force-recreate"]
+
+        args += [self.name]
+
+        self.composer.compose(*args)
 
     def stop(self):
-        self.composer.compose("down", self.name)
+        self.composer.compose("down", "--remove-orphans", self.name)
 
 
 class Composer:
