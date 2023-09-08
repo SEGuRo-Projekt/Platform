@@ -4,6 +4,8 @@
 
 version: "3.9"
 
+name: platform
+
 services:
   landing-page:
     build:
@@ -271,5 +273,7 @@ services:
     restart: unless-stopped
     build:
       context: .
+    env_file:
+    - .env
 
     command: ["scheduler"]

@@ -48,9 +48,10 @@ class Service:
 
 
 class Composer:
-    def __init__(self):
+    def __init__(self, name: str = "composer"):
         self.logger = logging.getLogger(__name__)
         self.watch_proc = None
+        self.name = name
 
     @property
     def services(self):
@@ -61,17 +62,21 @@ class Composer:
             file_fd = file.fileno()
             args = [
                 "docker-compose",
+                "--ansi",
+                "never",
+                "--progress",
+                "plain",
                 "--file",
                 f"/proc/self/fd/{file_fd}",
                 *args,
             ]
             self.logger.info(f"Running: {' '.join(args)}")
-            subprocess.Popen(args, pass_fds=[file_fd])
+            subprocess.run(args, pass_fds=[file_fd])
 
     @property
     def spec(self) -> dict:
         return {
-            "name": "scheduler",
+            "name": self.name,
             "services": {svc.name: svc.service_spec for svc in self.services},
         }
 

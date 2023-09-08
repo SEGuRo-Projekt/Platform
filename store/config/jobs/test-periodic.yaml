@@ -1,14 +1,21 @@
 # SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
 # SPDX-License-Identifier: Apache-2.0
 ---
-triggers:
-- type: schedule
-  interval: 5
-  unit: seconds
+# triggers:
+# - type: schedule
+#   interval: 1
+#   unit: minutes
 
-scale: 1
+recreate: true
 
 container:
   image: ubuntu
-  command: /bin/sh -c "echo $(date); env; sleep 2"
+  command:
+  - /bin/sh
+  - -c
+  - |
+    echo "Hallo 6"
+    date
+    env
+    sleep 1000
   # Docker-compose compatible service definition

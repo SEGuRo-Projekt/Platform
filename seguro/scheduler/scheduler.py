@@ -22,7 +22,7 @@ class Scheduler(compose.Composer):
     def __init__(
         self, docker_client: docker.DockerClient, store_client: store.Client
     ):
-        super().__init__()
+        super().__init__("scheduler")
 
         self.docker = docker_client
         self.store = store_client
@@ -86,15 +86,10 @@ class Scheduler(compose.Composer):
             self.logger.warn(f"Attempted to remove unknown job: {name}")
 
     def run(self):
-        # thd = threading.Thread(target=super().run)
-        # thd.start()
-
         while not self._stopflag.is_set():
             self.logger.debug("Run pending tasks")
             self.scheduler.run_pending()
             time.sleep(1)
-
-        # thd.join()
 
     def stop(self):
         self._stopflag.set()

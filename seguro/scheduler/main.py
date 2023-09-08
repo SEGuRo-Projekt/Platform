@@ -18,7 +18,7 @@ def main():
         datefmt="%H:%M:%S",
     )
 
-    store_client = store.Client("scheduler")
+    store_client = store.Client()
     docker_client = docker.from_env()
 
     scheduler = Scheduler(docker_client, store_client)
