@@ -44,12 +44,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install .[dev]
 
+      - name: Ensure S3 buckets exist
+        run: docker compose up minio-setup
+
       - name: Test with pytest
         env:
           S3_HOST: localhost
           MQTT_HOST: localhost
         run: |
-          minio-setup # Ensure that buckets exist
           pytest
 
       - name: Stop containers

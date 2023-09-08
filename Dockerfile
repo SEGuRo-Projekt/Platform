@@ -3,26 +3,21 @@
 
 FROM python:3.11-bookworm AS python
 
+ARG DOCKER_COMPOSE_VERSION=v2.20.0
+
+# Install Minio client
+RUN curl --create-dirs -fsSL https://dl.min.io/client/mc/release/linux-amd64/mc -o /usr/local/bin/mc && \
+    chmod +x /usr/local/bin/mc
+
+# Install Docker Compose
+RUN curl --create-dirs -fsSL https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose && \
+    chmod +x /usr/local/bin/docker-compose
+
 RUN mkdir /platform
 COPY pyproject.toml /platform
 COPY seguro /platform/seguro
 RUN pip install -v --no-cache-dir /platform
 
-# Install Docker Compose
-ARG DOCKER_COMPOSE_VERSION=v2.20.0
-RUN mkdir -p /usr/local/bin && \
-    curl -fsSL https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose && \
-    chmod +x /usr/local/bin/docker-compose
-
-
-FROM golang:1.20-alpine as go-builder
-
-RUN  go install github.com/minio/mc@latest
-
-
-FROM python AS minio-setup
-
-COPY --from=go-builder /go/bin/mc /usr/bin/mc
 
 FROM debian:bookworm AS setup
 
@@ -55,9 +50,6 @@ RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${
     && tar xzvf docker-${DOCKER_VERSION}.tgz --strip 1 \
     -C /usr/local/bin docker/docker \
     && rm docker-${DOCKER_VERSION}.tgz
-
-# Install Minio CLI
-COPY --from=go-builder /go/bin/mc /usr/bin/mc
 
 RUN groupadd --gid $USER_GID $USERNAME && \
     useradd --uid $USER_UID --gid $USER_GID -m $USERNAME && \
