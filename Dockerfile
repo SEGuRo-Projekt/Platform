@@ -20,6 +20,7 @@ RUN mkdir -p /usr/local/bin && \
 
 
 FROM golang:1.20-alpine as go-builder
+
 RUN  go install github.com/minio/mc@latest
 
 
