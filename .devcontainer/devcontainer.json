@@ -8,7 +8,7 @@
   ],
   "service": "dev",
   "workspaceFolder": "/workspace",
-  "postCreateCommand": "pip install -r requirements-dev.txt && pip install -e . && pre-commit install",
+  "postCreateCommand": "pip install -e .[dev] && pre-commit install",
   "shutdownAction": "stopCompose",
   "customizations": {
     // Configure properties specific to VS Code.
