@@ -11,7 +11,7 @@ on:
       - main
 
 jobs:
-  docker-compose:
+  compose:
     timeout-minutes: 10
     runs-on: ubuntu-latest
 
