@@ -33,7 +33,7 @@ class Service:
         if self.composer.watch_proc is not None:
             self.composer.watch_proc.terminate()
 
-        args = ["up", "--detach", "--remove-orphans", "--quiet-pull"]
+        args = ["up", "--detach", "--quiet-pull"]
 
         if self.scale > 1:
             args += ["--scale", f"{self.name}={self.scale}"]
@@ -46,7 +46,7 @@ class Service:
         self.composer.compose(*args)
 
     def stop(self):
-        self.composer.compose("down", "--remove-orphans", self.name)
+        self.composer.compose("down", self.name)
 
     @property
     def spec(self):
@@ -60,13 +60,14 @@ class Service:
         if env_files := spec.get("env_file"):
             if isinstance(env_files, str):
                 env_files = [env_files]
-            elif isinstance(env_files, list):
+
+            if isinstance(env_files, list):
                 env_files = [
                     f if os.path.isabs(f) else os.path.abspath(f)
                     for f in env_files
                 ]
 
-            spec["env_file"] = env_files
+                spec["env_file"] = env_files
 
         return spec
 
@@ -86,6 +87,8 @@ class Composer:
             file_fd = file.fileno()
             args = [
                 "docker-compose",
+                "--project-name",
+                self.name,
                 "--ansi",
                 "never",
                 "--progress",
@@ -100,8 +103,10 @@ class Composer:
     @property
     def spec(self) -> dict:
         return {
-            "name": self.name,
             "services": {svc.name: svc.spec for svc in self.services},
+            "networks": {
+                "default": {"external": True, "name": "platform_default"}
+            },
         }
 
     @contextmanager
