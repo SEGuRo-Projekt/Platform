@@ -11,10 +11,7 @@ import pytest
 
 @pytest.mark.logger
 def test_file_logger(capsys):
-    filepath = os.path.join(
-        os.path.dirname(__file__),
-        "../../log/test_logger.log",
-    )
+    filepath = "test_logger.log"
 
     # Cleanup before test
     if os.path.isfile(filepath):
