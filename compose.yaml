@@ -141,9 +141,6 @@ services:
     - type: bind
       source: ./etc/mosquitto/
       target: /mosquitto/config/
-    - type: bind
-      source: ./log/mosquitto/
-      target: /mosquitto/log/
     - type: volume
       source: mosquitto
       target: /mosquitto/data/
