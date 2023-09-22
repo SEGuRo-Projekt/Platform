@@ -79,11 +79,11 @@ services:
       start_period: 20s
 
     volumes:
-    - type: bind
-      source: ./data/minio/
+    - type: volume
+      source: store
       target: /data/
-    - type: bind
-      source: ./data/keys
+    - type: volume
+      source: keys
       target: /keys
 
   minio-setup:
@@ -103,8 +103,8 @@ services:
     - MINIO_ROOT_PASSWORD=${S3_SECRET_KEY}
 
     volumes:
-    - type: bind
-      source: ./data/keys
+    - type: volume
+      source: keys
       target: /keys
 
   setup:
@@ -128,8 +128,8 @@ services:
       fi
 
     volumes:
-    - type: bind
-      source: ./data/keys
+    - type: volume
+      source: keys
       target: /keys
 
   mosquitto:
@@ -144,8 +144,8 @@ services:
     - type: bind
       source: ./log/mosquitto/
       target: /mosquitto/log/
-    - type: bind
-      source: ./data/mosquitto/
+    - type: volume
+      source: mosquitto
       target: /mosquitto/data/
 
     ports:
@@ -175,8 +175,8 @@ services:
     - 8000:8000
 
     volumes:
-    - type: bind
-      source: ./data/yacht
+    - type: volume
+      source: yacht-config
       target: /config
     - type: bind
       source: /var/run/docker.sock
@@ -204,14 +204,14 @@ services:
       target: 5001
 
     volumes:
-    - type: bind
-      source: ./data/registry
+    - type: volume
+      source: registry
       target: /var/lib/registry
     - type: bind
       source: ./etc/registry
       target: /etc/docker/registry
-    - type: bind
-      source: ./data/keys
+    - type: volume
+      source: keys
       target: /keys
 
   registry-ui:
@@ -259,8 +259,8 @@ services:
       target: /etc/traefik/
       read_only: true
 
-    - type: bind
-      source: ./data/keys
+    - type: volume
+      source: keys
       target: /keys
 
     depends_on:
@@ -292,3 +292,11 @@ services:
       source: /var/run/docker.sock
       target: /var/run/docker.sock
       read_only: true
+
+
+volumes:
+  keys:
+  store:
+  registry:
+  mosquitto:
+  yacht-config:
