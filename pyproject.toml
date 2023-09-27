@@ -29,6 +29,7 @@ dependencies = [
   "paho-mqtt==1.6.1",
   "python-slugify==8.0.1",
   "pyyaml==6.0",
+  "rfc3161ng==2.1.3",
   "schedule==1.2.0",
 ]
 
@@ -36,9 +37,9 @@ dynamic = ["version","readme"]
 
 [project.optional-dependencies]
 dev = [
-  "pytest==7.3.1",
   "flake8==6.0.0",
-  "pre-commit==3.3.1"
+  "pre-commit==3.3.1",
+  "pytest==7.3.1",
 ]
 
 [project.scripts]
@@ -47,6 +48,7 @@ minio-setup = "seguro.setup.minio:main"
 scheduler = "seguro.scheduler.main:main"
 recorder = "seguro.recorder.main:main"
 demo-data = "seguro.demo_data.main:main"
+signature-sender = "seguro.signature_sender.main:main"
 
 [project.urls]
 "Homepage" = "https://github.com/SEGuRo-Projekt/Plattform"
