@@ -66,7 +66,7 @@ class BrokerClient:
     def subscribe(
         self,
         topic,
-        cb: Callable["BrokerClient", mqtt.MQTTMessage],
+        cb: Callable[["BrokerClient", mqtt.MQTTMessage], None],
     ):
         """Subscribe client to given topic and registering callback (optional).
 

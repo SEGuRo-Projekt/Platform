@@ -27,14 +27,14 @@ class Job(compose.Service):
         )
 
         self.scheduler = scheduler
-        self.watchers = []
+        self.watchers: list[store.Watcher] = []
         self.triggers = self.job_spec.get("triggers", [])
 
         for trigger in self.triggers:
             self._setup_trigger(trigger)
 
-    def _setup_trigger(self, trigger: dict):
-        typ: str = trigger.get("type")
+    def _setup_trigger(self, trigger: dict[str, str]):
+        typ = trigger.get("type")
         if typ in ["created", "removed"]:
             event = store.Event[typ.upper()]
             prefix = trigger.get("prefix", "/")

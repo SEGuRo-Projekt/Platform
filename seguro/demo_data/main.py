@@ -19,7 +19,7 @@ def main():
 
     broker = BrokerClient("demo-data")
 
-    value = 0
+    value = 0.0
 
     while True:
         broker.publish("measurements/ms1/value", value)

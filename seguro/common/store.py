@@ -160,7 +160,7 @@ class Watcher(threading.Thread):
         self,
         client: Client,
         prefix: str,
-        cb: Callable[[Event], None],
+        cb: Callable[[Event, str], None],
         events: Event,
     ):
         super().__init__()
@@ -207,13 +207,13 @@ class Watcher(threading.Thread):
         self.join()
 
 
-def _decode_event(event) -> (Event, str):
+def _decode_event(event) -> tuple[Event, str]:
     records = event.get("Records")
     record = records[0]
 
     event_name: str = record.get("eventName")
     s3: dict = record.get("s3", {})
-    obj: str = s3.get("object", {})
+    obj = s3.get("object", {})
 
     filename: str = obj.get("key")
 
