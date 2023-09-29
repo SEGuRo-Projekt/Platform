@@ -20,15 +20,16 @@ classifiers = [
 ]
 
 dependencies = [
-  "django-environ==0.10.0",
-  "minio==7.1.14",
-  "paho-mqtt==1.6.1",
+  "apprise==1.5.0",
   "aws-logging-handlers==2.0.5",
   "boto3==1.26.142",
+  "django-environ==0.10.0",
   "docker==6.1.3",
+  "minio==7.1.14",
+  "paho-mqtt==1.6.1",
+  "python-slugify==8.0.1",
   "pyyaml==6.0",
   "schedule==1.2.0",
-  "python-slugify==8.0.1"
 ]
 
 dynamic = ["version","readme"]
@@ -41,6 +42,7 @@ dev = [
 ]
 
 [project.scripts]
+apprise_service = "seguro.apprise_service.main:main"
 minio-setup = "seguro.setup.minio:main"
 scheduler = "seguro.scheduler.main:main"
 recorder = "seguro.recorder.main:main"
