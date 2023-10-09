@@ -4,13 +4,15 @@
   // The order of the files is important since later files override previous ones
   "dockerComposeFile": [
     "../compose.yaml",
-    "compose.extend.yaml"
+    "compose.yaml"
   ],
   "service": "dev",
-  "remoteUser": "vscode",
   "workspaceFolder": "/workspace",
   "postCreateCommand": "pip install -e .[dev] && pre-commit install",
   "shutdownAction": "stopCompose",
+  "remoteEnv": {
+    "PATH": "${containerEnv:PATH}:/usr/local/bin"
+  },
   "customizations": {
     // Configure properties specific to VS Code.
     "vscode": {
