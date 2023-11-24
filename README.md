@@ -22,12 +22,16 @@ See [.env](./.env).
 
 ## Usage
 
-1. Start platform via Docker Compose
+1. Install SEGuRo project (and its dependencies) in editable mode
+```bash
+pip install -e .
+```
+2. Start platform via Docker Compose
 ```bash
 docker compose up --detach --build
 ```
 
-2. Open [landing page](https://localhost)
+3. Open [landing page](https://localhost)
 
 
 ## Development
