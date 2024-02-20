@@ -33,6 +33,19 @@ docker compose up --detach --build
 
 3. Open [landing page](https://localhost)
 
+### Default credentials
+
+#### Yacht
+
+- **Username:** admin@yacht.local
+- **Password:** pass
+
+#### Minio
+
+- **Username:** seguro
+- **Password:** stwh4herne
+
+
 
 ## Development
 
