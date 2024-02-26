@@ -3,6 +3,7 @@
 
 build/
 data/
+.direnv/
 
 *.pyc
 *.egg-info/
