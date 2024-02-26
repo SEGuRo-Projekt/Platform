@@ -128,13 +128,23 @@ class Client:
         return self.client.get_object(self.bucket, filename)
 
     def watch(
-        self, prefix: str, events: Event = Event.CREATED | Event.REMOVED
+        self,
+        prefix: str,
+        events: Event = Event.CREATED | Event.REMOVED,
+        initial: bool = False,
     ):
         s3_events = []
         if Event.CREATED in events:
             s3_events.append("s3:ObjectCreated:*")
         if Event.REMOVED in events:
             s3_events.append("s3:ObjectRemoved:*")
+
+        if initial and Event.CREATED in events:
+            objs = self.client.list_objects(
+                self.bucket, prefix=prefix, recursive=True
+            )
+            for obj in objs:
+                yield Event.CREATED, obj.object_name
 
         with self.client.listen_bucket_notification(
             self.bucket,
@@ -149,8 +159,9 @@ class Client:
         prefix: str,
         cb: Callable[[Event, str], None],
         events=Event.CREATED | Event.REMOVED,
+        initial: bool = False,
     ):
-        return Watcher(self, prefix, cb, events)
+        return Watcher(self, prefix, cb, events, initial)
 
 
 class Watcher(threading.Thread):
@@ -161,11 +172,13 @@ class Watcher(threading.Thread):
         client: Client,
         prefix: str,
         cb: Callable[[Event, str], None],
-        events: Event,
+        events: Event = Event.CREATED | Event.REMOVED,
+        initial: bool = False,
     ):
         super().__init__()
 
         self.cb = cb
+        self.client = client
         self._stopflag = threading.Event()
 
         s3_events = []
@@ -174,8 +187,15 @@ class Watcher(threading.Thread):
         if Event.REMOVED in events:
             s3_events.append("s3:ObjectRemoved:*")
 
-        self.events = client.client.listen_bucket_notification(
-            client.bucket,
+        if initial and Event.CREATED in events:
+            objs = self.client.client.list_objects(
+                self.client.bucket, prefix=prefix, recursive=True
+            )
+            for obj in objs:
+                cb(self.client, Event.CREATED, obj.object_name)
+
+        self.events = self.client.client.listen_bucket_notification(
+            self.client.bucket,
             prefix=prefix,
             events=s3_events,
         )
