@@ -8,7 +8,7 @@
   "configurations": [
     {
       "name": "Python: scheduler",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/seguro/scheduler/main.py",
       "console": "integratedTerminal",
@@ -16,7 +16,7 @@
     },
     {
       "name": "Python: current file",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "program": "${file}",
       "console": "integratedTerminal",

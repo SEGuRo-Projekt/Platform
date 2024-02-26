@@ -3,6 +3,6 @@ Upstream-Name: SEGuRo Plattform
 Upstream-Contact: Steffen Vogel <steffen.vogel@opal-rt.com>
 Source: https://github.com/SEGuRo-Projekt/Plattform
 
-Files: *.drawio *.png store/*
+Files: *.drawio *.png store/* flake.lock poetry.lock
 Copyright: 2023 Steffen Vogel, OPAL-RT Germany GmbH
 License: Apache-2.0
