@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from queue import Queue
 from pyasn1.codec import der
 from rfc3161ng import TimeStampResp, oid_to_hash
-from seguro.common.broker import BrokerClient, Message
+from seguro.common.broker import Client as BrokerClient, Message
 from seguro.common.store import Client as StoreClient
 
 

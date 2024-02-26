@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 import time
 import pytest
 
-from seguro.common.broker import BrokerClient
+from seguro.common.broker import Client
 
 # Used to store callback messages
 messages = []
@@ -19,7 +19,7 @@ def callback(client, msg):
 
 @pytest.mark.broker
 def test_broker():
-    broker = BrokerClient("pytest-broker")
+    broker = Client("pytest-broker")
 
     # Subscribe to topic "mytopic" and start listening in another thread
     broker.subscribe("mytopic", callback)

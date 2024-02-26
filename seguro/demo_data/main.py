@@ -7,7 +7,7 @@ import time
 import random
 import logging
 
-from seguro.common.broker import BrokerClient
+from seguro.common.broker import Client as BrokerClient
 
 
 def main():

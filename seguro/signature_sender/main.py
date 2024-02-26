@@ -12,7 +12,7 @@ from pyasn1.codec import der
 from rfc3161ng import RemoteTimestamper
 from villas.node.digest import Digest
 
-from seguro.common.broker import BrokerClient
+from seguro.common.broker import Client as BrokerClient
 
 
 @dc.dataclass
