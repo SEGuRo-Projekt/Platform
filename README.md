@@ -35,15 +35,12 @@ docker compose up --detach --build
 
 ### Default credentials
 
-#### Yacht
+The administrator credentials can be configued in the `.env` file.
 
-- **Username:** admin@yacht.local
-- **Password:** pass
+The defaults are:
 
-#### Minio
-
-- **Username:** seguro
-- **Password:** stwh4herne
+- **Username:** admin
+- **Password:** s3gur0herne
 
 ## Development
 
@@ -92,15 +89,7 @@ You then can access the links above by substituting `localhost` with `seguro`.
 
 #### Production
 
-For production setup, you will need to register and configure a domain name and point its `A` and `AAAA` records to the IP address of your Docker host.
-
-Also update the Traefik rules by adding your own domain name in the `compose.yaml` file. E.g.:
-
-```diff
--    - traefik.http.routers.store-s3.rule=Host(`store.localhost`, `store.seguro`, `store.seguro.eonerc.rwth-aachen.de`)
-+    - traefik.http.routers.store-s3.rule=Host(`store.localhost`, `store.seguro`, `store.my-seguro-platform.com`)
-```
-
+For production setup, you will need to register and configure a domain name (environment variable `DOMAIN` in `.env`) and point its `A` and `AAAA` records to the IP address of your Docker host.
 
 ## License
 

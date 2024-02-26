@@ -24,10 +24,12 @@ FROM debian:bookworm AS setup
 RUN apt-get update && \
     apt-get install --yes --no-install-recommends \
     openssh-client \
+    apache2-utils \
     openssl && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+ENTRYPOINT [ "/bin/bash" ]
 
 FROM python AS dev-vscode
 
