@@ -14,7 +14,7 @@ services:
 
     labels:
     - traefik.enable=true
-    - traefik.http.routers.landing-page.rule=Host(`localhost`)
+    - traefik.http.routers.landing-page.rule=Host(`localhost`, `seguro`, `seguro.eonerc.rwth-aachen.de`)
     - traefik.http.routers.landing-page.tls=true
 
   minio:
@@ -36,11 +36,11 @@ services:
 
     labels:
     - traefik.enable=true
-    - traefik.http.routers.store-s3.rule=Host(`store.localhost`)
+    - traefik.http.routers.store-s3.rule=Host(`store.localhost`, `store.seguro`, `store.seguro.eonerc.rwth-aachen.de`)
     - traefik.http.routers.store-s3.service=store-s3
     - traefik.http.routers.store-s3.tls=true
     - traefik.http.services.store-s3.loadbalancer.server.port=9000
-    - traefik.http.routers.store-ui.rule=Host(`ui.store.localhost`)
+    - traefik.http.routers.store-ui.rule=Host(`ui.store.localhost`, `ui.store.seguro`, `ui.store.seguro.eonerc.rwth-aachen.de`)
     - traefik.http.routers.store-ui.service=store-ui
     - traefik.http.routers.store-ui.tls=true
     - traefik.http.services.store-ui.loadbalancer.server.port=9001
@@ -165,7 +165,7 @@ services:
 
     labels:
     - traefik.enable=true
-    - traefik.http.routers.yacht.rule=Host(`ui.localhost`)
+    - traefik.http.routers.yacht.rule=Host(`ui.localhost`, `ui.seguro`, `ui.seguro.eonerc.rwth-aachen.de`)
     - traefik.http.routers.yacht.tls=true
 
     ports:
@@ -191,7 +191,7 @@ services:
 
     labels:
     - traefik.enable=true
-    - traefik.http.routers.registry.rule=Host(`registry.localhost`)
+    - traefik.http.routers.registry.rule=Host(`registry.localhost`, `registry.seguro`, `registry.seguro.eonerc.rwth-aachen.de`)
     - traefik.http.routers.registry.tls=true
 
     ports:
@@ -218,7 +218,7 @@ services:
 
     labels:
     - traefik.enable=true
-    - traefik.http.routers.registry-ui.rule=Host(`ui.registry.localhost`)
+    - traefik.http.routers.registry-ui.rule=Host(`ui.registry.localhost`, `ui.registry.seguro`, `ui.registry.seguro.eonerc.rwth-aachen.de`)
     - traefik.http.routers.registry-ui.tls=true
 
     ports:
