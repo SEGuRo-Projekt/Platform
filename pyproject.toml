@@ -1,48 +1,21 @@
 # SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
 # SPDX-License-Identifier: Apache-2.0
 
-[build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
-
-[project]
-name = "seguro-platform"
+[tool.poetry]
 authors = [
-  { name="Steffen Vogel", email="steffen.vogel@opal-rt.com" },
-  { name="Felix Wege", email="felix.wege@eonerc.rwth-aachen.de" },
+  "Steffen Vogel <steffen.vogel@opal-rt.com>",
+  "Felix Wege <felix.wege@eonerc.rwth-aachen.de>",
 ]
+name = "seguro-platform"
+version = "0.1.0"
 description = "Common Python helpers for accessing the SEGuRo platform"
-requires-python = ">=3.11"
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-]
+license = "Apache-2.0"
+readme = "README.md"
+packages = [{include = "seguro"}]
 
-dependencies = [
-  "apprise==1.5.0",
-  "aws-logging-handlers==2.0.5",
-  "boto3==1.26.142",
-  "django-environ==0.10.0",
-  "docker==6.1.3",
-  "minio==7.1.14",
-  "paho-mqtt==1.6.1",
-  "python-slugify==8.0.1",
-  "pyyaml==6.0",
-  "rfc3161ng==2.1.3",
-  "schedule==1.2.0",
-]
+[tool.poetry.scripts]
+poetry = "poetry.console.application:main"
 
-dynamic = ["version","readme"]
-
-[project.optional-dependencies]
-dev = [
-  "flake8==6.0.0",
-  "pre-commit==3.3.1",
-  "pytest==7.3.1",
-]
-
-[project.scripts]
 apprise_service = "seguro.apprise_service.main:main"
 minio-setup = "seguro.setup.minio:main"
 scheduler = "seguro.scheduler.main:main"
@@ -51,24 +24,39 @@ demo-data = "seguro.demo_data.main:main"
 signature-sender = "seguro.signature_sender.main:main"
 signature-recorder = "seguro.signature_recorder.main:main"
 
-[project.urls]
+[tool.poetry.urls]
 "Homepage" = "https://github.com/SEGuRo-Projekt/Plattform"
 "Bug Tracker" = "https://github.com/SEGuRo-Projekt/Plattform/issues"
-
-[tool.setuptools.packages.find]
-include=["seguro.*"]
-
-[tool.setuptools.dynamic]
-version = {attr = "seguro.__version__"}
-readme = {file = ["README.md"], content-type = "text/markdown"}
 
 [tool.black]
 line-length = 79
 
 [tool.pytest.ini_options]
-markers = [
-  "broker",
-  "store",
-  "logger",
-  "config"
-]
+markers = ["broker", "store", "logger", "config"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+apprise = "^1.7.2"
+boto3 = "^1.34.50"
+django-environ = "^0.11.2"
+docker = "^7.0.0"
+minio = "^7.2.4"
+paho-mqtt = "^2.0.0"
+python-slugify = "^8.0.4"
+pyyaml = "^6.0.1"
+rfc3161ng = "^2.1.3"
+schedule = "^1.2.1"
+pandas = {extras = ["excel", "parquet"], version = "^2.2.1"}
+cryptography = "42.0.3"
+aws-logging-handlers = "^2.0.5"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.2"
+ipython = "^8.22.1"
+flake8 = "^7.0.0"
+black = "^24.2.0"
+pre-commit = "^3.6.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
