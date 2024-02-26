@@ -10,7 +10,7 @@ from queue import SimpleQueue
 
 from apprise import Apprise, AppriseConfig, NotifyType
 
-from seguro.common.broker import BrokerClient, Message
+from seguro.common.broker import Client as BrokerClient, Message
 
 
 @dc.dataclass

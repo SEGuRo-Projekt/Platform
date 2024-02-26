@@ -21,7 +21,7 @@ from seguro.common.config import (
 Message = mqtt.MQTTMessage
 
 
-class BrokerClient:
+class Client:
     """Helper class for MQTT interaction with the SEGuRo platform.
 
     This class provides an abstraction layer for MQTT based communication
@@ -66,7 +66,7 @@ class BrokerClient:
     def subscribe(
         self,
         topic,
-        cb: Callable[["BrokerClient", mqtt.MQTTMessage], None],
+        cb: Callable[["Client", mqtt.MQTTMessage], None],
     ):
         """Subscribe client to given topic and registering callback (optional).
 
