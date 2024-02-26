@@ -44,4 +44,12 @@
   </ul>
 </body>
 
+<script>
+// Fix-up domain of links in case we are not on localhost
+for (let link of document.getElementsByTagName('a')) {
+  link.hostname = link.hostname.replace('localhost', window.location.hostname);
+  console.log(link);
+}
+</script>
+
 </html>
