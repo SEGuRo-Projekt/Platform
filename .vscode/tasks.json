@@ -8,7 +8,7 @@
     {
       "label": "Sync datastore objects",
       "type": "shell",
-      "command": "mc --quiet alias set minio http://${env:S3_HOST}:${env:S3_PORT} ${env:S3_ACCESS_KEY} ${env:S3_SECRET_KEY} && mc --quiet mirror --remove --overwrite ${workspaceFolder}/store minio/seguro",
+      "command": "mc --quiet alias set minio http://${env:S3_HOST}:${env:S3_PORT} ${env:ADMIN_USERNAME} ${env:ADMIN_PASSWORD} && mc --quiet mirror --remove --overwrite ${workspaceFolder}/store minio/seguro",
       "problemMatcher": []
     }
   ]

@@ -14,7 +14,7 @@ services:
 
     labels:
     - traefik.enable=true
-    - traefik.http.routers.landing-page.rule=Host(`localhost`, `seguro`, `seguro.eonerc.rwth-aachen.de`)
+    - traefik.http.routers.landing-page.rule=Host(`${DOMAIN}`)
     - traefik.http.routers.landing-page.tls=true
 
   minio:
@@ -36,11 +36,11 @@ services:
 
     labels:
     - traefik.enable=true
-    - traefik.http.routers.store-s3.rule=Host(`store.localhost`, `store.seguro`, `store.seguro.eonerc.rwth-aachen.de`)
+    - traefik.http.routers.store-s3.rule=Host(`store.${DOMAIN}`)
     - traefik.http.routers.store-s3.service=store-s3
     - traefik.http.routers.store-s3.tls=true
     - traefik.http.services.store-s3.loadbalancer.server.port=9000
-    - traefik.http.routers.store-ui.rule=Host(`ui.store.localhost`, `ui.store.seguro`, `ui.store.seguro.eonerc.rwth-aachen.de`)
+    - traefik.http.routers.store-ui.rule=Host(`ui.store.${DOMAIN}`)
     - traefik.http.routers.store-ui.service=store-ui
     - traefik.http.routers.store-ui.tls=true
     - traefik.http.services.store-ui.loadbalancer.server.port=9001
@@ -50,8 +50,8 @@ services:
         condition: service_completed_successfully
 
     environment:
-    - MINIO_ROOT_USER=${S3_ACCESS_KEY}
-    - MINIO_ROOT_PASSWORD=${S3_SECRET_KEY}
+    - MINIO_ROOT_USER=${ADMIN_USERNAME}
+    - MINIO_ROOT_PASSWORD=${ADMIN_PASSWORD}
 
     ports:
     - target: 9000
@@ -99,8 +99,8 @@ services:
     - .env
 
     environment:
-    - MINIO_ROOT_USER=${S3_ACCESS_KEY}
-    - MINIO_ROOT_PASSWORD=${S3_SECRET_KEY}
+    - MINIO_ROOT_USER=${ADMIN_USERNAME}
+    - MINIO_ROOT_PASSWORD=${ADMIN_PASSWORD}
 
     volumes:
     - type: volume
@@ -111,26 +111,20 @@ services:
     build:
       context: .
       target: setup
-    command:
-    - sh
-    - -c
-    - if ! [ -f /keys/ssh_host_rsa_key ]; then
-        ssh-keygen -N '' -t rsa -b 4096 -f /keys/ssh_host_rsa_key;
-      fi
 
-      if ! [ -f /keys/server.crt -a -f /keys/server.key ]; then
-        openssl req -nodes -x509 -sha256 -newkey rsa:4096
-          -keyout /keys/server.key
-          -out /keys/server.crt
-          -days 356
-          -subj "/C=DE/ST=NRW/L=Aachen/O=OPAL-RT/OU=RnD/CN=localhost"
-          -addext "subjectAltName = DNS:*.localhost,DNS:localhost" 2> /dev/null;
-      fi
+    environment:
+    - ADMIN_USERNAME=${ADMIN_USERNAME}
+    - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+
+    command: /setup.sh
 
     volumes:
     - type: volume
       source: keys
       target: /keys
+    - type: bind
+      source: setup.sh
+      target: /setup.sh
 
   mosquitto:
     image: eclipse-mosquitto:2
@@ -163,9 +157,19 @@ services:
     container_name: yacht
     restart: unless-stopped
 
+    environment:
+    - SECRET_KEY=${SECRET}
+    - ADMIN_EMAIL=${ADMIN_USERNAME}
+    - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+    - ACCESS_TOKEN_EXPIRES=2592000
+
+    - PUID=0
+    - PGID=0
+    - COMPOSE_DIR=/compose
+
     labels:
     - traefik.enable=true
-    - traefik.http.routers.yacht.rule=Host(`ui.localhost`, `ui.seguro`, `ui.seguro.eonerc.rwth-aachen.de`)
+    - traefik.http.routers.yacht.rule=Host(`ui.${DOMAIN}`)
     - traefik.http.routers.yacht.tls=true
 
     ports:
@@ -179,11 +183,6 @@ services:
       source: /var/run/docker.sock
       target: /var/run/docker.sock
 
-    environment:
-    - PUID=0
-    - PGID=0
-    - COMPOSE_DIR=/compose
-
   registry:
     image: registry:2
     container_name: registry
@@ -191,8 +190,12 @@ services:
 
     labels:
     - traefik.enable=true
-    - traefik.http.routers.registry.rule=Host(`registry.localhost`, `registry.seguro`, `registry.seguro.eonerc.rwth-aachen.de`)
+    - traefik.http.routers.registry.rule=Host(`registry.${DOMAIN}`)
     - traefik.http.routers.registry.tls=true
+
+    depends_on:
+      setup:
+        condition: service_completed_successfully
 
     ports:
     - protocol: tcp
@@ -211,6 +214,15 @@ services:
       source: keys
       target: /keys
 
+    environment:
+    - REGISTRY_STORAGE_S3_ACCESSKEY=${ADMIN_USERNAME}
+    - REGISTRY_STORAGE_S3_SECRETKEY=${ADMIN_PASSWORD}
+    - REGISTRY_HTTP_SECRET=${SECRET}
+    - REGISTRY_HTTP_HEADERS_Access-Control-Allow-Origin=[https://ui.registry.${DOMAIN}]
+    # See: https://distribution.github.io/distribution/#tls
+    # - REGISTRY_HTTP_TLS_CERTIFICATE=
+    # - REGISTRY_HTTP_TLS_KEY
+
   registry-ui:
     image: joxit/docker-registry-ui:latest
     container_name: registry_ui
@@ -218,7 +230,7 @@ services:
 
     labels:
     - traefik.enable=true
-    - traefik.http.routers.registry-ui.rule=Host(`ui.registry.localhost`, `ui.registry.seguro`, `ui.registry.seguro.eonerc.rwth-aachen.de`)
+    - traefik.http.routers.registry-ui.rule=Host(`ui.registry.${DOMAIN}`)
     - traefik.http.routers.registry-ui.tls=true
 
     ports:
@@ -226,16 +238,16 @@ services:
       target: 80
       published: 8080
 
+    depends_on:
+    - registry
+
     environment:
     - REGISTRY_TITLE=SEGuRo Private Docker Registry
-    - REGISTRY_URL=http://localhost:5001
+    - REGISTRY_URL=https://registry.${DOMAIN}
     - SINGLE_REGISTRY=true
     - DELETE_IMAGES=true
     - SHOW_CONTENT_DIGEST=true
     - THEME=light
-
-    depends_on:
-    - registry
 
   traefik:
     image: "traefik:v2.10"

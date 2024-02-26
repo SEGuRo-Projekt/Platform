@@ -23,8 +23,8 @@ BACKUP_COUNT = 5
 # Object storage
 S3_HOST = env.str("S3_HOST", "minio")
 S3_PORT = env.int("S3_PORT", 9001)
-S3_ACCESS_KEY = env.str("S3_ACCESS_KEY", None)
-S3_SECRET_KEY = env.str("S3_SECRET_KEY", None)
+S3_ACCESS_KEY = env.str("S3_ACCESS_KEY", env.str("ADMIN_USERNAME", None))
+S3_SECRET_KEY = env.str("S3_SECRET_KEY", env.str("ADMIN_PASSWORD", None))
 S3_SECURE = env.bool("S3_SECURE", False)
 S3_REGION = env.str("S3_REGION", "us-east-1")
 S3_BUCKET = env.str("S3_BUCKET", "seguro")
@@ -32,5 +32,5 @@ S3_BUCKET = env.str("S3_BUCKET", "seguro")
 # Message broker
 MQTT_HOST = env.str("MQTT_HOST", "mosquitto")
 MQTT_PORT = env.int("MQTT_PORT", 1883)
-MQTT_USERNAME = env.str("MQTT_USERNAME", None)
-MQTT_PASSWORD = env.str("MQTT_PASSWORD", None)
+MQTT_USERNAME = env.str("MQTT_USERNAME", env.str("ADMIN_USERNAME", None))
+MQTT_PASSWORD = env.str("MQTT_PASSWORD", env.str("ADMIN_PASSWORD", None))
