@@ -45,9 +45,9 @@ docker compose up --detach --build
 - **Username:** seguro
 - **Password:** stwh4herne
 
-
-
 ## Development
+
+### With [Docker](https://www.docker.com/) & [Devcontainer](https://containers.dev/)
 
 1. Install Docker, Git & Visual Studio Code
 2. Clone Repo: `git clone git@github.com:SEGuRo-Projekt/Plattform.git`
@@ -56,6 +56,14 @@ docker compose up --detach --build
   - Type: `Dev Containers: Reopen in container`
   - Press Enter
   - Wait (the initial setup can take a couple of minutes)
+
+### Manual
+
+1. Clone Repo: `git clone git@github.com:SEGuRo-Projekt/Plattform.git`
+2. Initialize [Python virtual environment](https://docs.python.org/3/library/venv.html): `python3 -m virtualenv .venv`
+3. Enter virtual environment: `. .venv/bin/activate`
+4. Install Python packages and dependencies: `pip install -e .[dev]`
+5. Start Platform via Docker Compose: `docker compose up -d`
 
 ## License
 
