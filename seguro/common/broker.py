@@ -51,7 +51,10 @@ class Client:
             uid = uid
 
         self.logger = logging.getLogger(__name__)
-        self.client = mqtt.Client(client_id=uid)
+        self.client = mqtt.Client(
+            client_id=uid,
+            callback_api_version=mqtt.CallbackAPIVersion.VERSION1,
+        )
 
         if username is not None or password is not None:
             self.client.username_pw_set(username, password)
