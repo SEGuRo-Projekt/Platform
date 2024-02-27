@@ -171,7 +171,7 @@ class Watcher(threading.Thread):
         self,
         client: Client,
         prefix: str,
-        cb: Callable[[Event, str], None],
+        cb: Callable[[Client, Event, str], None],
         events: Event = Event.CREATED | Event.REMOVED,
         initial: bool = False,
     ):
@@ -217,7 +217,7 @@ class Watcher(threading.Thread):
 
             try:
                 typ, filename = _decode_event(event)
-                self.cb(typ, filename)
+                self.cb(self.client, typ, filename)
             except StopIteration:
                 break
 
