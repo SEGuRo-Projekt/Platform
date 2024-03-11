@@ -24,7 +24,8 @@ See [.env](./.env).
 
 1. Install SEGuRo project (and its dependencies) in editable mode
 ```bash
-pip install -e .
+pip install poetry
+poetry install
 ```
 2. Start platform via Docker Compose
 ```bash
@@ -57,10 +58,9 @@ The defaults are:
 ### Manual
 
 1. Clone Repo: `git clone git@github.com:SEGuRo-Projekt/Plattform.git`
-2. Initialize [Python virtual environment](https://docs.python.org/3/library/venv.html): `python3 -m virtualenv .venv`
-3. Enter virtual environment: `. .venv/bin/activate`
-4. Install Python packages and dependencies: `pip install -e .[dev]`
-5. Start Platform via Docker Compose: `docker compose up -d`
+2. Install Poetry: `pip install poetry`
+3. Install Python packages and dependencies: `poetry install`
+4. Start Platform via Docker Compose: `docker compose up -d`
 
 ## Accessing Platform
 

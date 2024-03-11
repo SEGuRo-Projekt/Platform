@@ -8,7 +8,7 @@
   ],
   "service": "dev",
   "workspaceFolder": "/workspace",
-  "postCreateCommand": "pip install -e .[dev] && pre-commit install",
+  "postCreateCommand": "git config --global --add safe.directory /workspace && poetry install && pre-commit install",
   "shutdownAction": "stopCompose",
   "remoteEnv": {
     "PATH": "${containerEnv:PATH}:/usr/local/bin"
