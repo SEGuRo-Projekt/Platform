@@ -37,6 +37,13 @@
                     buildInputs = (old.buildInputs or []) ++ [super.setuptools];
                   }
                 );
+              villas-python =
+                super.villas-python.overridePythonAttrs
+                (
+                  old: {
+                    buildInputs = (old.buildInputs or []) ++ [super.setuptools];
+                  }
+                );
             });
         };
         default = self.packages.${system}.seguro;
