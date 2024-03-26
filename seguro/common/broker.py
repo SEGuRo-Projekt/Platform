@@ -10,6 +10,8 @@ import logging
 from typing import Callable
 
 import paho.mqtt.client as mqtt
+from villas.node.sample import Sample, Timestamp  # noqa: F401
+from villas.node.formats import Protobuf
 
 from seguro.common.config import (
     MQTT_HOST,
@@ -97,3 +99,23 @@ class Client:
         """Publish message to given topic."""
         self.logger.debug("Send msg: %s - %s", topic, message)
         self.client.publish(topic, message)
+
+    def subscribe_samples(
+        self, topic, cb: Callable[["Client", list[Sample]], None]
+    ):
+        """Subscribe client to given topic and registering callback (optional).
+
+        Arguments:
+            topic -- topic that is subscribed
+            callback -- callback func that is called for each received sample.
+        """
+
+        def on_message(client: "Client", msg: mqtt.MQTTMessage):
+            cb(client, Protobuf().loadb(msg.payload))
+
+        self.subscribe(topic, on_message)
+
+    def publish_samples(self, topic, samples: list[Sample]):
+        """Publish sample to given topic."""
+
+        self.publish(topic, Protobuf().dumpb(samples))
