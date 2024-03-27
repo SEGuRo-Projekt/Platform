@@ -34,10 +34,10 @@ jobs:
           --detach
           --build
 
-      - name: Install poetry
-        run: pip install poetry
+      - name: Install Poetry
+        run: pipx install poetry==1.7.1
 
-      - name: Setup Python 3.11
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: 3.11
@@ -55,7 +55,7 @@ jobs:
           S3_HOST: localhost
           MQTT_HOST: localhost
         run: |
-          pytest
+          poetry run pytest
 
       - name: Stop containers
         if: always()
