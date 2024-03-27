@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath(".."))
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "SEGuRo Plattform"
+project = "SEGuRo Platform"
 copyright = "2024, The SEGuRo project partners"
 author = "The SEGuRo project partners"
 
@@ -88,7 +88,7 @@ autoapi_ignore = ["*migrations*", "*/test_*"]
 
 # Link code
 commit = "master"
-code_url = f"https://github.com/SEGuRo-Projekt/Plattform/blob/{commit}"
+code_url = f"https://github.com/SEGuRo-Projekt/Platform/blob/{commit}"
 
 
 def linkcode_resolve(domain, info):
