@@ -111,7 +111,7 @@ class Client:
         """
 
         def on_message(client: "Client", msg: mqtt.MQTTMessage):
-            cb(client, Protobuf().loadb(msg.payload))
+            cb(client, msg.topic, Protobuf().loadb(msg.payload))
 
         self.subscribe(topic, on_message)
 
