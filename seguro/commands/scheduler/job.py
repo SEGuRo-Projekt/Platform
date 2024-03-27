@@ -1,7 +1,5 @@
-"""
-SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
-SPDX-License-Identifier: Apache-2.0
-"""
+# SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
+# SPDX-License-Identifier: Apache-2.0
 
 import functools
 import logging
@@ -10,7 +8,7 @@ import json
 import time
 
 import seguro.common.store as store
-from . import scheduler, compose
+from seguro.commands.scheduler import scheduler, compose
 
 
 class Job(compose.Service):

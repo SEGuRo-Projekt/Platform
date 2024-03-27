@@ -1,7 +1,5 @@
-"""
-SPDX-FileCopyrightText: 2023 Philipp Jungkamp, OPAL-RT Germany GmbH
-SPDX-License-Identifier: Apache-2.0
-"""  # noqa: E501
+# SPDX-FileCopyrightText: 2023 Philipp Jungkamp, OPAL-RT Germany GmbH
+# SPDX-License-Identifier: Apache-2.0
 
 import logging
 import sys
