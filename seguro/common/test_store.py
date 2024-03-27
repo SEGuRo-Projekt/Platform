@@ -75,7 +75,7 @@ def test_watch_async():
 
     i = 0
 
-    def callback(typ: Event, filename: str):
+    def callback(client: Client, typ: Event, filename: str):
         nonlocal i
 
         if i == 0:
