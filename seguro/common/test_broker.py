@@ -40,9 +40,11 @@ def test_broker_samples():
 
     # Used to store callback messages
     smps_recv: list[Sample] = []
+    topics_recv: list[str] = []
 
-    def callback(client, samples: list[Sample]):
+    def callback(client, topic: str, samples: list[Sample]):
         smps_recv.extend(samples)
+        topics_recv.append(topic)
 
     # Subscribe to topic "mytopic" and start listening in another thread
     broker.subscribe_samples("mytopic", callback)
@@ -73,3 +75,5 @@ def test_broker_samples():
 
     assert len(smps_recv) == 2
     assert smps_recv == smps_send
+    assert len(topics_recv) == 1
+    assert topics_recv[0] == "mytopic"

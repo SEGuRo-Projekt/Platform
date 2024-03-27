@@ -55,7 +55,7 @@ class Client:
         self.logger = logging.getLogger(__name__)
         self.client = mqtt.Client(
             client_id=uid,
-            callback_api_version=mqtt.CallbackAPIVersion.VERSION1,
+            callback_api_version=mqtt.CallbackAPIVersion.VERSION2,
         )
 
         if username is not None or password is not None:
@@ -101,7 +101,7 @@ class Client:
         self.client.publish(topic, message)
 
     def subscribe_samples(
-        self, topic, cb: Callable[["Client", list[Sample]], None]
+        self, topic, cb: Callable[["Client", str, list[Sample]], None]
     ):
         """Subscribe client to given topic and registering callback (optional).
 
