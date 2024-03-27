@@ -1,0 +1,16 @@
+{#
+SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
+SPDX-License-Identifier: Apache-2.0
+#}
+{% extends "!layout.html" %}
+
+{%- block footer %}
+{{ super() }}
+<script type="text/javascript">
+  // Fix-up domain of links in case we are not on localhost
+  for (let link of document.getElementsByTagName('a')) {
+    link.hostname = link.hostname.replace('localhost', window.location.hostname);
+    console.log(link);
+  }
+</script>
+{% endblock %}

@@ -7,3 +7,4 @@ data/
 
 *.pyc
 *.egg-info/
+/venv/
