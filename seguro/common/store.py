@@ -179,7 +179,7 @@ class Client:
     def watch_async(
         self,
         prefix: str,
-        cb: Callable[[Event, str], None],
+        cb: Callable[["Client", Event, str], None],
         events=Event.CREATED | Event.REMOVED,
         initial: bool = False,
     ):
