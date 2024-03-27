@@ -6,11 +6,11 @@ This is the Git repository containing the SEGuRo platform.
 
 Please visit the public documentation here:
 
-- **https://seguro-projekt.github.io/Plattform/**
+- **https://seguro-projekt.github.io/Platform/**
 
 ## Code
 
-- [GitHub](https://github.com/SEGuRo-Projekt/Plattform)
+- [GitHub](https://github.com/SEGuRo-Projekt/Platform)
 
 ## Partners
 

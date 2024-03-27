@@ -25,8 +25,8 @@ signature-sender = "seguro.signature_sender.main:main"
 signature-recorder = "seguro.signature_recorder.main:main"
 
 [tool.poetry.urls]
-"Homepage" = "https://github.com/SEGuRo-Projekt/Plattform"
-"Bug Tracker" = "https://github.com/SEGuRo-Projekt/Plattform/issues"
+"Homepage" = "https://github.com/SEGuRo-Projekt/Platform"
+"Bug Tracker" = "https://github.com/SEGuRo-Projekt/Platform/issues"
 
 [tool.black]
 line-length = 79
