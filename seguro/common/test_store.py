@@ -7,6 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 import os
 import threading
 import pytest
+import pandas as pd
 
 from seguro.common.store import Client, Event
 
@@ -98,3 +99,16 @@ def test_watch_async():
     store.remove_file(filename)
 
     watcher.join()
+
+
+@pytest.mark.store
+def test_frame():
+    store = Client()
+
+    df1 = pd.DataFrame([[1, 2, 3], [4, 5, 6]])
+
+    store.put_frame("test_frame.parquet", df1)
+
+    df2 = store.get_frame("test_frame.parquet")
+
+    assert df1.equals(df2)

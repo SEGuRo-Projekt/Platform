@@ -9,7 +9,7 @@ import enum
 import logging
 import http.client
 import minio
-
+import pandas as pd
 from typing import Callable
 
 from seguro.common.config import (
@@ -69,6 +69,15 @@ class Client:
             region=region,
         )
 
+        # Used by Pandas
+        self.storage_options = {
+            "endpoint_url": f"http{'s' if secure else ''}://{host}:{port}",
+            "use_ssl": secure,
+            "key": access_key,
+            "secret": secret_key,
+            "client_kwargs": {"region_name": region},
+        }
+
         if not self.client.bucket_exists(self.bucket):
             raise Exception(f"Error: Bucket {self.bucket} does not exist...")
 
@@ -126,6 +135,19 @@ class Client:
             raise Exception(f"Error: Bucket {self.bucket} does not exist...")
 
         return self.client.get_object(self.bucket, filename)
+
+    def put_frame(self, filename: str, df: pd.DataFrame):
+        df.to_parquet(
+            f"s3://{self.bucket}/{filename}",
+            compression="zstd",
+            storage_options=self.storage_options,
+        )
+
+    def get_frame(self, filename: str) -> pd.DataFrame:
+        return pd.read_parquet(
+            f"s3://{self.bucket}/{filename}",
+            storage_options=self.storage_options,
+        )
 
     def watch(
         self,
