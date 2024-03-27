@@ -48,7 +48,9 @@ class Job(compose.Service):
         elif typ == "schedule":
             self._setup_schedule(trigger)
 
-    def _handle_trigger_event(self, typ: store.Event, filename: str):
+    def _handle_trigger_event(
+        self, client: store.Client, evt: store.Event, obj: str
+    ):
         self.start()
 
     def _setup_schedule(self, schedule: Dict):

@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 import uuid
 import logging
 
-from typing import Callable
+from typing import Callable, Iterable
 
 import paho.mqtt.client as mqtt
 from villas.node.sample import Sample, Timestamp  # noqa: F401
@@ -85,7 +85,7 @@ class Client:
             cb(self, msg)
 
         self.client.message_callback_add(topic, callback)
-        self.logger.info("Subscribed to %s with callback-func %s", topic, cb)
+        self.logger.debug("Subscribed to %s with callback-func %s", topic, cb)
 
     def start_listening(self):
         """Start async listening on subscribed topics."""
@@ -115,7 +115,7 @@ class Client:
 
         self.subscribe(topic, on_message)
 
-    def publish_samples(self, topic, samples: list[Sample]):
+    def publish_samples(self, topic, samples: Iterable[Sample]):
         """Publish sample to given topic."""
 
         self.publish(topic, Protobuf().dumpb(samples))

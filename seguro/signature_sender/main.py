@@ -3,6 +3,7 @@ SPDX-FileCopyrightText: 2023 Philipp Jungkamp, OPAL-RT Germany GmbH
 SPDX-License-Identifier: Apache-2.0
 """  # noqa: E501
 
+import sys
 import dataclasses as dc
 import logging
 import multiprocessing as mp
@@ -45,7 +46,7 @@ class PipeWorker:
         self.worker.terminate()
 
 
-def main():
+def main() -> int:
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s.%(msecs)03d %(levelname)s %(message)s",
@@ -83,6 +84,8 @@ def main():
 
         logging.debug("Closing pipe")
 
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

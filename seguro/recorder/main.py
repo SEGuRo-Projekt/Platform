@@ -3,10 +3,10 @@ SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
 SPDX-License-Identifier: Apache-2.0
 """
 
+import sys
 import argparse
 import logging
 import time
-from typing import Iterable
 import functools as ft
 
 from seguro.common import store, broker
@@ -17,7 +17,7 @@ recorders: dict[str, Recorder] = {}
 
 
 def on_samples(
-    s: store.Client, _: broker.Client, topic: str, samples: Iterable[Sample]
+    s: store.Client, _: broker.Client, topic: str, samples: list[Sample]
 ):
     try:
         recorder = recorders[topic]
@@ -28,7 +28,7 @@ def on_samples(
     recorder.record_samples(samples)
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-p", "--prefix", type=str, default="data")
@@ -63,6 +63,8 @@ def main():
         except KeyboardInterrupt:
             break
 
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

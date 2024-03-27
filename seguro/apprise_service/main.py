@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 import dataclasses as dc
 import json
+import sys
 import logging
 from queue import SimpleQueue
 
@@ -68,14 +69,14 @@ class Notification:
         )
 
 
-def main():
+def main() -> int:
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s.%(msecs)03d %(levelname)s %(message)s",
         datefmt="%H:%M:%S",
     )
 
-    queue = SimpleQueue()
+    queue: SimpleQueue = SimpleQueue()
     apprise = Apprise()
     config = AppriseConfig("config.yaml")
     broker = BrokerClient("apprise")
@@ -97,7 +98,11 @@ def main():
             notification.publish(apprise)
         except Exception as err:
             logging.error(f"{err}")
+        except KeyboardInterrupt:
+            break
+
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

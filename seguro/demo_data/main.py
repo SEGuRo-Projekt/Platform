@@ -3,6 +3,7 @@ SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
 SPDX-License-Identifier: Apache-2.0
 """
 
+import sys
 import time
 import random
 import logging
@@ -10,7 +11,7 @@ import logging
 from seguro.common.broker import Client as BrokerClient
 
 
-def main():
+def main() -> int:
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s.%(msecs)03d %(levelname)s %(message)s",
@@ -28,4 +29,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

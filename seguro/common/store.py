@@ -7,8 +7,8 @@ import io
 import threading
 import enum
 import logging
-import http.client
 import minio
+import urllib3
 import pandas as pd
 from typing import Callable
 
@@ -124,7 +124,7 @@ class Client:
             len(content),
         )
 
-    def get_file_contents(self, filename: str) -> http.client.HTTPResponse:
+    def get_file_contents(self, filename: str) -> urllib3.BaseHTTPResponse:
         """Write to file stored it in the S3Storage.
 
         Arguments:
@@ -171,7 +171,7 @@ class Client:
         with self.client.listen_bucket_notification(
             self.bucket,
             prefix=prefix,
-            events=s3_events,
+            events=tuple(s3_events),
         ) as events:
             for event in events:
                 yield _decode_event(event)
@@ -219,7 +219,7 @@ class Watcher(threading.Thread):
         self.events = self.client.client.listen_bucket_notification(
             self.client.bucket,
             prefix=prefix,
-            events=s3_events,
+            events=tuple(s3_events),
         )
 
         self.start()

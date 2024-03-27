@@ -4,6 +4,7 @@ SPDX-License-Identifier: Apache-2.0
 """  # noqa: E501
 
 import logging
+import sys
 from io import BytesIO
 from dataclasses import dataclass
 from queue import Queue
@@ -30,7 +31,7 @@ class TSRMessage:
         return TSRMessage(algorithm, digest, tsr, msg.payload)
 
 
-def main():
+def main() -> int:
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s.%(msecs)03d %(levelname)s %(message)s",
@@ -62,6 +63,8 @@ def main():
             length=len(msg.payload),
         )
 
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
