@@ -2148,6 +2148,17 @@ docs = ["myst-parser", "pydata-sphinx-theme", "sphinx"]
 test = ["argcomplete (>=3.0.3)", "mypy (>=1.7.0)", "pre-commit", "pytest (>=7.0,<8.1)", "pytest-mock", "pytest-mypy-testing"]
 
 [[package]]
+name = "types-python-slugify"
+version = "8.0.2.20240310"
+description = "Typing stubs for python-slugify"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "types-python-slugify-8.0.2.20240310.tar.gz", hash = "sha256:5157b508c7fed587520c70d77f62aea0fafdc6620893c2ec8972f13a1faf5560"},
+    {file = "types_python_slugify-8.0.2.20240310-py3-none-any.whl", hash = "sha256:0efec18b802c69ebd22dcee55c91afaeaa80e1e40ddd66ccabf69fd42ce87b74"},
+]
+
+[[package]]
 name = "types-pytz"
 version = "2024.1.0.20240203"
 description = "Typing stubs for pytz"
@@ -2475,4 +2486,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "67b2c0b12ef44f66fca7dc93b16e22ce81cb9cb3a8e22352b7df4e47385c38d6"
+content-hash = "d74d44b0508f72200041b6a9af85ba2a7ec8fd602b77044d7fe0d9e7c16f1f23"
