@@ -46,9 +46,9 @@ class Scheduler(compose.Composer):
         objs = self.store.client.list_objects("seguro", "config/jobs/")
 
         for obj in objs:
-            self._handler(store.Event.CREATED, obj.object_name)
+            self._handler(self.store, store.Event.CREATED, obj.object_name)
 
-    def _handler(self, event: store.Event, objname: str):
+    def _handler(self, _: store.Client, event: store.Event, objname: str):
         filename = os.path.basename(objname)
         name, ext = os.path.splitext(filename)
 

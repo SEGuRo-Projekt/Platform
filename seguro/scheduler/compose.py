@@ -9,6 +9,7 @@ import logging
 import os
 import subprocess
 import tempfile
+from typing import Optional
 import yaml
 
 from contextlib import contextmanager
@@ -75,7 +76,7 @@ class Service:
 class Composer:
     def __init__(self, name: str = "composer"):
         self.logger = logging.getLogger(__name__)
-        self.watch_proc = None
+        self.watch_proc: Optional[subprocess.Popen[bytes]] = None
         self.name = name
 
     @property
@@ -85,7 +86,7 @@ class Composer:
     def compose(self, *args):
         with self.file() as file:
             file_fd = file.fileno()
-            args = [
+            args = (
                 "docker-compose",
                 "--project-name",
                 self.name,
@@ -96,7 +97,7 @@ class Composer:
                 "--file",
                 f"/proc/self/fd/{file_fd}",
                 *args,
-            ]
+            )
             self.logger.info(f"Running: {' '.join(args)}")
             subprocess.run(args, pass_fds=[file_fd])
 
@@ -124,11 +125,15 @@ class Composer:
 
             self.watch_proc = subprocess.Popen(args, stdout=subprocess.PIPE)
 
-            for line in self.watch_proc.stdout.readlines():
-                output = json.loads(line)
+            output = self.watch_proc.stdout
+            if output is None:
+                raise Exception("Missing output stream")
 
-                action = output.get("action")
-                attrs = output.get("attributes")
+            for raw_line in output.readlines():
+                line = json.loads(raw_line)
+
+                action = line.get("action")
+                attrs = line.get("attributes")
                 image = attrs.get("image")
                 name = attrs.get("name")
 

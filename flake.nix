@@ -51,7 +51,7 @@
 
       devShells.default = pkgs.mkShell {
         inputsFrom = [self.packages.${system}.seguro];
-        packages = [pkgs.poetry];
+        packages = [pkgs.poetry pkgs.mypy];
         shellHook = ''
           export PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring
         '';

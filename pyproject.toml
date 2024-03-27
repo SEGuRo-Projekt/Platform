@@ -49,7 +49,9 @@ schedule = "^1.2.1"
 pandas = {extras = ["excel", "parquet"], version = "^2.2.1"}
 cryptography = "42.0.3"
 aws-logging-handlers = "^2.0.5"
-villas-python = {git = "https://github.com/VILLASframework/node.git", rev = "master", subdirectory = "python"}
+s3fs = "^2024.3.1"
+fsspec = "^2024.3.1"
+villas-python = {git = "https://github.com/VILLASframework/node.git", rev = "b66b125ea192faa876fc18ab64fcc798dcdb17ce", subdirectory = "python"}
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.2"
@@ -57,6 +59,13 @@ ipython = "^8.22.1"
 flake8 = "^7.0.0"
 black = "^24.2.0"
 pre-commit = "^3.6.2"
+types-pyyaml = "^6.0.12.20240311"
+pandas-stubs = "^2.2.1.240316"
+mypy = "^1.9.0"
+
+[tool.mypy]
+ignore_missing_imports = true
+check_untyped_defs = true
 
 [build-system]
 requires = ["poetry-core"]

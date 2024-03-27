@@ -2,23 +2,25 @@
 # SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
 # SPDX-License-Identifier: Apache-2.0
 
+import sys
 import logging
 import os
 from pprint import pformat
 
 import minio
+import minio.credentials
 
 BUCKETS = ["seguro", "registry"]
 
 
-def main():
+def main() -> int:
     logging.basicConfig(
         format="%(asctime)s %(name)s %(levelname)s: %(message)s",
         level=logging.INFO,
     )
 
-    minio_user = os.environ.get("MINIO_ROOT_USER")
-    minio_pass = os.environ.get("MINIO_ROOT_PASSWORD")
+    minio_user = os.environ.get("MINIO_ROOT_USER", "")
+    minio_pass = os.environ.get("MINIO_ROOT_PASSWORD", "")
     minio_endpoint = "minio:9000"
     minio_url = f"http://{minio_endpoint}"
 
@@ -27,8 +29,9 @@ def main():
         f"mc config host add minio {minio_url} {minio_user} {minio_pass}"
     )
 
-    mc = minio.Minio(minio_endpoint, minio_user, minio_pass, secure=False)
-    mca = minio.MinioAdmin(target="minio")
+    creds = minio.credentials.StaticProvider(minio_user, minio_pass)
+    mc = minio.Minio(minio_endpoint, credentials=creds, secure=False)
+    mca = minio.MinioAdmin(minio_endpoint, credentials=creds, secure=False)
 
     logging.info("Server info: %s", pformat(mca.info()))
 
@@ -39,6 +42,8 @@ def main():
             logging.info(f"Creating bucket {bucket}:")
             mc.make_bucket(bucket)
 
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

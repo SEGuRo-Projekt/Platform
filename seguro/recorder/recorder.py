@@ -5,7 +5,6 @@ SPDX-License-Identifier: Apache-2.0
 
 import logging
 import math
-from typing import Iterable
 from pathlib import Path
 import pandas as pd
 
@@ -27,7 +26,7 @@ class Recorder:
 
         self._reset()
 
-    def record_samples(self, samples: Iterable[Sample]):
+    def record_samples(self, samples: list[Sample]):
         self.logger.debug("Recording %d samples", len(samples))
 
         for sample in samples:
@@ -67,7 +66,7 @@ class Recorder:
         ts = ts.replace(microsecond=0)
         obj_path = self.path / f"{ts.isoformat()}.parquet"
 
-        self.store.put_frame(obj_path, df)
+        self.store.put_frame(obj_path.as_posix(), df)
 
         self._reset()
 
