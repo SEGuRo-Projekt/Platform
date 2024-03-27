@@ -23,6 +23,16 @@ genindex
 search
 ```
 
+## Documentation
+
+Please visit the public documentation here:
+
+- **https://seguro-projekt.github.io/Plattform/**
+
+## Code
+
+- [GitHub](https://github.com/SEGuRo-Projekt/Plattform)
+
 ## Partners
 
 The SEGuRo platform is developed collaboratively by the participants of the SEGuRo project:
@@ -83,12 +93,6 @@ We are grateful for the financial support of the [BMWK (Federal Ministry of Econ
 ```{image} _static/bmwk_funding.png
 :width: 250px
 ```
-
-## Code
-
-The code of the SEGuRo platform and several other components can be found on GitHub:
-
--   [GitHub](https://github.com/SEGuRo-Projekt/Plattform)
 
 ## License
 
