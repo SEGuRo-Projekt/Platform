@@ -1,0 +1,56 @@
+---
+# SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+name: Deploy Sphinx documentation to Pages
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  pages:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    permissions:
+      pages: write
+      id-token: write
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Install poetry
+      run: pip install poetry
+
+    - name: Setup Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.11
+        cache: poetry
+
+    - name: Install dependencies
+      run: |
+        poetry install
+
+    - name: Build docs
+      run: |
+        poetry run sphinx-build -b html docs/ build/
+
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+
+    - name: Upload Pages artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: build
+
+    - name: Deploy to Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
