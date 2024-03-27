@@ -20,7 +20,7 @@
   }:
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = nixpkgs.legacyPackages.${system};
-      inherit (poetry2nix.lib.mkPoetry2Nix {inherit pkgs;}) mkPoetryApplication defaultPoetryOverrides;
+      inherit (poetry2nix.lib.mkPoetry2Nix {inherit pkgs;}) mkPoetryApplication mkPoetryEditablePackage mkPoetryScriptsPackage defaultPoetryOverrides;
     in {
       packages = {
         seguro = mkPoetryApplication {
@@ -51,7 +51,19 @@
 
       devShells.default = pkgs.mkShell {
         inputsFrom = [self.packages.${system}.seguro];
-        packages = [pkgs.poetry pkgs.mypy];
+        packages = with pkgs; [
+          mypy
+          poetry
+          (mkPoetryEditablePackage {
+            projectDir = ./.;
+            editablePackageSources = {
+              seguro = ./seguro;
+            };
+          })
+          (mkPoetryScriptsPackage {
+            projectDir = ./.;
+          })
+        ];
         shellHook = ''
           export PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring
         '';
