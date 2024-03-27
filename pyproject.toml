@@ -64,6 +64,16 @@ types-pyyaml = "^6.0.12.20240311"
 types-python-slugify = "^8.0.2.20240310"
 pandas-stubs = "^2.2.1.240316"
 
+[tool.poetry.group.docs.dependencies]
+sphinx = "^7.2.6"
+sphinx-copybutton = "^0.5.2"
+sphinx-autobuild = "^2024.2.4"
+sphinx-inline-tabs = "^2023.4.21"
+sphinx-autoapi = "^3.0.0"
+furo = "^2024.1.29"
+myst-parser = "^2.0.0"
+sphinxext-opengraph = "^0.9.1"
+sphinxcontrib-bibtex = "^2.6.2"
 
 [tool.mypy]
 ignore_missing_imports = true

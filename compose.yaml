@@ -6,16 +6,17 @@ version: "3.9"
 name: platform
 
 services:
-  landing-page:
+  docs:
     build:
-      context: images/landing-page
-    container_name: landing_page
+      context: .
+      dockerfile: docs/Dockerfile
+    container_name: docs
     restart: unless-stopped
 
     labels:
     - traefik.enable=true
-    - traefik.http.routers.landing-page.rule=Host(`${DOMAIN}`)
-    - traefik.http.routers.landing-page.tls=true
+    - traefik.http.routers.docs.rule=Host(`${DOMAIN}`)
+    - traefik.http.routers.docs.tls=true
 
   minio:
     image: minio/minio:RELEASE.2023-04-28T18-11-17Z
