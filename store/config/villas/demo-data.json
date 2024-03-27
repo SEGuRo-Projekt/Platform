@@ -1,0 +1,32 @@
+{
+  "nodes": {
+    "broker": {
+      "format": "protobuf",
+      "host": "localhost",
+      "out": {
+        "publish": "data/ms1"
+      },
+      "type": "mqtt"
+    },
+    "siggen": {
+      "rate": 10,
+      "signal": "mixed",
+      "type": "signal",
+      "values": 6
+    }
+  },
+  "paths": [
+    {
+      "hooks": [
+        {
+          "interval": 15,
+          "trigger": "timestamp",
+          "type": "frame",
+          "unit": "seconds"
+        }
+      ],
+      "in": "siggen",
+      "out": "broker"
+    }
+  ]
+}

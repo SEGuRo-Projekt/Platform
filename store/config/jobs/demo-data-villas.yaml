@@ -1,0 +1,10 @@
+---
+# SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+container:
+  image: registry.git.rwth-aachen.de/acs/public/villas/node:master
+
+  env_file: .env
+
+  command: ["node", "/etc/villas.conf"]
