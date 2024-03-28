@@ -303,6 +303,18 @@ services:
       target: /var/run/docker.sock
       read_only: true
 
+  notifier:
+    container_name: notifier
+    restart: unless-stopped
+    build:
+      context: .
+      tags:
+      - seguro/platform
+
+    env_file:
+    - .env
+
+    command: ["notifier"]
 
 volumes:
   keys:
