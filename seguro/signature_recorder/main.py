@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 import logging
 import sys
+import argparse
 from io import BytesIO
 from dataclasses import dataclass
 from queue import Queue
@@ -32,9 +33,22 @@ class TSRMessage:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("-t", "--topic", type=str, default="signatures/tsr")
+    parser.add_argument(
+        "-l",
+        "--log-level",
+        default="info",
+        help="Logging level",
+        choices=["debug", "info", "warn", "error", "critical"],
+    )
+
+    args = parser.parse_args()
+
     logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(asctime)s.%(msecs)03d %(levelname)s %(message)s",
+        level=args.log_level.upper(),
+        format="%(asctime)s.%(msecs)03d %(levelname)s %(name)s %(message)s",
         datefmt="%H:%M:%S",
     )
 
@@ -48,7 +62,7 @@ def main() -> int:
         except Exception as err:
             logging.error(f"Failed to receive TSR: {err}")
 
-    broker.subscribe("signatures/tsr", tsr_callback)
+    broker.subscribe(args.topic, tsr_callback)
 
     msg: TSRMessage
     while (msg := queue.get()) is not None:
