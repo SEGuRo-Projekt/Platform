@@ -3,8 +3,11 @@ SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
 SPDX-License-Identifier: Apache-2.0
 """
 
+import functools
 import logging
+import json
 
+import time
 from typing import Dict
 
 import seguro.common.store as store
@@ -21,27 +24,33 @@ class Job(compose.Service):
         super().__init__(
             scheduler,
             name,
-            self.job_spec.get("container", {}),
-            self.job_spec.get("scale", 1),
-            self.job_spec.get("recreate", False),
+            spec.get("container", {}),
+            spec.get("scale", 1),
+            spec.get("recreate", False),
         )
 
         self.scheduler = scheduler
         self.watchers: list[store.Watcher] = []
-        self.triggers = self.job_spec.get("triggers", [])
+        self.triggers = spec.get("triggers", [])
 
         for trigger in self.triggers:
             self._setup_trigger(trigger)
 
     def _setup_trigger(self, trigger: dict[str, str]):
         typ = trigger.get("type")
-        if typ in ["created", "removed"]:
-            event = store.Event[typ.upper()]
+        if typ in ["created", "removed", "modified"]:
+            if typ == "created":
+                event = store.Event.CREATED
+            elif typ == "removed":
+                event = store.Event.REMOVED
+            elif typ == "modified":
+                event = store.Event.CREATED | store.Event.REMOVED
+
             prefix = trigger.get("prefix", "/")
 
-            watcher = self.scheduler.store.watch_async(
-                prefix, self._handle_trigger_event, event
-            )
+            cb = functools.partial(self._handle_trigger_event, trigger)
+
+            watcher = self.scheduler.store.watch_async(prefix, cb, event)
 
             self.watchers.append(watcher)
 
@@ -49,9 +58,12 @@ class Job(compose.Service):
             self._setup_schedule(trigger)
 
     def _handle_trigger_event(
-        self, client: store.Client, evt: store.Event, obj: str
+        self, trigger: dict, client: store.Client, evt: store.Event, obj: str
     ):
-        self.start()
+        triggered_by = {**trigger, "event": str(evt), "object": obj}
+        info = {"triggered_by": triggered_by}
+
+        self.start(info)
 
     def _setup_schedule(self, schedule: Dict):
         interval = schedule.get("interval", 1)
@@ -75,12 +87,36 @@ class Job(compose.Service):
                 if start_day := schedule.get("start_day", "monday"):
                     job.start_day = start_day
 
-        job.do(self.start)
+        info = {"triggered_by": schedule}
+
+        job.do(self.start, info)
 
         self.logger.info(f"Started schedule {job}")
 
-    def start(self):
-        super().start()
+    def start(self, info: dict | None = None):
+        full_info = {
+            "name": self.name,
+            "triggered_at": time.time(),
+            **self.job_spec,
+        }
+
+        if info is not None:
+            full_info.update(info)
+
+        overlays = [
+            {
+                "services": {
+                    self.name: {
+                        "environment": {
+                            "SEGURO_JOB_INFO": json.dumps(full_info)
+                        }
+                    }
+                }
+            }
+        ]
+
+        super().start(overlays)
+
         self.logger.info(f"Started job: {self.name}")
 
     def stop(self):
