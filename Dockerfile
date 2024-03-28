@@ -27,7 +27,7 @@ WORKDIR /platform
 COPY README.md poetry.lock pyproject.toml /platform/
 COPY seguro /platform/seguro
 
-RUN poetry install
+RUN poetry install --without docs
 
 
 FROM debian:bookworm AS setup

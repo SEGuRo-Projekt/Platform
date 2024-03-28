@@ -46,7 +46,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry install
+          poetry install --without docs
 
       - name: Ensure S3 buckets exist
         run: docker compose up minio-setup
