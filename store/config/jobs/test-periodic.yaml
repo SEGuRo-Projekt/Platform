@@ -14,8 +14,8 @@ container:
   - /bin/sh
   - -c
   - |
-    echo "Hallo 6"
+    echo "Hallo"
     date
     env
-    sleep 1000
-  # Docker-compose compatible service definition
+    sleep 5
+    echo "Bye..."
