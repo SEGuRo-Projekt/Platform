@@ -11,7 +11,7 @@ repos:
         exclude: ^\.(vscode|devcontainer)
       - id: pretty-format-json
         args: [--autofix]
-        exclude: ^\.(vscode|devcontainer)
+        exclude: ^\.(vscode|devcontainer|ipynb)
       - id: end-of-file-fixer
       - id: trailing-whitespace
       - id: check-added-large-files

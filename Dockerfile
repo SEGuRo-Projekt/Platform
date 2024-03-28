@@ -6,18 +6,26 @@ FROM python:3.11-bookworm AS python
 ARG DOCKER_COMPOSE_VERSION=v2.20.0
 
 ENV POETRY_NO_INTERACTION=1 \
-   POETRY_VIRTUALENVS_CREATE=false \
-   POETRY_CACHE_DIR='/var/cache/pypoetry' \
-   POETRY_HOME='/usr/local' \
-   POETRY_VERSION=1.7.1
+    POETRY_VIRTUALENVS_CREATE=false \
+    POETRY_CACHE_DIR='/var/cache/pypoetry' \
+    POETRY_HOME='/usr/local' \
+    POETRY_VERSION=1.7.1
+
+# Install dependencies for nbconvert
+RUN apt-get update && \
+    apt-get install --yes --no-install-recommends \
+    texlive-xetex texlive-fonts-recommended texlive-plain-generic \
+    pandoc && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install Minio client
 RUN curl --create-dirs -fsSL https://dl.min.io/client/mc/release/linux-amd64/mc -o /usr/local/bin/mc && \
     chmod +x /usr/local/bin/mc
 
 # Install Docker Compose
-RUN curl --create-dirs -fsSL https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose && \
-    chmod +x /usr/local/bin/docker-compose
+RUN mkdir -p /root/.docker/cli-plugins && \
+    curl --create-dirs -fsSL https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-x86_64 -o /root/.docker/cli-plugins/docker-compose && \
+    chmod +x /root/.docker/cli-plugins/docker-compose
 
 # Install Poetry
 RUN pip install --no-cache-dir poetry==${POETRY_VERSION}
@@ -25,10 +33,14 @@ RUN pip install --no-cache-dir poetry==${POETRY_VERSION}
 RUN mkdir /platform
 WORKDIR /platform
 COPY README.md poetry.lock pyproject.toml /platform/
+
+# Only install dependencies here to improve utilization of layer cache
+RUN poetry install --without docs --no-root
+
 COPY seguro /platform/seguro
 
-RUN poetry install --without docs
-
+# Install the seguro package
+RUN poetry install
 
 FROM debian:bookworm AS setup
 
