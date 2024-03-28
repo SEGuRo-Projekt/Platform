@@ -10,12 +10,11 @@ WORKDIR /src
 
 COPY pyproject.toml poetry.lock /src/
 
-RUN poetry install
+RUN poetry install --with-docs
 
 COPY seguro /src/seguro
 COPY docs /src/docs
 
-RUN poetry install --with=docs
 RUN poetry run sphinx-build -b html docs /build
 
 FROM nginx:1.25.4
