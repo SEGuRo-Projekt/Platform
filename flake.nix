@@ -21,43 +21,53 @@
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = nixpkgs.legacyPackages.${system};
       p2n = poetry2nix.lib.mkPoetry2Nix {inherit pkgs;};
+
+      overrides = p2n.overrides.withDefaults (
+        self: super: let
+          # Workaround https://github.com/nix-community/poetry2nix/issues/568
+          addBuildInputs = name: buildInputs:
+            super.${name}.overridePythonAttrs (old: {
+              buildInputs = (builtins.map (x: super.${x}) buildInputs) ++ (old.buildInputs or []);
+            });
+          mkOverrides = pkgs.lib.attrsets.mapAttrs (name: value: addBuildInputs name value);
+        in
+          mkOverrides {
+            aws-logging-handlers = ["setuptools"];
+            villas-python = ["setuptools"];
+            types-python-slugify = ["setuptools"];
+            paho-mqtt = ["hatchling"];
+            pyxlsb = ["setuptools"];
+            rfc3161ng = ["setuptools"];
+          }
+          // {
+            python-calamine = super.python-calamine.override {
+              preferWheel = true;
+            };
+            apprise = super.apprise.override {
+              preferWheel = true;
+            };
+            pandas = super.pandas.override {
+              preferWheel = true;
+            };
+            mypy = super.mypy.override {
+              preferWheel = true;
+            };
+          }
+      );
     in {
       packages = {
         seguro = p2n.mkPoetryApplication {
           projectDir = ./.;
           groups = ["dev"];
-          overrides = p2n.overrides.withDefaults (
-            self: super: let
-              # Workaround https://github.com/nix-community/poetry2nix/issues/568
-              addBuildInputs = name: buildInputs:
-                super.${name}.overridePythonAttrs (old: {
-                  buildInputs = (builtins.map (x: super.${x}) buildInputs) ++ (old.buildInputs or []);
-                });
-              mkOverrides = pkgs.lib.attrsets.mapAttrs (name: value: addBuildInputs name value);
-            in
-              mkOverrides {
-                aws-logging-handlers = ["setuptools"];
-                villas-python = ["setuptools"];
-                types-python-slugify = ["setuptools"];
-                paho-mqtt = ["hatchling"];
-                pyxlsb = ["setuptools"];
-                rfc3161ng = ["setuptools"];
-              }
-              // {
-                python-calamine = super.python-calamine.override {
-                  preferWheel = true;
-                };
-                apprise = super.apprise.override {
-                  preferWheel = true;
-                };
-                pandas = super.pandas.override {
-                  preferWheel = true;
-                };
-                mypy = super.mypy.override {
-                  preferWheel = true;
-                };
-              }
-          );
+          inherit overrides;
+        };
+        env = p2n.mkPoetryEnv {
+          projectDir = ./.;
+          groups = ["jupyter"];
+          editablePackageSources = {
+            seguro-platform = ./seguro;
+          };
+          inherit overrides;
         };
         default = self.packages.${system}.seguro;
       };
@@ -67,12 +77,7 @@
         packages = with pkgs; [
           mypy
           poetry
-          (p2n.mkPoetryEditablePackage {
-            projectDir = ./.;
-            editablePackageSources = {
-              seguro = ./seguro;
-            };
-          })
+          self.packages.${system}.env
           (p2n.mkPoetryScriptsPackage {
             projectDir = ./.;
           })
