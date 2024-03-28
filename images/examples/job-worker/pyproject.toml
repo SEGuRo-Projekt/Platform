@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+[project]
+name = "seguro-example-job-worker"
+version = "0.1.0"
+
+dependencies = [
+    "seguro-platform@git+https://github.com/SEGurO-Projekt/Platform"
+]
+
+requires-python = ">= 3.11"
+
+[project.scripts]
+worker = "worker:main"
+
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
