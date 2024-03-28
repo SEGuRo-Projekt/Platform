@@ -21,6 +21,7 @@ scheduler = "seguro.scheduler.main:main"
 recorder = "seguro.recorder.main:main"
 notifier = "seguro.notifier.main:main"
 signature-sender = "seguro.signature_sender.main:main"
+heartbeat-sender = "seguro.heartbeat_sender.main:main"
 signature-recorder = "seguro.signature_recorder.main:main"
 demo-data = "seguro.demo_data.main:main"
 
@@ -52,6 +53,8 @@ aws-logging-handlers = "^2.0.5"
 s3fs = "^2024.3.1"
 fsspec = "^2024.3.1"
 villas-python = {git = "https://github.com/VILLASframework/node.git", rev = "b66b125ea192faa876fc18ab64fcc798dcdb17ce", subdirectory = "python"}
+pyusb = "^1.2.1"
+psutil = "^5.9.8"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.2"
