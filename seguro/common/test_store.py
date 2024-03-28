@@ -17,25 +17,21 @@ def test_store():
     store = Client()
 
     # Create new file and fill with content
-    if not os.path.isfile("myfile.txt"):
-        f = open("myfile.txt", "w")
-
-    f = open("myfile.txt", "w")
-    f.write("Hello S3Storage!")
-    f.close()
+    with open("myfile.txt", "wb") as fw:
+        fw.write(b"Hello S3Storage!")
 
     # Put file into storage
     store.put_file("myStorageFile.txt", "myfile.txt")
 
     # Write new content to file
-    store.put_file_contents("myStorageFile.txt", "!egarotS3S olleH")
+    store.put_file_contents("myStorageFile.txt", b"!egarotS3S olleH")
 
     store.get_file("myLocalStorageFile.txt", "myStorageFile.txt")
 
-    f = open("myLocalStorageFile.txt", "r")
-    content = f.read()
+    with open("myLocalStorageFile.txt", "rb") as fr:
+        content = fr.read()
 
-    assert content == "!egarotS3S olleH"
+    assert content == b"!egarotS3S olleH"
     print(content)
 
     # Clean up files after test
@@ -52,7 +48,7 @@ def test_watch():
     store.remove_file(filename)
 
     def create_obj():
-        store.put_file_contents(filename, "this is a test2")
+        store.put_file_contents(filename, b"this is a test2")
         store.remove_file(filename)
 
     t = threading.Timer(0.1, create_obj)
@@ -95,7 +91,7 @@ def test_watch_async():
     store.remove_file(filename)
     watcher = store.watch_async("some/prefix/", callback)
 
-    store.put_file_contents(filename, "this is a test2")
+    store.put_file_contents(filename, b"this is a test2")
     store.remove_file(filename)
 
     watcher.join()

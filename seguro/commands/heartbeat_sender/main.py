@@ -39,7 +39,7 @@ def get_disks() -> list[dict]:
     return disks
 
 
-def get_usb() -> dict:
+def get_usb() -> list:
     devs = []
     for cfg in usb.core.find(find_all=True):
         dev = {
