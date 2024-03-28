@@ -28,6 +28,12 @@ class Event(enum.Flag):
     CREATED = enum.auto()
     REMOVED = enum.auto()
 
+    def __str__(self):
+        if self.name:
+            return self.name.lower()
+
+        return ""
+
 
 class Client:
     """Helper class for S3 object store interaction with the SEGuRo platform
@@ -107,7 +113,7 @@ class Client:
         """
         return self.client.remove_object(self.bucket, filename)
 
-    def put_file_contents(self, filename: str, content: str):
+    def put_file_contents(self, filename: str, content: bytes):
         """Write to file stored it in the S3Storage.
 
         Arguments:
@@ -120,7 +126,7 @@ class Client:
         return self.client.put_object(
             self.bucket,
             filename,
-            io.BytesIO(b"%b" % content.encode("utf8")),
+            io.BytesIO(content),
             len(content),
         )
 

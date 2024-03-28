@@ -76,6 +76,48 @@
           (p2n.mkPoetryScriptsPackage {
             projectDir = ./.;
           })
+
+          # For notebook_executor
+          # See: https://github.com/jupyter/nbconvert/issues/1328#issuecomment-1768665936
+          (texliveSmall.withPackages
+            (ps:
+              with ps; [
+                amsmath
+                booktabs
+                caption
+                collectbox
+                collection-fontsrecommended
+                adjustbox
+                ec
+                enumitem
+                environ
+                etoolbox
+                eurosym
+                fancyvrb
+                float
+                fontspec
+                geometry
+                grffile
+                hyperref
+                iftex
+                infwarerr
+                jknapltx
+                kvoptions
+                kvsetkeys
+                ltxcmds
+                parskip
+                pdfcol
+                pgf
+                rsfs
+                soul
+                tcolorbox
+                titling
+                trimspaces
+                ucs
+                ulem
+                unicode-math
+                upquote
+              ]))
         ];
         shellHook = ''
           export PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring

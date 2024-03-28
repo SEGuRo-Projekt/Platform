@@ -6,7 +6,7 @@ import json
 from types import SimpleNamespace
 
 
-def _get_job_info() -> dict:
+def _get_job_info():
     info_raw = os.environ.get("SEGURO_JOB_INFO")
     if info_raw is None:
         raise Exception("Missing job details")
