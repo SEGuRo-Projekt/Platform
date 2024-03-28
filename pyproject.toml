@@ -16,13 +16,13 @@ packages = [{include = "seguro"}]
 [tool.poetry.scripts]
 poetry = "poetry.console.application:main"
 
-apprise_service = "seguro.apprise_service.main:main"
 minio-setup = "seguro.setup.minio:main"
 scheduler = "seguro.scheduler.main:main"
 recorder = "seguro.recorder.main:main"
-demo-data = "seguro.demo_data.main:main"
+notifier = "seguro.notifier.main:main"
 signature-sender = "seguro.signature_sender.main:main"
 signature-recorder = "seguro.signature_recorder.main:main"
+demo-data = "seguro.demo_data.main:main"
 
 [tool.poetry.urls]
 "Homepage" = "https://github.com/SEGuRo-Projekt/Platform"

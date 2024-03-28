@@ -1,17 +1,16 @@
-"""
-SPDX-FileCopyrightText: 2023 Philipp Jungkamp, OPAL-RT Germany GmbH
-SPDX-License-Identifier: Apache-2.0
-"""  # noqa: E501
+# SPDX-FileCopyrightText: 2023 Philipp Jungkamp, OPAL-RT Germany GmbH
+# SPDX-License-Identifier: Apache-2.0
 
 import dataclasses as dc
 import json
 import sys
+import argparse
 import logging
 from queue import SimpleQueue
 
 from apprise import Apprise, AppriseConfig, NotifyType
 
-from seguro.common.broker import Client as BrokerClient, Message
+from seguro.common import broker
 
 
 @dc.dataclass
@@ -70,25 +69,38 @@ class Notification:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("-p", "--prefix", type=str, default="tsr")
+    parser.add_argument(
+        "-l",
+        "--log-level",
+        default="info",
+        help="Logging level",
+        choices=["debug", "info", "warn", "error", "critical"],
+    )
+
+    args = parser.parse_args()
+
     logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s.%(msecs)03d %(levelname)s %(message)s",
+        level=args.log_level.upper(),
+        format="%(asctime)s.%(msecs)03d %(levelname)s %(name)s %(message)s",
         datefmt="%H:%M:%S",
     )
 
     queue: SimpleQueue = SimpleQueue()
     apprise = Apprise()
     config = AppriseConfig("config.yaml")
-    broker = BrokerClient("apprise")
+    client = broker.Client("notifier")
 
-    def notification_callback(_broker, msg: Message):
-        assert msg.topic.startswith("apprise/")
-        tag = msg.topic.removeprefix("apprise/")
+    def notification_callback(_broker, msg: broker.Message):
+        assert msg.topic.startswith(f"{args.prefix}/")
+        tag = msg.topic.removeprefix(f"{args.prefix}/")
         queue.put(Notification(tag, msg.payload))
 
     apprise.add(config)
-    apprise.notify("Started apprise service", tag="debug")
-    broker.subscribe("apprise/+", notification_callback)
+    apprise.notify("Started notification service", tag="debug")
+    client.subscribe(f"{args.prefix}/+", notification_callback)
 
     while True:
         try:
