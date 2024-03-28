@@ -12,7 +12,8 @@ import tempfile
 from typing import Optional
 import yaml
 
-from contextlib import contextmanager
+from itertools import chain
+from contextlib import contextmanager, ExitStack
 
 
 class Service:
@@ -30,7 +31,7 @@ class Service:
         self.scale = scale
         self.force_recreate = force_recreate
 
-    def start(self):
+    def start(self, overlays=[]):
         if self.composer.watch_proc is not None:
             self.composer.watch_proc.terminate()
 
@@ -44,7 +45,7 @@ class Service:
 
         args += [self.name]
 
-        self.composer.compose(*args)
+        self.composer.compose(*args, overlays=overlays)
 
     def stop(self):
         self.composer.compose("down", self.name)
@@ -54,8 +55,8 @@ class Service:
         spec = copy.deepcopy(self.service_spec)
 
         # Ensure that all env_file's are passed as absolute
-        # paths, as docker-compose would otherwise resolve them
-        # relatively to the docker-compose.yml which in our case
+        # paths, as 'docker compose' would otherwise resolve them
+        # relatively to the compose.yml which in our case
         # is /self/proc/fd/X. So env_file's would be resolved as
         # /self/proc/fd/some_env_file
         if env_files := spec.get("env_file"):
@@ -83,23 +84,39 @@ class Composer:
     def services(self):
         return []
 
-    def compose(self, *args):
-        with self.file() as file:
-            file_fd = file.fileno()
-            args = (
-                "docker-compose",
-                "--project-name",
-                self.name,
-                "--ansi",
-                "never",
-                "--progress",
-                "plain",
-                "--file",
-                f"/proc/self/fd/{file_fd}",
-                *args,
+    def compose(self, *args, overlays=[]):
+        compose_file_contents = [self.spec] + overlays
+
+        with ExitStack() as stack:
+            compose_file_fds = [
+                stack.enter_context(self._temp_file_fd(spec))
+                for spec in compose_file_contents
+            ]
+
+            args = tuple(
+                chain(
+                    [
+                        "docker",
+                        "compose",
+                        "--project-name",
+                        self.name,
+                        "--ansi",
+                        "never",
+                        "--progress",
+                        "plain",
+                    ],
+                    chain.from_iterable(
+                        [
+                            ["--file", f"/proc/self/fd/{fd}"]
+                            for fd in compose_file_fds
+                        ]
+                    ),
+                    args,
+                )
             )
+
             self.logger.info(f"Running: {' '.join(args)}")
-            subprocess.run(args, pass_fds=[file_fd])
+            subprocess.run(args, pass_fds=compose_file_fds)
 
     @property
     def spec(self) -> dict:
@@ -110,20 +127,28 @@ class Composer:
             },
         }
 
-    @contextmanager
-    def file(self):
-        with tempfile.NamedTemporaryFile(mode="w+") as file:
-            yaml.dump(self.spec, file)
-            self.logger.info("Compose file:\n" + yaml.dump(self.spec))
-            file.flush()
-            yield file
+    def run(self):
+        while True:
+            self._watch_events()
+
+    def remove_orphans(self):
+        self.compose("down", "--remove-orphans")
 
     def _watch_events(self):
-        with self.file() as file:
-            args = ["docker-compose", "--file", file.name, "events", "--json"]
+        with self._temp_file_fd(self.spec) as fd:
+            args = [
+                "docker",
+                "compose",
+                "--file",
+                f"/proc/self/fd/{fd}",
+                "events",
+                "--json",
+            ]
             self.logger.info(f"Running: {' '.join(args)}")
 
-            self.watch_proc = subprocess.Popen(args, stdout=subprocess.PIPE)
+            self.watch_proc = subprocess.Popen(
+                args, stdout=subprocess.PIPE, pass_fds=[fd]
+            )
 
             output = self.watch_proc.stdout
             if output is None:
@@ -139,9 +164,10 @@ class Composer:
 
                 self.logger.info(f"Event {action} of {name}[{image}]")
 
-    def run(self):
-        while True:
-            self._watch_events()
-
-    def remove_orphans(self):
-        self.compose("down", "--remove-orphans")
+    @contextmanager
+    def _temp_file_fd(self, contents: dict):
+        with tempfile.NamedTemporaryFile(mode="w+") as file:
+            yaml.dump(contents, file)
+            self.logger.info("Compose file:\n" + yaml.dump(contents))
+            file.flush()
+            yield file.fileno()
