@@ -7,6 +7,6 @@ RUN mkdir /src
 WORKDIR /src
 
 COPY . /src
-RUN pip install .
+RUN pip install --no-cache-dir .
 
 CMD ["worker"]
