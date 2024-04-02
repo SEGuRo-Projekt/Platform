@@ -53,7 +53,7 @@ cryptography = "42.0.3"
 aws-logging-handlers = "^2.0.5"
 s3fs = "^2024.3.1"
 fsspec = "^2024.3.1"
-villas-python = {git = "https://github.com/VILLASframework/node.git", rev = "b66b125ea192faa876fc18ab64fcc798dcdb17ce", subdirectory = "python"}
+villas-python = { url = "https://github.com/VILLASframework/node/archive/bcb83e2733ed7b042fd87f9cfdcde37b1b14226d.tar.gz" }
 pyusb = "^1.2.1"
 psutil = "^5.9.8"
 nbconvert = "^7.16.3"
