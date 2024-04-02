@@ -56,7 +56,7 @@
       );
     in {
       packages = {
-        seguro = p2n.mkPoetryApplication {
+        seguro-platform = p2n.mkPoetryApplication {
           projectDir = ./.;
           groups = ["dev"];
           inherit overrides;
@@ -69,11 +69,11 @@
           };
           inherit overrides;
         };
-        default = self.packages.${system}.seguro;
+        default = self.packages.${system}.seguro-platform;
       };
 
       devShells.default = pkgs.mkShell {
-        inputsFrom = [self.packages.${system}.seguro];
+        inputsFrom = [self.packages.${system}.seguro-platform];
         packages = with pkgs; [
           mypy
           poetry
