@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 import sys
 import argparse
+import socket
 import dataclasses as dc
 import logging
 import multiprocessing as mp
@@ -50,9 +51,41 @@ class PipeWorker:
 def main() -> int:
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-t", "--topic", type=str, default="signatures/tsr")
-    parser.add_argument("-u", "--uid", type=str, default="ms1")
-    parser.add_argument("-f", "--fifo", type=str, default="digest.fifo")
+    parser.add_argument(
+        "-t",
+        "--topic",
+        type=str,
+        help="MQTT topic for publishing signatures",
+        default="signatures/tsr",
+    )
+    parser.add_argument(
+        "-U",
+        "--uid",
+        type=str,
+        help="MQTT client identifier",
+        default=socket.gethostname(),
+    )
+    parser.add_argument(
+        "-f",
+        "--fifo",
+        type=str,
+        help="FIFO for receiving frame digests",
+        default="/run/villas-digests.fifo",
+    )
+    parser.add_argument(
+        "-u",
+        "--uri",
+        type=str,
+        help="URL of Time Stamp Authority server ",
+        default="https://freetsa.org/tsr",
+    )
+    parser.add_argument(
+        "-d",
+        "--digest",
+        type=str,
+        help="Frame digest algorithm",
+        default="sha256",
+    )
     parser.add_argument(
         "-l",
         "--log-level",
@@ -71,7 +104,7 @@ def main() -> int:
 
     pipe = PipeWorker(Path(args.fifo))
     client = broker.Client(f"signature-sender/{args.uid}")
-    tsa = RemoteTimestamper("https://freetsa.org/tsr", hashname="sha256")
+    tsa = RemoteTimestamper(args.uri, hashname=args.digest)
 
     with pipe:
         while (digest := pipe.queue.get()) is not None:
