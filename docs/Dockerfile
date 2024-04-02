@@ -10,7 +10,7 @@ WORKDIR /src
 
 COPY pyproject.toml poetry.lock /src/
 
-RUN poetry install --with-docs
+RUN poetry install --with=docs
 
 COPY seguro /src/seguro
 COPY docs /src/docs
