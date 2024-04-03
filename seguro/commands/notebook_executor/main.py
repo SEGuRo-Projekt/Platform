@@ -12,7 +12,7 @@ from seguro.common import store, job
 
 
 def main() -> int:
-    client = store.Client()
+    s = store.Client()
 
     if job.info.triggered_by.event != "created":
         return -1
@@ -20,7 +20,7 @@ def main() -> int:
     nb_obj = job.info.notebook
 
     # Fetch Notebook from store
-    nb_contents = client.get_file_contents(nb_obj).read()
+    nb_contents = s.get_file_contents(nb_obj).read()
 
     # Read Notebook
     nb = nbformat.reads(nb_contents, as_version=4)
@@ -36,7 +36,7 @@ def main() -> int:
     pre, _ = os.path.splitext(nb_obj)
     pdf_obj = pre + ".pdf"
 
-    client.put_file_contents(pdf_obj, resp[0])
+    s.put_file_contents(pdf_obj, resp[0])
 
     return 0
 

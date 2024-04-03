@@ -103,13 +103,13 @@ def main() -> int:
     )
 
     pipe = PipeWorker(Path(args.fifo))
-    client = broker.Client(f"signature-sender/{args.uid}")
+    b = broker.Client("signature-sender")
     tsa = RemoteTimestamper(args.uri, hashname=args.digest)
 
     with pipe:
         while (digest := pipe.queue.get()) is not None:
             logging.info(f"Received {digest.dump()=}")
-            client.publish("signatures/digest", digest.dump())
+            b.publish("signatures/digest", digest.dump())
 
             algorithm = digest.algorithm
             digest_hex = digest.bytes.hex().upper()
@@ -122,7 +122,7 @@ def main() -> int:
 
                 logging.info(f"Received TSR for {algorithm}:{digest_hex}")
 
-                client.publish(args.topic, der.encoder.encode(tsr))
+                b.publish(args.topic, der.encoder.encode(tsr))
             except Exception as err:
                 logging.error(
                     f"Failed to produce TSR for {algorithm}:{digest_hex} {err}"  # noqa: E501

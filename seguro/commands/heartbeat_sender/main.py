@@ -173,9 +173,8 @@ def main() -> int:
         datefmt="%H:%M:%S",
     )
 
-    client = broker.Client("heartbeat")
-
-    client.publish(args.topic, json.dumps(get_status()))
+    b = broker.Client("heartbeat")
+    b.publish(args.topic, json.dumps(get_status()))
 
     return 0
 
