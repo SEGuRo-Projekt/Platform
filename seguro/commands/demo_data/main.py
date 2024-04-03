@@ -8,7 +8,7 @@ import time
 import random
 import logging
 
-from seguro.common.broker import Client as BrokerClient
+from seguro.common import broker
 
 
 def main() -> int:
@@ -18,12 +18,12 @@ def main() -> int:
         datefmt="%H:%M:%S",
     )
 
-    broker = BrokerClient("demo-data")
+    b = broker.Client("demo-data")
 
     value = 0.0
 
     while True:
-        broker.publish("measurements/ms1/value", value)
+        b.publish("measurements/ms1/value", value)
         value += 0.1 * random.uniform(-1, 1)
         time.sleep(0.1)
 

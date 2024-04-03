@@ -58,7 +58,7 @@ class Job(compose.Service):
             self._setup_schedule(trigger)
 
     def _handle_trigger_event(
-        self, trigger: dict, client: store.Client, evt: store.Event, obj: str
+        self, trigger: dict, _s: store.Client, evt: store.Event, obj: str
     ):
         triggered_by = {**trigger, "event": str(evt), "object": obj}
         info = {"triggered_by": triggered_by}

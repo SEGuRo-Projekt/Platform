@@ -7,15 +7,15 @@ from seguro.common import store
 
 
 def main() -> int:
-    client = store.Client()
+    s = store.Client()
 
     filename = "data/md1/mp1"
 
-    frame = client.get_frame(filename)
+    frame = s.get_frame(filename)
 
     frame *= 2
 
-    client.put_frame(filename + "_scaled", frame)
+    s.put_frame(filename + "_scaled", frame)
 
     return 0
 
