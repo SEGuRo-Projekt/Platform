@@ -27,6 +27,13 @@ class Recorder:
         self._reset()
 
     def record_samples(self, samples: list[Sample]):
+        """
+
+        Args:
+          samples: A list of samples which should be appended to the
+                   current frame
+
+        """
         self.logger.debug("Recording %d samples", len(samples))
 
         for sample in samples:

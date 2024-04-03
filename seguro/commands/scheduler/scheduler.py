@@ -12,8 +12,6 @@ import threading
 import slugify
 import yaml
 
-from typing import Dict
-
 import seguro.common.store as store
 from . import job, compose
 
@@ -32,7 +30,7 @@ class Scheduler(compose.Composer):
 
         self.logger.info("Scheduler starting")
 
-        self.jobs: Dict[str, job.Job] = {}
+        self.jobs: dict[str, job.Job] = {}
 
         self.watcher = self.store.watch_async(
             "config/jobs/",
@@ -48,7 +46,15 @@ class Scheduler(compose.Composer):
         for obj in objs:
             self._handler(self.store, store.Event.CREATED, obj.object_name)
 
-    def _handler(self, _: store.Client, event: store.Event, objname: str):
+    def _handler(self, _s: store.Client, event: store.Event, objname: str):
+        """Callback for store events
+
+        Args:
+          _s: The store client
+          event: the store event
+          objname: The name of the store object
+
+        """
         filename = os.path.basename(objname)
         name, ext = os.path.splitext(filename)
 
@@ -66,6 +72,14 @@ class Scheduler(compose.Composer):
             self._on_job_removed(job_name)
 
     def _on_job_created(self, name: str, spec: dict):
+        """Callback which get called when a job specification is
+        added to the store.
+
+        Args:
+          name: Name of the job specification
+          spec: The job specification
+
+        """
         if name in self.jobs:
             self.jobs[name].stop()
             del self.jobs[name]
@@ -77,6 +91,13 @@ class Scheduler(compose.Composer):
             new_job.start()
 
     def _on_job_removed(self, name: str):
+        """Callback which get called when a job specification is removed
+        from the store.
+
+        Args:
+          name: Name of the job specification
+
+        """
         try:
             self.jobs[name].stop()
             del self.jobs[name]

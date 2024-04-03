@@ -17,11 +17,17 @@ from seguro.common.config import (
 
 
 def file_logger(log_level, logfile, max_bytes=20000, backup_count=5):
-    """Return logger object that logs into local files.
+    """
 
-    Arguments:
-        log_level   -- Log level for logfiles
-        logfile     -- Path to logfile
+    Args:
+      log_level: Log level for logfiles
+      logfile: Path to logfile
+      max_bytes:  (Default value = 20000)
+      backup_count:  (Default value = 5)
+
+    Returns:
+
+
     """
     logger = logging.getLogger("file_logger")
     logger.setLevel(log_level)
@@ -48,10 +54,14 @@ def file_logger(log_level, logfile, max_bytes=20000, backup_count=5):
 def store_logger(log_level, logfile, bucket=S3_BUCKET):
     """Return logger object that logs into s3 storage.
 
-    Arguments:
-        log_level   -- Log level for logfiles
-        logfile     -- Path to logfile
-        bucket      -- Bucket name for logfiles
+    Args:
+      log_level: Log level for logfiles
+      logfile: Path to logfile
+      bucket: Bucket name for logfiles (Default value = S3_BUCKET)
+
+    Returns:
+
+
     """
 
     logger = logging.getLogger("store_logger")

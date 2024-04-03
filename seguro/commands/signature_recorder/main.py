@@ -23,6 +23,15 @@ class TSRMessage:
 
     @staticmethod
     def decode(msg: broker.Message) -> "TSRMessage":
+        """Decode a MQTT message into a TSR message
+
+        Args:
+          msg: The MQTT message
+
+        Returns:
+            TSRMessage: The decoded TSR message
+
+        """
         tsr, tail = der.decoder.decode(msg.payload, asn1Spec=TimeStampResp())
         assert not tail
         imprint = tsr.time_stamp_token.tst_info.message_imprint
@@ -55,7 +64,14 @@ def main() -> int:
     b = broker.Client("signature-recorder")
     s = store.Client()
 
-    def tsr_callback(_broker, msg):
+    def tsr_callback(_b: broker.Client, msg: broker.Message):
+        """
+
+        Args:
+          _b:
+          msg:
+
+        """
         try:
             queue.put(TSRMessage.decode(msg))
         except Exception as err:

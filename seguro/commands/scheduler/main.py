@@ -24,7 +24,14 @@ def main() -> int:
 
     scheduler = Scheduler(docker_client, store_client)
 
-    def signal_handler(signum, frame):
+    def signal_handler(signum: int, frame):
+        """Callback which gets called for received signals
+
+        Args:
+          signum: The signal number
+          frame:
+
+        """
         logging.info("Stopping scheduler")
         scheduler.stop()
 
