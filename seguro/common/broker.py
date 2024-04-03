@@ -32,7 +32,7 @@ class Client:
 
     def __init__(
         self,
-        uid="",
+        uid=None,
         host=MQTT_HOST,
         port=MQTT_PORT,
         username=MQTT_USERNAME,
@@ -46,11 +46,11 @@ class Client:
         Arguments:
             uid -- Unique id/name of the client
         """
-        if not uid:
-            # Create uid based onMAC address and time component
+        # Create uid based onMAC address and time component
+        if uid is None:
             uid = str(uuid.uuid1())
         else:
-            uid = uid
+            uid += "/" + str(uuid.uuid1())
 
         self.logger = logging.getLogger(__name__)
         self.client = mqtt.Client(
