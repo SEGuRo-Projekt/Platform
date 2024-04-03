@@ -5,7 +5,6 @@ SPDX-License-Identifier: Apache-2.0
 
 import sys
 import argparse
-import socket
 import dataclasses as dc
 import logging
 import multiprocessing as mp
@@ -57,13 +56,6 @@ def main() -> int:
         type=str,
         help="MQTT topic for publishing signatures",
         default="signatures/tsr",
-    )
-    parser.add_argument(
-        "-U",
-        "--uid",
-        type=str,
-        help="MQTT client identifier",
-        default=socket.gethostname(),
     )
     parser.add_argument(
         "-f",
