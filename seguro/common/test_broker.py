@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 import time
 import pytest
 
-from seguro.common.broker import Client, Sample, Timestamp
+from seguro.common.broker import Client, Sample, Timestamp, Message
 
 
 @pytest.mark.broker
@@ -17,7 +17,14 @@ def test_broker():
     # Used to store callback messages
     messages = []
 
-    def callback(client, msg):
+    def callback(b: Client, msg: Message):
+        """Callback which gets called for each received MQTT message
+
+        Args:
+          client: The broker client
+          msg: The MQTT message
+
+        """
         messages.append(msg)
 
     # Subscribe to topic "mytopic" and start listening in another thread
@@ -42,7 +49,15 @@ def test_broker_samples():
     smps_recv: list[Sample] = []
     topics_recv: list[str] = []
 
-    def callback(client, topic: str, samples: list[Sample]):
+    def callback(b: Client, topic: str, samples: list[Sample]):
+        """Callback which gets called for each block of received samples
+
+        Args:
+          client: The broker client
+          topic: The MQTT topic on which the samples have been received
+          samples: The list of samples
+
+        """
         smps_recv.extend(samples)
         topics_recv.append(topic)
 

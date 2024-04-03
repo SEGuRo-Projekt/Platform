@@ -58,6 +58,12 @@ class Notification:
         return body, title, notify_type
 
     def publish(self, apprise: Apprise):
+        """Publish the notification to the provided Apprise object.
+
+        Args:
+          apprise: The Apprise object to which the notification should be send
+
+        """
         body, title, notify_type = self._parse_payload()
 
         apprise.notify(
@@ -93,7 +99,15 @@ def main() -> int:
     config = AppriseConfig("config.yaml")
     client = broker.Client("notifier")
 
-    def notification_callback(_broker, msg: broker.Message):
+    def notification_callback(_b: broker.Client, msg: broker.Message):
+        """Callback which gets called for each message received on the
+        MQTT notification topic.
+
+        Args:
+          _broker: The MQTT client
+          msg: The MQTT message
+
+        """
         assert msg.topic.startswith(f"{args.prefix}/")
         tag = msg.topic.removeprefix(f"{args.prefix}/")
         queue.put(Notification(tag, msg.payload))

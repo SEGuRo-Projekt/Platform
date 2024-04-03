@@ -9,7 +9,6 @@ import logging
 import os
 import subprocess
 import tempfile
-from typing import Optional
 import yaml
 
 from itertools import chain
@@ -32,6 +31,12 @@ class Service:
         self.force_recreate = force_recreate
 
     def start(self, overlays=[]):
+        """
+
+        Args:
+          overlays:  (Default value = [])
+
+        """
         if self.composer.watch_proc is not None:
             self.composer.watch_proc.terminate()
 
@@ -77,7 +82,7 @@ class Service:
 class Composer:
     def __init__(self, name: str = "composer"):
         self.logger = logging.getLogger(__name__)
-        self.watch_proc: Optional[subprocess.Popen[bytes]] = None
+        self.watch_proc: subprocess.Popen[bytes] | None = None
         self.name = name
 
     @property
@@ -85,6 +90,15 @@ class Composer:
         return []
 
     def compose(self, *args, overlays=[]):
+        """
+
+        Args:
+          *args:
+          overlays:  (Default value = [])
+
+        Returns:
+
+        """
         compose_file_contents = [self.spec] + overlays
 
         with ExitStack() as stack:
@@ -166,6 +180,15 @@ class Composer:
 
     @contextmanager
     def _temp_file_fd(self, contents: dict):
+        """
+
+        Args:
+          contents:
+
+        Yields:
+          A file descriptor to a temporary file
+
+        """
         with tempfile.NamedTemporaryFile(mode="w+") as file:
             yaml.dump(contents, file)
             self.logger.info("Compose file:\n" + yaml.dump(contents))

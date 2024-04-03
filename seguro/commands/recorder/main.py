@@ -17,8 +17,17 @@ recorders: dict[str, Recorder] = {}
 
 
 def on_samples(
-    s: store.Client, _: broker.Client, topic: str, samples: list[Sample]
+    s: store.Client, _b: broker.Client, topic: str, samples: list[Sample]
 ):
+    """Callback for each received block of received samples.
+
+    Args:
+      s: S3 store client
+      _b: MQTT broker client
+      topic: The MQTT topic on which the samples have been received
+      samples: The list of received samples
+
+    """
     try:
         recorder = recorders[topic]
     except KeyError:

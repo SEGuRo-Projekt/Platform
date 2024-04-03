@@ -15,6 +15,15 @@ from seguro.common import broker
 
 
 def strip_none(d: dict) -> dict:
+    """Remove elements from dictionary whose value is None
+
+    Args:
+      d: The dictionary from which None values should be removed
+
+    Returns:
+      The filtered dictionary
+
+    """
     return {k: v for k, v in d.items() if v is not None}
 
 

@@ -40,6 +40,19 @@ class Client:
 
     This class provides an abstraction layer for interactions between
     the S3 data store and the SEGuRo platform.
+
+    Connect to an S3 object store using the given credentials and store the
+    returned client handle.
+
+    Args:
+        host: Hostname or IP address of the storage server
+        port: Network port of the storage server
+        access_key: Access key for authentication
+        secret_key: Secret key for authentication
+        secure: Establish secure connection via TLS
+        region: The S3 region
+        bucket: The S3 bucket
+
     """
 
     def __init__(
@@ -52,19 +65,6 @@ class Client:
         region=S3_REGION,
         bucket=S3_BUCKET,
     ):
-        """Store Constructor
-
-        Connect to an S3 object store using the given credentials and store the
-        returned client handle.
-
-        Arguments:
-            uid         -- Unique id/name of the store client
-            host        -- Hostname or IP address of the storage server
-            port        -- Network port of the storage server
-            access_key  -- Access key (UID) for authentication
-            secret_key  -- Secret key (password) for authentication
-        """
-
         self.logger = logging.getLogger(__name__)
         self.bucket = bucket
         self.client = minio.Minio(
@@ -90,35 +90,54 @@ class Client:
     def get_file(self, filename: str, file: str):
         """Download file from the S3 object store and store it locally.
 
-        Arguments:
-            filename -- Local filename that is used
-            file     -- Name of requested file in storage
+        Args:
+          filename: Local filename that is used
+          file: Name of requested file in storage
+          filename: str:
+          file: str:
+
+        Returns:
+
         """
         return self.client.fget_object(self.bucket, file, filename)
 
     def put_file(self, filename: str, file: str):
         """Upload local file and store it in the S3Storage.
 
-        Arguments:
-            filename -- Name of uploaded file in storage
-            file     -- Local file that is used
+        Args:
+          filename: Name of uploaded file in storage
+          file: Local file that is used
+          filename: str:
+          file: str:
+
+        Returns:
+
         """
         return self.client.fput_object(self.bucket, filename, file)
 
     def remove_file(self, filename: str):
         """Remove a local file from the S3Storage.
 
-        Arguments:
-            filename -- Name of removed file in storage
+        Args:
+          filename: Name of removed file in storage
+          filename: str:
+
+        Returns:
+
         """
         return self.client.remove_object(self.bucket, filename)
 
     def put_file_contents(self, filename: str, content: bytes):
         """Write to file stored it in the S3Storage.
 
-        Arguments:
-            filename -- Name of file in storage
-            content  -- Content that is written to file
+        Args:
+          filename: Name of file in storage
+          content: Content that is written to file
+          filename: str:
+          content: bytes:
+
+        Returns:
+
         """
         if not self.client.bucket_exists(self.bucket):
             raise Exception(f"Error: Bucket {self.bucket} does not exist...")
@@ -133,9 +152,13 @@ class Client:
     def get_file_contents(self, filename: str) -> urllib3.BaseHTTPResponse:
         """Write to file stored it in the S3Storage.
 
-        Arguments:
-            filename -- Name of file in storage
-            content  -- Content that is written to file
+        Args:
+          filename: Name of file in storage
+          content: Content that is written to file
+          filename: str:
+
+        Returns:
+
         """
         if not self.client.bucket_exists(self.bucket):
             raise Exception(f"Error: Bucket {self.bucket} does not exist...")
@@ -143,6 +166,15 @@ class Client:
         return self.client.get_object(self.bucket, filename)
 
     def put_frame(self, filename: str, df: pd.DataFrame):
+        """Upload a Pandas Dataframe as a Parquet file to the store
+
+        Args:
+          filename: The filename at which it should be stored
+          df: The Pandas DataFrame
+
+        Returns:
+
+        """
         df.to_parquet(
             f"s3://{self.bucket}/{filename}",
             compression="zstd",
@@ -150,6 +182,14 @@ class Client:
         )
 
     def get_frame(self, filename: str) -> pd.DataFrame:
+        """Download a Pandas Dataframe as a Parquet file to the store
+
+        Args:
+          filename: The filename from which it should be retrieved
+
+        Returns:
+
+        """
         return pd.read_parquet(
             f"s3://{self.bucket}/{filename}",
             storage_options=self.storage_options,
@@ -161,6 +201,16 @@ class Client:
         events: Event = Event.CREATED | Event.REMOVED,
         initial: bool = False,
     ):
+        """
+
+        Args:
+          prefix: str:
+          events: Event:  (Default value = Event.CREATED | Event.REMOVED)
+          initial: bool:  (Default value = False)
+
+        Returns:
+
+        """
         s3_events = []
         if Event.CREATED in events:
             s3_events.append("s3:ObjectCreated:*")
@@ -189,6 +239,20 @@ class Client:
         events=Event.CREATED | Event.REMOVED,
         initial: bool = False,
     ):
+        """
+
+        Args:
+          prefix: str:
+          cb: Callable[["Client":
+          Event:
+          str]:
+          None]:
+          events:  (Default value = Event.CREATED | Event.REMOVED)
+          initial: bool:  (Default value = False)
+
+        Returns:
+
+        """
         return Watcher(self, prefix, cb, events, initial)
 
 
@@ -256,6 +320,14 @@ class Watcher(threading.Thread):
 
 
 def _decode_event(event) -> tuple[Event, str]:
+    """
+
+    Args:
+      event:
+
+    Returns:
+
+    """
     records = event.get("Records")
     record = records[0]
 
