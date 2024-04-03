@@ -14,7 +14,7 @@ from seguro.common import broker
 def main() -> int:
     logging.basicConfig(
         level=logging.DEBUG,
-        format="%(asctime)s.%(msecs)03d %(levelname)s %(message)s",
+        format="%(asctime)s.%(msecs)03d %(levelname)s %(name)s %(message)s",
         datefmt="%H:%M:%S",
     )
 

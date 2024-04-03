@@ -15,7 +15,7 @@ BUCKETS = ["seguro", "registry"]
 
 def main() -> int:
     logging.basicConfig(
-        format="%(asctime)s %(name)s %(levelname)s: %(message)s",
+        format="%(asctime)s.%(msecs)03d %(levelname)s %(name)s %(message)s",
         level=logging.INFO,
     )
 
