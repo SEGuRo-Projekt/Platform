@@ -74,10 +74,10 @@
 
       devShells.default = pkgs.mkShell {
         inputsFrom = [self.packages.${system}.seguro-platform];
-        packages = with pkgs; [
+        packages = with pkgs // self.packages.${system}; [
           mypy
           poetry
-          self.packages.${system}.env
+          env
           (p2n.mkPoetryScriptsPackage {
             projectDir = ./.;
           })
