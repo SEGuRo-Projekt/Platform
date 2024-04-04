@@ -2,7 +2,7 @@
 
 ## Environment Variables
 
-See `.env`:
+See [`.env`](https://github.com/SEGuRo-Projekt/Platform/blob/main/.env):
 
 ```{literalinclude} ../.env
 ```
