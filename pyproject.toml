@@ -3,15 +3,15 @@
 
 [tool.poetry]
 authors = [
-  "Steffen Vogel <steffen.vogel@opal-rt.com>",
-  "Felix Wege <felix.wege@eonerc.rwth-aachen.de>",
+	"Steffen Vogel <steffen.vogel@opal-rt.com>",
+	"Felix Wege <felix.wege@eonerc.rwth-aachen.de>",
 ]
 name = "seguro-platform"
 version = "0.1.0"
 description = "Common Python helpers for accessing the SEGuRo platform"
 license = "Apache-2.0"
 readme = "README.md"
-packages = [{include = "seguro"}]
+packages = [{ include = "seguro" }]
 
 [tool.poetry.scripts]
 poetry = "poetry.console.application:main"
@@ -48,15 +48,14 @@ python-slugify = "^8.0.4"
 pyyaml = "^6.0.1"
 rfc3161ng = "^2.1.3"
 schedule = "^1.2.1"
-pandas = {extras = ["excel", "parquet"], version = "^2.2.1"}
+pandas = { extras = ["excel", "parquet"], version = "^2.2.1" }
 cryptography = "42.0.3"
 aws-logging-handlers = "^2.0.5"
 s3fs = "^2024.3.1"
 fsspec = "^2024.3.1"
-villas-python = { url = "https://github.com/VILLASframework/node/archive/bcb83e2733ed7b042fd87f9cfdcde37b1b14226d.tar.gz" }
 pyusb = "^1.2.1"
 psutil = "^5.9.8"
-nbconvert = "^7.16.3"
+villas-node = "0.11.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.2"
@@ -84,6 +83,7 @@ sphinxcontrib-bibtex = "^2.6.2"
 [tool.poetry.group.jupyter.dependencies]
 jupyterlab = "^4.1.5"
 ipykernel = "^6.29.4"
+nbconvert = "^7.16.3"
 
 [tool.mypy]
 ignore_missing_imports = true
