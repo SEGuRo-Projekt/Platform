@@ -2,12 +2,12 @@
 
 The components compromising the SEGuRo platform are accessible via various sub-domains of `seguro`:
 
-- [`localhost`](https://seguro) Platform Landing Page
-- [`ui.localhost`](https://ui.seguro) Docker Web-Interface ([Yacht](https://yacht.sh/))
-- [`store.localhost`](https://store.seguro) S3 Datastore ([Minio](https://min.io/))
-- [`ui.store.localhost`](https://ui.store.seguro) S3 Datastore Web-Interface
-- [`registry.localhost`](https://registry.seguro) Docker Image Registry ([distribution](https://distribution.github.io/distribution/about/))
-- [`ui.registry.localhost`](https://ui.registry.seguro) Docker Image Registry Web-Interface ([docker-registry-ui](https://github.com/Joxit/docker-registry-ui))
+- [`localhost`](https://localhost) Platform Landing Page
+- [`ui.localhost`](https://ui.localhost) Docker Web-Interface ([Yacht](https://yacht.sh/))
+- [`store.localhost`](https://store.localhost) S3 Datastore ([Minio](https://min.io/))
+- [`ui.store.localhost`](https://ui.store.localhost) S3 Datastore Web-Interface
+- [`registry.localhost`](https://registry.localhost) Docker Image Registry ([distribution](https://distribution.github.io/distribution/about/))
+- [`ui.registry.localhost`](https://ui.registry.localhost) Docker Image Registry Web-Interface ([docker-registry-ui](https://github.com/Joxit/docker-registry-ui))
 
 ```{note}
 Please substitute `localhost` with the `DOMAIN` from your [configuration](./configuration.md).

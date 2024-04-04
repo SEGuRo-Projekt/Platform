@@ -63,8 +63,8 @@ ogp_enable_meta_description = True
 
 html_theme = "furo"
 html_static_path = ["_static"]
-html_css_files = ["custom.css"]
-
+html_css_files = ["styles/custom.css"]
+html_js_files = ["scripts/custom.js"]
 html_title = "SEGuRo Platform"
 html_theme_options = {
     "source_repository": "https://github.com/SEGuRo-Projekt/Platform/",
