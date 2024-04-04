@@ -33,7 +33,7 @@
         in
           mkOverrides {
             aws-logging-handlers = ["setuptools"];
-            villas-python = ["setuptools"];
+            villas-node = ["setuptools"];
             types-python-slugify = ["setuptools"];
             paho-mqtt = ["hatchling"];
             pyxlsb = ["setuptools"];
