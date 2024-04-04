@@ -8,20 +8,20 @@ from seguro.common import broker
 from villas.node.sample import Sample
 
 
-def new_samples(client: broker.Client, topic: str, samples: list[Sample]):
+def new_samples(b: broker.Client, topic: str, samples: list[Sample]):
     for sample in samples:
         print(topic, sample)
 
         sample.data[0] *= 2
         sample.data[1] += 10
 
-    client.publish_samples("data/scaled/ms1/mp1", samples)
+    b.publish_samples("data/scaled/ms1/mp1", samples)
 
 
 def main() -> int:
-    client = broker.Client("example-worker")
+    b = broker.Client("example-worker")
 
-    client.subscribe_samples("data/ms1/mp1", new_samples)
+    b.subscribe_samples("data/ms1/mp1", new_samples)
 
     while True:
         try:

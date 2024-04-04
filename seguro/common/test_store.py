@@ -71,14 +71,22 @@ def test_watch_async():
 
     i = 0
 
-    def callback(client: Client, typ: Event, filename: str):
+    def callback(s: Client, evt: Event, filename: str):
+        """Callback for
+
+        Args:
+          client:
+          typ:
+          filename:
+
+        """
         nonlocal i
 
         if i == 0:
-            assert typ == Event.CREATED
+            assert evt == Event.CREATED
             assert filename == filename
         elif i == 1:
-            assert typ == Event.REMOVED
+            assert evt == Event.REMOVED
             assert filename == filename
 
             # Raise a StopIteration exception to stop processing events

@@ -8,22 +8,22 @@ import time
 import random
 import logging
 
-from seguro.common.broker import Client as BrokerClient
+from seguro.common import broker
 
 
 def main() -> int:
     logging.basicConfig(
         level=logging.DEBUG,
-        format="%(asctime)s.%(msecs)03d %(levelname)s %(message)s",
+        format="%(asctime)s.%(msecs)03d %(levelname)s %(name)s %(message)s",
         datefmt="%H:%M:%S",
     )
 
-    broker = BrokerClient("demo-data")
+    b = broker.Client("demo-data")
 
     value = 0.0
 
     while True:
-        broker.publish("measurements/ms1/value", value)
+        b.publish("measurements/ms1/value", value)
         value += 0.1 * random.uniform(-1, 1)
         time.sleep(0.1)
 

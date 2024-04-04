@@ -29,8 +29,13 @@
         "redhat.vscode-yaml",
         "elagil.pre-commit-helper",
         "editorconfig.editorconfig",
-        "gruntfuggly.triggertaskonsave"
-      ]
+        "gruntfuggly.triggertaskonsave",
+        "njpwerner.autodocstring"
+      ],
+
+      "settings": {
+        "autoDocstring.docstringFormat": "google-notypes"
+      }
     }
   }
 }

@@ -11,8 +11,7 @@ from dataclasses import dataclass
 from queue import Queue
 from pyasn1.codec import der
 from rfc3161ng import TimeStampResp, oid_to_hash
-from seguro.common.broker import Client as BrokerClient, Message
-from seguro.common.store import Client as StoreClient
+from seguro.common import broker, store
 
 
 @dataclass
@@ -23,7 +22,16 @@ class TSRMessage:
     payload: bytes
 
     @staticmethod
-    def decode(msg: Message) -> "TSRMessage":
+    def decode(msg: broker.Message) -> "TSRMessage":
+        """Decode a MQTT message into a TSR message
+
+        Args:
+          msg: The MQTT message
+
+        Returns:
+            TSRMessage: The decoded TSR message
+
+        """
         tsr, tail = der.decoder.decode(msg.payload, asn1Spec=TimeStampResp())
         assert not tail
         imprint = tsr.time_stamp_token.tst_info.message_imprint
@@ -53,16 +61,23 @@ def main() -> int:
     )
 
     queue: Queue = Queue()
-    broker = BrokerClient("signature-recorder")
-    store = StoreClient()
+    b = broker.Client("signature-recorder")
+    s = store.Client()
 
-    def tsr_callback(_broker, msg):
+    def tsr_callback(_b: broker.Client, msg: broker.Message):
+        """
+
+        Args:
+          _b:
+          msg:
+
+        """
         try:
             queue.put(TSRMessage.decode(msg))
         except Exception as err:
             logging.error(f"Failed to receive TSR: {err}")
 
-    broker.subscribe(args.topic, tsr_callback)
+    b.subscribe(args.topic, tsr_callback)
 
     msg: TSRMessage
     while (msg := queue.get()) is not None:
@@ -70,8 +85,8 @@ def main() -> int:
         digest_hex = msg.digest.hex().upper()
         logging.info(f"Received TSR for {algorithm}:{digest_hex}")
 
-        store.client.put_object(
-            bucket_name=store.bucket,
+        s.client.put_object(
+            bucket_name=s.bucket,
             object_name=f"tsr/{digest_hex}.{algorithm}.tsr",
             data=BytesIO(msg.payload),
             length=len(msg.payload),

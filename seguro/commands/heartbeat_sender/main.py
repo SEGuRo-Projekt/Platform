@@ -15,6 +15,15 @@ from seguro.common import broker
 
 
 def strip_none(d: dict) -> dict:
+    """Remove elements from dictionary whose value is None
+
+    Args:
+      d: The dictionary from which None values should be removed
+
+    Returns:
+      The filtered dictionary
+
+    """
     return {k: v for k, v in d.items() if v is not None}
 
 
@@ -173,9 +182,8 @@ def main() -> int:
         datefmt="%H:%M:%S",
     )
 
-    client = broker.Client("heartbeat")
-
-    client.publish(args.topic, json.dumps(get_status()))
+    b = broker.Client("heartbeat")
+    b.publish(args.topic, json.dumps(get_status()))
 
     return 0
 

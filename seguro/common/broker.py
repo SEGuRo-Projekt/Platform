@@ -10,6 +10,7 @@ import logging
 from typing import Callable, Iterable
 
 import paho.mqtt.client as mqtt
+from paho.mqtt.client import PayloadType, MQTTMessageInfo
 from villas.node.sample import Sample, Timestamp  # noqa: F401
 from villas.node.formats import Protobuf
 
@@ -28,29 +29,34 @@ class Client:
 
     This class provides an abstraction layer for MQTT based communication
     between the SEGuRo platform and the MQTT broker.
+
+    Creates a paho.mqtt.client object and initialize the message queue.
+
+    Args:
+      uid: An identifier of the client
+      host: The MQTT hostname or IP address. Defaults to localhost.
+      port: The port number used for connecting to the MQTT broker.
+            Defaults to 1883.
+      username: The username for authentication of MQTT broker.
+      password: The password for authentication of MQTT broker.
+      keepalive: The keepalive interval in seconds.
+
     """
 
     def __init__(
         self,
-        uid="",
+        uid=None,
         host=MQTT_HOST,
         port=MQTT_PORT,
         username=MQTT_USERNAME,
         password=MQTT_PASSWORD,
         keepalive=60,
     ):
-        """Broker Constructor
-
-        Create a paho.mqtt.client object and initialize the message queue.
-
-        Arguments:
-            uid -- Unique id/name of the client
-        """
-        if not uid:
-            # Create uid based onMAC address and time component
+        # Create uid based onMAC address and time component
+        if uid is None:
             uid = str(uuid.uuid1())
         else:
-            uid = uid
+            uid += "/" + str(uuid.uuid1())
 
         self.logger = logging.getLogger(__name__)
         self.client = mqtt.Client(
@@ -75,9 +81,10 @@ class Client:
     ):
         """Subscribe client to given topic and registering callback (optional).
 
-        Arguments:
-            topic -- topic that is subscribed
-            callback -- callback func that is called on message reception.
+        Args:
+          topic: The topic that is subscribed
+          callback: A callback func that is called on message reception
+
         """
         self.client.subscribe(topic)
 
@@ -95,19 +102,30 @@ class Client:
         """Stop async listening on subscribed topics."""
         self.client.loop_stop()
 
-    def publish(self, topic, message):
-        """Publish message to given topic."""
+    def publish(self, topic: str, message: PayloadType) -> MQTTMessageInfo:
+        """Publish message to given topic
+
+        Args:
+          topic:
+          message:
+
+        Returns:
+            MQTTMessageInfo: The MQTT message information
+
+        """
         self.logger.debug("Send msg: %s - %s", topic, message)
-        self.client.publish(topic, message)
+
+        return self.client.publish(topic, message)
 
     def subscribe_samples(
-        self, topic, cb: Callable[["Client", str, list[Sample]], None]
+        self, topic: str, cb: Callable[["Client", str, list[Sample]], None]
     ):
         """Subscribe client to given topic and registering callback (optional).
 
-        Arguments:
-            topic -- topic that is subscribed
-            callback -- callback func that is called for each received sample.
+        Args:
+          topic: The topic that is subscribed
+          cb: The callback func that is called for each received sample
+
         """
 
         def on_message(client: "Client", msg: mqtt.MQTTMessage):
@@ -115,7 +133,18 @@ class Client:
 
         self.subscribe(topic, on_message)
 
-    def publish_samples(self, topic, samples: Iterable[Sample]):
-        """Publish sample to given topic."""
+    def publish_samples(
+        self, topic, samples: Iterable[Sample]
+    ) -> MQTTMessageInfo:
+        """Publish sample to given topic.
 
-        self.publish(topic, Protobuf().dumpb(samples))
+        Args:
+          topic:
+          samples:
+
+        Returns:
+            MQTTMessageInfo: The MQTT message information
+
+        """
+
+        return self.publish(topic, Protobuf().dumpb(samples))

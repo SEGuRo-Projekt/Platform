@@ -15,7 +15,7 @@ from seguro.commands.scheduler.scheduler import Scheduler
 def main() -> int:
     logging.basicConfig(
         level=logging.DEBUG,
-        format="%(asctime)s.%(msecs)03d %(levelname)s %(message)s",
+        format="%(asctime)s.%(msecs)03d %(levelname)s %(name)s %(message)s",
         datefmt="%H:%M:%S",
     )
 
@@ -24,7 +24,14 @@ def main() -> int:
 
     scheduler = Scheduler(docker_client, store_client)
 
-    def signal_handler(signum, frame):
+    def signal_handler(signum: int, frame):
+        """Callback which gets called for received signals
+
+        Args:
+          signum: The signal number
+          frame:
+
+        """
         logging.info("Stopping scheduler")
         scheduler.stop()
 

@@ -8,7 +8,6 @@ import logging
 import json
 
 import time
-from typing import Dict
 
 import seguro.common.store as store
 from . import scheduler, compose
@@ -37,6 +36,13 @@ class Job(compose.Service):
             self._setup_trigger(trigger)
 
     def _setup_trigger(self, trigger: dict[str, str]):
+        """Setup the trigger.
+
+        Args:
+          trigger: The trigger specification
+
+        """
+
         typ = trigger.get("type")
         if typ in ["created", "removed", "modified"]:
             if typ == "created":
@@ -58,14 +64,31 @@ class Job(compose.Service):
             self._setup_schedule(trigger)
 
     def _handle_trigger_event(
-        self, trigger: dict, client: store.Client, evt: store.Event, obj: str
+        self, trigger: dict, _s: store.Client, evt: store.Event, obj: str
     ):
+        """
+
+        Args:
+          trigger:
+          _s:
+          evt:
+          obj:
+
+        Returns:
+
+        """
         triggered_by = {**trigger, "event": str(evt), "object": obj}
         info = {"triggered_by": triggered_by}
 
         self.start(info)
 
-    def _setup_schedule(self, schedule: Dict):
+    def _setup_schedule(self, schedule: dict):
+        """
+
+        Args:
+          schedule:
+
+        """
         interval = schedule.get("interval", 1)
 
         job = self.scheduler.scheduler.every(interval)
@@ -94,6 +117,12 @@ class Job(compose.Service):
         self.logger.info(f"Started schedule {job}")
 
     def start(self, info: dict | None = None):
+        """
+
+        Args:
+          info: dict | None:  (Default value = None)
+
+        """
         full_info = {
             "name": self.name,
             "triggered_at": time.time(),
