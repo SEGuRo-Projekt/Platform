@@ -9,7 +9,7 @@ import logging
 import docker
 import seguro.common.store as store
 
-from seguro.scheduler.scheduler import Scheduler
+from seguro.commands.scheduler.scheduler import Scheduler
 
 
 def main() -> int:
