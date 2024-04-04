@@ -11,7 +11,7 @@ import functools as ft
 
 from seguro.common import store, broker
 from seguro.common.broker import Sample
-from seguro.recorder.recorder import Recorder
+from seguro.commands.recorder.recorder import Recorder
 
 recorders: dict[str, Recorder] = {}
 
