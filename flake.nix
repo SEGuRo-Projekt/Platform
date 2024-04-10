@@ -12,121 +12,139 @@
     };
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    flake-utils,
-    poetry2nix,
-  }:
-    flake-utils.lib.eachDefaultSystem (system: let
-      pkgs = nixpkgs.legacyPackages.${system};
-      p2n = poetry2nix.lib.mkPoetry2Nix {inherit pkgs;};
-
-      overrides = p2n.overrides.withDefaults (
-        self: super: let
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+      poetry2nix,
+    }:
+    let
+      poetryOverrrides =
+        final: prev:
+        let
           # Workaround https://github.com/nix-community/poetry2nix/issues/568
-          addBuildInputs = name: buildInputs:
-            super.${name}.overridePythonAttrs (old: {
-              buildInputs = (builtins.map (x: super.${x}) buildInputs) ++ (old.buildInputs or []);
+          addBuildInputs =
+            name: buildInputs:
+            prev.${name}.overridePythonAttrs (old: {
+              buildInputs = (builtins.map (x: prev.${x}) buildInputs) ++ (old.buildInputs or [ ]);
             });
-          mkOverrides = pkgs.lib.attrsets.mapAttrs (name: value: addBuildInputs name value);
+          mkOverrides = prev.lib.mapAttrs (name: value: addBuildInputs name value);
         in
-          mkOverrides {
-            aws-logging-handlers = ["setuptools"];
-            villas-node = ["setuptools"];
-            types-python-slugify = ["setuptools"];
-            paho-mqtt = ["hatchling"];
-            pyxlsb = ["setuptools"];
-            rfc3161ng = ["setuptools"];
-          }
-          // {
-            python-calamine = super.python-calamine.override {
-              preferWheel = true;
-            };
-            apprise = super.apprise.override {
-              preferWheel = true;
-            };
-            pandas = super.pandas.override {
-              preferWheel = true;
-            };
-            mypy = super.mypy.override {
-              preferWheel = true;
-            };
-          }
-      );
-    in {
-      packages = {
-        seguro-platform = p2n.mkPoetryApplication {
-          projectDir = ./.;
-          groups = ["dev"];
-          inherit overrides;
+        mkOverrides {
+          aws-logging-handlers = [ "setuptools" ];
+          villas-node = [ "setuptools" ];
+          types-python-slugify = [ "setuptools" ];
+          paho-mqtt = [ "hatchling" ];
+          pyxlsb = [ "setuptools" ];
+          rfc3161ng = [ "setuptools" ];
+        }
+        // {
+          python-calamine = prev.python-calamine.override { preferWheel = true; };
+          apprise = prev.apprise.override { preferWheel = true; };
+          pandas = prev.pandas.override { preferWheel = true; };
+          mypy = prev.mypy.override { preferWheel = true; };
         };
-        env = p2n.mkPoetryEnv {
+
+      packagesOverlay = final: prev: {
+        seguro-platform = final.poetry2nix.mkPoetryApplication {
           projectDir = ./.;
-          groups = ["jupyter"];
+          groups = [ "dev" ];
+          overrides = final.poetry2nix.overrides.withDefaults poetryOverrrides;
+        };
+      };
+
+      overlays = {
+        default = nixpkgs.lib.composeExtensions poetry2nix.overlays.default packagesOverlay;
+      };
+    in
+    flake-utils.lib.eachDefaultSystem (
+      system:
+      let
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = builtins.attrValues overlays;
+        };
+
+        env = pkgs.poetry2nix.mkPoetryEnv {
+          projectDir = ./.;
+          groups = [ "jupyter" ];
           editablePackageSources = {
             seguro-platform = ./seguro;
           };
-          inherit overrides;
+          overrides = pkgs.poetry2nix.overrides.withDefaults poetryOverrrides;
         };
-        default = self.packages.${system}.seguro-platform;
-      };
+      in
+      {
+        packages = rec {
+          inherit (pkgs) seguro-platform;
+          default = seguro-platform;
+        };
 
-      devShells.default = pkgs.mkShell {
-        inputsFrom = [self.packages.${system}.seguro-platform];
-        packages = with pkgs // self.packages.${system}; [
-          mypy
-          poetry
-          env
-          (p2n.mkPoetryScriptsPackage {
-            projectDir = ./.;
-          })
+        devShells = rec {
+          seguro-platform = pkgs.mkShell {
+            inputsFrom = [ pkgs.seguro-platform ];
 
-          # For notebook_executor
-          # See: https://github.com/jupyter/nbconvert/issues/1328#issuecomment-1768665936
-          (texliveSmall.withPackages
-            (ps:
-              with ps; [
-                amsmath
-                booktabs
-                caption
-                collectbox
-                collection-fontsrecommended
-                adjustbox
-                ec
-                enumitem
-                environ
-                etoolbox
-                eurosym
-                fancyvrb
-                float
-                fontspec
-                geometry
-                grffile
-                hyperref
-                iftex
-                infwarerr
-                jknapltx
-                kvoptions
-                kvsetkeys
-                ltxcmds
-                parskip
-                pdfcol
-                pgf
-                rsfs
-                soul
-                tcolorbox
-                titling
-                trimspaces
-                ucs
-                ulem
-                unicode-math
-                upquote
-              ]))
-        ];
-        shellHook = ''
-          export PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring
-        '';
-      };
-    });
+            packages = with pkgs; [
+              mypy
+              poetry
+              env
+              mosquitto
+
+              (pkgs.poetry2nix.mkPoetryScriptsPackage { projectDir = ./.; })
+
+              # For notebook_executor
+              # See: https://github.com/jupyter/nbconvert/issues/1328#issuecomment-1768665936
+              (texliveSmall.withPackages (
+                ps: with ps; [
+                  amsmath
+                  booktabs
+                  caption
+                  collectbox
+                  collection-fontsrecommended
+                  adjustbox
+                  ec
+                  enumitem
+                  environ
+                  etoolbox
+                  eurosym
+                  fancyvrb
+                  float
+                  fontspec
+                  geometry
+                  grffile
+                  hyperref
+                  iftex
+                  infwarerr
+                  jknapltx
+                  kvoptions
+                  kvsetkeys
+                  ltxcmds
+                  parskip
+                  pdfcol
+                  pgf
+                  rsfs
+                  soul
+                  tcolorbox
+                  titling
+                  trimspaces
+                  ucs
+                  ulem
+                  unicode-math
+                  upquote
+                ]
+              ))
+            ];
+            shellHook = ''
+              export PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring
+            '';
+          };
+
+          default = seguro-platform;
+        };
+      }
+    )
+    // {
+      inherit overlays;
+    };
 }
