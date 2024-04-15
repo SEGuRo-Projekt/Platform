@@ -4,5 +4,5 @@
 
 See [`.env`](https://github.com/SEGuRo-Projekt/Platform/blob/main/.env):
 
-```{literalinclude} ../.env
+```{literalinclude} ./_static/example_env.conf
 ```
