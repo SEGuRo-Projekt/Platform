@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 {
   "[python]": {
-    "editor.defaultFormatter": "ms-python.black-formatter"
+    "editor.defaultFormatter": "ms-python.black-formatter",
     "editor.formatOnSave": true,
   },
   "python.testing.pytestEnabled": true,
