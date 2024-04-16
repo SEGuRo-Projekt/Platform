@@ -189,6 +189,22 @@ services:
       retries: 3
       start_period: 10s
 
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+      mosquitto-setup:
+        condition: service_completed_successfully
+
+  mosquitto-setup:
+    image: eclipse-mosquitto:2
+
+    entrypoint: ["/usr/bin/mosquitto_ctrl", "dynsec", "init", "/mosquitto/config/dynsec.json", "${ADMIN_USERNAME}", "${ADMIN_PASSWORD}"]
+
+    volumes:
+    - type: bind
+      source: ./etc/mosquitto/
+      target: /mosquitto/config/
+
   yacht:
     image: selfhostedpro/yacht
     restart: unless-stopped

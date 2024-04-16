@@ -9,3 +9,5 @@ data/
 *.pyc
 *.egg-info/
 /venv/
+
+etc/mosquitto/dynsec.json
