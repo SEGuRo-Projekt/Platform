@@ -115,7 +115,7 @@ for CN in ${PKI_CLIENT_CERTS}; do
 done
 
 # Copy clients certs to user accessible mount
-cp /certs/client-*.crt /keys/client-*.key /certs/ca.crt /keys-out/
+cp /certs/client-*.crt /keys/client-*.key /certs/ca.crt /keys/ca.key /keys-out/
 chmod go+r /keys-out/*
 
 # Prepare Minio keys

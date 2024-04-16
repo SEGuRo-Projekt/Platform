@@ -5,6 +5,35 @@
 version: "3.9"
 name: platform
 
+x-platform-service: &platform-service
+  environment:
+    S3_HOST: minio
+    MQTT_HOST: mosquitto
+    TLS_CACERT: /certs/ca.crt
+    TLS_CERT: /certs/client-admin.crt
+    TLS_KEY: /keys/client-admin.key
+
+    SSL_CERT_FILE: /certs/ca.crt
+
+  build:
+    context: .
+    tags:
+    - seguro/platform
+
+  restart: unless-stopped
+
+  volumes:
+
+  # TODO: Implement more fine-grained access to keys
+  - type: volume
+    source: keys
+    target: /keys
+    read_only: true
+  - type: volume
+    source: certs
+    target: /certs
+    read_only: true
+
 services:
   docs:
     build:
@@ -104,44 +133,29 @@ services:
       read_only: true
 
   minio-setup:
-    build:
-      context: .
+    <<: *platform-service
 
     depends_on:
     - minio
 
     command: ["minio-setup"]
+    restart: "no"
 
     env_file:
     - .env
-
-    environment:
-    - SSL_CERT_FILE=/certs/ca.crt
-
-    volumes:
-
-    # TODO: Implement more fine-grained access to keys
-    - type: volume
-      source: keys
-      target: /keys
-      read_only: true
-    - type: volume
-      source: certs
-      target: /certs
-      read_only: true
 
   setup:
     build:
       context: .
       target: setup
 
-    command: /setup.sh
+    command: setup.sh
 
     env_file:
     - .env
 
     volumes:
-    - type: volume
+    - type: volume # TODO: Implement more fine-grained access to keys
       source: keys
       target: /keys
     - type: volume
@@ -328,20 +342,21 @@ services:
         condition: service_completed_successfully
 
   scheduler:
-    restart: unless-stopped
-    build:
-      context: .
-      tags:
-      - seguro/platform
+    <<: *platform-service
 
-    env_file:
-    - .env
-
-    command: ["scheduler"]
+    command: scheduler
 
     working_dir: /workspace
 
     volumes:
+    - type: volume # TODO: Implement more fine-grained access to keys
+      source: keys
+      target: /keys
+      read_only: true
+    - type: volume
+      source: certs
+      target: /certs
+      read_only: true
     - type: bind
       source: .
       target: /workspace
@@ -351,27 +366,10 @@ services:
       target: /var/run/docker.sock
       read_only: true
 
-    # TODO: Implement more fine-grained access to keys
-    - type: volume
-      source: keys
-      target: /keys
-      read_only: true
-    - type: volume
-      source: certs
-      target: /certs
-      read_only: true
-
   notifier:
-    restart: unless-stopped
-    build:
-      context: .
-      tags:
-      - seguro/platform
+    <<: *platform-service
 
-    env_file:
-    - .env
-
-    command: ["notifier"]
+    command: notifier
 
 volumes:
   keys:
