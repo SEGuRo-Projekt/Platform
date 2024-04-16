@@ -7,3 +7,20 @@ tls:
       defaultCertificate:
         certFile: /certs/server.crt
         keyFile: /keys/server.key
+
+  options:
+    default:
+      minVersion: VersionTLS13
+
+      clientAuth:
+        caFiles:
+          - /certs/ca.crt
+        clientAuthType: VerifyClientCertIfGiven
+
+http:
+  middlewares:
+    test-passtlsclientcert:
+      passTLSClientCert:
+        info:
+          subject:
+            commonName: true

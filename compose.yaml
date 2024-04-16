@@ -28,23 +28,27 @@ services:
     restart: unless-stopped
 
     command: server
-      --address ":9000"
-      --console-address ":9001"
+      --address=":9000"
+      --console-address=":9001"
+      --certs-dir="/keys/minio"
       --ftp="address=:2021"
       --ftp="passive-port-range=30000-40000"
       --sftp="address=:2022"
       --sftp="ssh-private-key=/keys/ssh_host_rsa_key"
+      --ftp="tls-private-key=/keys/server.key"
+      --ftp="tls-public-cert=/certs/server.crt"
       /data
 
-      # --ftp="tls-private-key=path/to/private.key"
-      # --ftp="tls-public-cert=path/to/public.crt"
 
     labels:
     - traefik.enable=true
-    - traefik.http.routers.store-s3.rule=Host(`store.${DOMAIN}`)
-    - traefik.http.routers.store-s3.service=store-s3
-    - traefik.http.routers.store-s3.tls=true
-    - traefik.http.services.store-s3.loadbalancer.server.port=9000
+
+    # Perform TLS passthrough to allow for mTLS authentication
+    - traefik.tcp.routers.store-s3.rule=HostSNI(`store.${DOMAIN}`)
+    - traefik.tcp.routers.store-s3.service=store-s3
+    - traefik.tcp.routers.store-s3.tls.passthrough=true
+    - traefik.tcp.services.store-s3.loadbalancer.server.port=9000
+
     - traefik.http.routers.store-ui.rule=Host(`ui.store.${DOMAIN}`)
     - traefik.http.routers.store-ui.service=store-ui
     - traefik.http.routers.store-ui.tls=true
@@ -57,6 +61,7 @@ services:
     environment:
     - MINIO_ROOT_USER=${ADMIN_USERNAME}
     - MINIO_ROOT_PASSWORD=${ADMIN_PASSWORD}
+    - MINIO_IDENTITY_TLS_ENABLE=on
 
     ports:
     - target: 9000
@@ -77,7 +82,7 @@ services:
       mode: host
 
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: ["CMD", "curl", "--insecure", "--cacert", "/certs/ca.crt", "--fail", "https://localhost:9000/minio/health/live"]
       interval: 10s
       timeout: 20s
       retries: 3
@@ -87,6 +92,8 @@ services:
     - type: volume
       source: store
       target: /data/
+
+    # TODO: Implement more fine-grained access to keys
     - type: volume
       source: keys
       target: /keys
@@ -111,6 +118,19 @@ services:
     environment:
     - MINIO_ROOT_USER=${ADMIN_USERNAME}
     - MINIO_ROOT_PASSWORD=${ADMIN_PASSWORD}
+    - SSL_CERT_FILE=/certs/ca.crt
+
+    volumes:
+
+    # TODO: Implement more fine-grained access to keys
+    - type: volume
+      source: keys
+      target: /keys
+      read_only: true
+    - type: volume
+      source: certs
+      target: /certs
+      read_only: true
 
   setup:
     build:
@@ -151,6 +171,8 @@ services:
     - type: volume
       source: mosquitto
       target: /mosquitto/data/
+
+    # TODO: Implement more fine-grained access to keys
     - type: volume
       source: keys
       target: /keys
@@ -161,13 +183,13 @@ services:
       read_only: true
 
     ports:
-    - target: 1883
-      published: 1883
+    - target: 8883
+      published: 8883
       protocol: tcp
       mode: host
 
     healthcheck:
-      test: ["CMD", "mosquitto_sub", "-p", "1880", "-t", "$$SYS/#", "-C", "1", "-i", "healthcheck", "-W", "3"]
+      test: ["CMD", "mosquitto_sub", "--cafile", "/certs/ca.crt", "--cert", "/certs/client-admin.crt", "--key", "/keys/client-admin.key", "-L", "mqtts://mosquitto:8883/$$SYS/#", "-C", "1", "-i", "healthcheck", "-W", "3"]
       interval: 10s
       timeout: 10s
       retries: 3
@@ -280,6 +302,8 @@ services:
       source: ./etc/traefik/
       target: /etc/traefik/
       read_only: true
+
+    # TODO: Implement more fine-grained access to keys
     - type: volume
       source: keys
       target: /keys
@@ -315,6 +339,16 @@ services:
     - type: bind
       source: /var/run/docker.sock
       target: /var/run/docker.sock
+      read_only: true
+
+    # TODO: Implement more fine-grained access to keys
+    - type: volume
+      source: keys
+      target: /keys
+      read_only: true
+    - type: volume
+      source: certs
+      target: /certs
       read_only: true
 
   notifier:

@@ -41,6 +41,10 @@ subjectAltName = @alt_names
 [alt_names]
 DNS.1 = ${DOMAIN}
 DNS.2 = *.${DOMAIN}
+
+# For platform internal communication only
+DNS.3 = minio
+DNS.4 = mosquitto
 EOF
 
   openssl req \
@@ -110,8 +114,16 @@ for CN in ${PKI_CLIENT_CERTS}; do
   create_pki_client ${CN}
 done
 
-cp /certs/client-*.crt /keys/client-*.key /keys-out/
+# Copy clients certs to user accessible mount
+cp /certs/client-*.crt /keys/client-*.key /certs/ca.crt /keys-out/
 chmod go+r /keys-out/*
+
+# Prepare Minio keys
+# See: https://min.io/docs/minio/linux/operations/network-encryption.html
+mkdir -p /keys/minio/CAs
+cp /certs/ca.crt /keys/minio/CAs
+cp /certs/server.crt /keys/minio/public.crt
+cp /keys/server.key /keys/minio/private.key
 
 echo "== Managing htpasswd for registry..."
 if [ -f /keys/registry_htpasswd ]; then
