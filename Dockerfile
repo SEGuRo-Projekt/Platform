@@ -18,11 +18,18 @@ RUN apt-get update && \
     pandoc && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Minio client
+# Install Minio CLI client
 RUN curl --create-dirs -fsSL https://dl.min.io/client/mc/release/linux-amd64/mc -o /usr/local/bin/mc && \
     chmod +x /usr/local/bin/mc
 
-# Install Docker Compose
+# Install Docker CLI client
+ARG DOCKER_VERSION=24.0.2
+RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz \
+    && tar xzvf docker-${DOCKER_VERSION}.tgz --strip 1 \
+    -C /usr/local/bin docker/docker \
+    && rm docker-${DOCKER_VERSION}.tgz
+
+# Install Docker Compose CLI client
 RUN mkdir -p /root/.docker/cli-plugins && \
     curl --create-dirs -fsSL https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-x86_64 -o /root/.docker/cli-plugins/docker-compose && \
     chmod +x /root/.docker/cli-plugins/docker-compose
@@ -63,13 +70,6 @@ RUN apt-get update && \
     mosquitto-clients && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-
-# Install Docker CLI
-ARG DOCKER_VERSION=24.0.2
-RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz \
-    && tar xzvf docker-${DOCKER_VERSION}.tgz --strip 1 \
-    -C /usr/local/bin docker/docker \
-    && rm docker-${DOCKER_VERSION}.tgz
 
 CMD ["/bin/bash", "-c", "while sleep 1000; do :; done"]
 
