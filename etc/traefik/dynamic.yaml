@@ -5,5 +5,5 @@ tls:
   stores:
     default:
       defaultCertificate:
-        certFile: /keys/server.crt
+        certFile: /certs/server.crt
         keyFile: /keys/server.key
