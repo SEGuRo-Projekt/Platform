@@ -17,6 +17,12 @@ services:
     - traefik.http.routers.docs.rule=Host(`${DOMAIN}`)
     - traefik.http.routers.docs.tls=true
 
+    volumes:
+    - type: volume
+      source: certs
+      target: /usr/share/nginx/html/certs
+      read_only: true
+
   minio:
     image: minio/minio:RELEASE.2023-04-28T18-11-17Z
     restart: unless-stopped
@@ -84,6 +90,11 @@ services:
     - type: volume
       source: keys
       target: /keys
+      read_only: true
+    - type: volume
+      source: certs
+      target: /certs
+      read_only: true
 
   minio-setup:
     build:
@@ -101,11 +112,6 @@ services:
     - MINIO_ROOT_USER=${ADMIN_USERNAME}
     - MINIO_ROOT_PASSWORD=${ADMIN_PASSWORD}
 
-    volumes:
-    - type: volume
-      source: keys
-      target: /keys
-
   setup:
     build:
       context: .
@@ -117,13 +123,22 @@ services:
 
     command: /setup.sh
 
+    env_file:
+    - .env
+
     volumes:
     - type: volume
       source: keys
       target: /keys
+    - type: volume
+      source: certs
+      target: /certs
     - type: bind
       source: setup.sh
       target: /setup.sh
+    - type: bind
+      source: ./keys
+      target: /keys-out
 
   mosquitto:
     image: eclipse-mosquitto:2
@@ -136,6 +151,14 @@ services:
     - type: volume
       source: mosquitto
       target: /mosquitto/data/
+    - type: volume
+      source: keys
+      target: /keys
+      read_only: true
+    - type: volume
+      source: certs
+      target: /certs
+      read_only: true
 
     ports:
     - target: 1883
@@ -206,9 +229,6 @@ services:
     - type: bind
       source: ./etc/registry
       target: /etc/docker/registry
-    - type: volume
-      source: keys
-      target: /keys
 
     environment:
     - REGISTRY_STORAGE_S3_ACCESSKEY=${ADMIN_USERNAME}
@@ -256,15 +276,18 @@ services:
       source: /var/run/docker.sock
       target: /var/run/docker.sock
       read_only: true
-
     - type: bind
       source: ./etc/traefik/
       target: /etc/traefik/
       read_only: true
-
     - type: volume
       source: keys
       target: /keys
+      read_only: true
+    - type: volume
+      source: certs
+      target: /certs
+      read_only: true
 
     depends_on:
       setup:
@@ -289,7 +312,6 @@ services:
       source: .
       target: /workspace
       read_only: true
-
     - type: bind
       source: /var/run/docker.sock
       target: /var/run/docker.sock
@@ -309,6 +331,7 @@ services:
 
 volumes:
   keys:
+  certs:
   store:
   registry:
   mosquitto:

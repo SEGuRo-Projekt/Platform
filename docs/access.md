@@ -13,9 +13,16 @@ The components compromising the SEGuRo platform are accessible via various sub-d
 Please substitute `localhost` with the `DOMAIN` from your [configuration](./configuration.md).
 ```
 
+## Certificate Authority
+
+All connections to the SEGuRo Platform are TLS encrypted.
+Server and client certificates are signed by a dedicated Certificate Authority (CA).
+
+Please download, import and trust the <a href="/certs/ca.crt">Platform's CA certificate</a> in your operating systems certificate store.
+
 ## Default Credentials
 
-The administrator credentials can be configued in the `.env` file.
+The administrator credentials can be configured in the `.env` file.
 
 The defaults are:
 
