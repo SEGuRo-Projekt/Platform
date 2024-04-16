@@ -6,17 +6,18 @@ import threading
 import enum
 import logging
 import minio
+import minio.credentials
 import urllib3
 import pandas as pd
 from typing import Callable
 
 from seguro.common.config import (
-    S3_ACCESS_KEY,
+    TLS_CACERT,
+    TLS_CERT,
+    TLS_KEY,
     S3_HOST,
     S3_PORT,
     S3_REGION,
-    S3_SECRET_KEY,
-    S3_SECURE,
     S3_BUCKET,
 )
 
@@ -45,8 +46,12 @@ class Client:
     Args:
         host: Hostname or IP address of the storage server
         port: Network port of the storage server
-        access_key: Access key for authentication
-        secret_key: Secret key for authentication
+        tls_cert: File containing the TLS client certificate for mutual TLS
+                    authentication.
+        tls_key: File containing the TLS client key for mutual TLS
+                authentication.
+        tls_cacert: File containing the TLS certificate authority to validate
+                    the servers certificate against.
         secure: Establish secure connection via TLS
         region: The S3 region
         bucket: The S3 bucket
@@ -55,30 +60,41 @@ class Client:
 
     def __init__(
         self,
-        host=S3_HOST,
-        port=S3_PORT,
-        access_key=S3_ACCESS_KEY,
-        secret_key=S3_SECRET_KEY,
-        secure=S3_SECURE,
-        region=S3_REGION,
-        bucket=S3_BUCKET,
+        host: str = S3_HOST,
+        port: int = S3_PORT,
+        tls_cacert: str = TLS_CACERT,
+        tls_cert: str = TLS_CERT,
+        tls_key: str = TLS_KEY,
+        region: str = S3_REGION,
+        bucket: str = S3_BUCKET,
     ):
         self.logger = logging.getLogger(__name__)
         self.bucket = bucket
+
+        http_client = urllib3.PoolManager(
+            cert_reqs="CERT_REQUIRED", ca_certs=tls_cacert
+        )
+
+        self.creds = minio.credentials.CertificateIdentityProvider(
+            sts_endpoint=f"https://{host}:{port}",
+            cert_file=tls_cert,
+            key_file=tls_key,
+            ca_certs=tls_cacert,
+        )
         self.client = minio.Minio(
             endpoint=f"{host}:{port}",
-            access_key=access_key,
-            secret_key=secret_key,
-            secure=secure,
             region=region,
+            credentials=self.creds,
+            http_client=http_client,
         )
 
         # Used by Pandas
+        creds = self.creds.retrieve()
         self.storage_options = {
-            "endpoint_url": f"http{'s' if secure else ''}://{host}:{port}",
-            "use_ssl": secure,
-            "key": access_key,
-            "secret": secret_key,
+            "endpoint_url": f"https://{host}:{port}",
+            "use_ssl": True,
+            "key": creds.access_key,
+            "secret": creds.secret_key,
             "client_kwargs": {"region_name": region},
         }
 
