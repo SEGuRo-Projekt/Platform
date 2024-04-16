@@ -14,9 +14,10 @@ from villas.node.formats import Protobuf
 
 from seguro.common.config import (
     MQTT_HOST,
-    MQTT_PASSWORD,
     MQTT_PORT,
-    MQTT_USERNAME,
+    TLS_CACERT,
+    TLS_CERT,
+    TLS_KEY,
 )
 
 Message = mqtt.MQTTMessage
@@ -35,8 +36,12 @@ class Client:
       host: The MQTT hostname or IP address. Defaults to localhost.
       port: The port number used for connecting to the MQTT broker.
             Defaults to 1883.
-      username: The username for authentication of MQTT broker.
-      password: The password for authentication of MQTT broker.
+      tls_cert: File containing the TLS client certificate for mutual TLS
+                authentication.
+      tls_key: File containing the TLS client key for mutual TLS
+               authentication.
+      tls_cacert: File containing the TLS certificate authority to validate
+                  the servers certificate against.
       keepalive: The keepalive interval in seconds.
 
     """
@@ -44,10 +49,11 @@ class Client:
     def __init__(
         self,
         uid=None,
-        host=MQTT_HOST,
-        port=MQTT_PORT,
-        username=MQTT_USERNAME,
-        password=MQTT_PASSWORD,
+        host: str = MQTT_HOST,
+        port: int = MQTT_PORT,
+        tls_cert: str = TLS_CERT,
+        tls_key: str = TLS_KEY,
+        tls_cacert: str = TLS_CACERT,
         keepalive=60,
     ):
         # Create uid based onMAC address and time component
@@ -62,8 +68,12 @@ class Client:
             callback_api_version=mqtt.CallbackAPIVersion.VERSION2,
         )
 
-        if username is not None or password is not None:
-            self.client.username_pw_set(username, password)
+        if tls_cert is not None and tls_key is not None:
+            self.client.tls_set(
+                ca_certs=tls_cacert,
+                certfile=tls_cert,
+                keyfile=tls_key,
+            )
 
         self.client.connect(host, port, keepalive)
 

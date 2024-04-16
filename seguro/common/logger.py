@@ -4,12 +4,14 @@
 import logging
 from logging.handlers import RotatingFileHandler
 from aws_logging_handlers.S3 import S3Handler
+from minio.credentials import CertificateIdentityProvider
 
 from seguro.common.config import (
-    S3_ACCESS_KEY,
+    TLS_CACERT,
+    TLS_CERT,
+    TLS_KEY,
     S3_HOST,
     S3_PORT,
-    S3_SECRET_KEY,
     S3_BUCKET,
 )
 
@@ -66,21 +68,29 @@ def store_logger(log_level, logfile, bucket=S3_BUCKET):
     logger.setLevel(log_level)
 
     # Log specified log level to file
-    storehandler = S3Handler(
+    store_endpoint = f"https://{S3_HOST}:{S3_PORT}"
+    store_creds_provider = CertificateIdentityProvider(
+        sts_endpoint=store_endpoint,
+        ca_certs=TLS_CACERT,
+        cert_file=TLS_CERT,
+        key_file=TLS_KEY,
+    )
+    store_creds = store_creds_provider.retrieve()
+    store_handler = S3Handler(
         f"logs/{logfile}",
         bucket=bucket,
-        endpoint_url=f"http://{S3_HOST}:{S3_PORT}",
-        aws_access_key_id=S3_ACCESS_KEY,
-        aws_secret_access_key=S3_SECRET_KEY,
+        endpoint_url=store_endpoint,
+        aws_access_key_id=store_creds.access_key,
+        aws_secret_access_key=store_creds.secret_key,
         encryption_options={},
     )
 
     storeformatter = logging.Formatter(
         "%(asctime)s - %(levelname)s - %(message)s"
     )
-    storehandler.setFormatter(storeformatter)
-    storehandler.setLevel(log_level)
-    logger.addHandler(storehandler)
+    store_handler.setFormatter(storeformatter)
+    store_handler.setLevel(log_level)
+    logger.addHandler(store_handler)
 
     # Additionally log errors to stderr
     logger.addHandler(error_handler())
