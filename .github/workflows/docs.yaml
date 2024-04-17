@@ -35,12 +35,10 @@ jobs:
         cache: poetry
 
     - name: Install dependencies
-      run: |
-        poetry install
+      run: poetry install
 
     - name: Build docs
-      run: |
-        poetry run sphinx-build -b html docs/ build/
+      run: poetry run sphinx-build -b html docs/ build/
 
     - name: Setup Pages
       uses: actions/configure-pages@v4
