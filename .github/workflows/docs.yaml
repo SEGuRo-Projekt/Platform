@@ -22,32 +22,26 @@ jobs:
       id-token: write
 
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-    - name: Install poetry
-      run: pip install poetry
+      - name: Setup Python, Poetry and Dependencies
+        uses: packetcoders/action-setup-cache-python-poetry@main
+        with:
+          python-version: 3.11
+          poetry-version: 1.7.1
 
-    - name: Setup Python 3.11
-      uses: actions/setup-python@v5
-      with:
-        python-version: 3.11
-        cache: poetry
+      - name: Build docs
+        run: poetry run sphinx-build -b html docs/ build/
 
-    - name: Install dependencies
-      run: poetry install
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
 
-    - name: Build docs
-      run: poetry run sphinx-build -b html docs/ build/
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build
 
-    - name: Setup Pages
-      uses: actions/configure-pages@v4
-
-    - name: Upload Pages artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: build
-
-    - name: Deploy to Pages
-      id: deployment
-      uses: actions/deploy-pages@v4
+      - name: Deploy to Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
