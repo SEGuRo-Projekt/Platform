@@ -26,5 +26,8 @@ jobs:
           python-version: 3.11
           cache: poetry
 
+      - name: Create dummy .env file
+        run: touch .env
+
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.0

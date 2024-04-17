@@ -98,6 +98,11 @@ EOF
     -out /certs/client-${CN}.crt 2> /dev/null
 }
 
+if [ ${SECRET} == "PLEASE-CHANGE-ME" ]; then
+  echo "Please change the value of the envvar SECRET in your .env file."
+  exit -1
+fi
+
 if ! [ -f /keys/ssh_host_rsa_key ]; then
   create_ssh_keys
 fi

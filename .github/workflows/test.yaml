@@ -30,6 +30,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
+      - name: Create .env file
+        run: |
+          SOME_SECRET=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+          sed "s/PLEASE-CHANGE-ME/${SOME_SECRET}/g" .env.example > .env
+
       - name: Start containers
         run: docker compose up
           --detach

@@ -14,7 +14,7 @@ RUN poetry install --with=docs
 
 COPY seguro /src/seguro
 COPY docs /src/docs
-COPY .env /src
+COPY .env.example /src
 
 RUN poetry run sphinx-build -b html docs /build
 
