@@ -24,3 +24,13 @@ http:
         info:
           subject:
             commonName: true
+
+  serversTransports:
+    default:
+      rootCAs:
+      - /certs/ca.crt
+
+    store-ui:
+      serverName: ui.store.localhost
+      rootCAs:
+      - /certs/ca.crt
