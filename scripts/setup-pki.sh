@@ -6,12 +6,13 @@ set -e
 
 PKI_CLIENT_CERTS="mp1 mp2 admin"
 PKI_SUBJECT="/C=DE/ST=NRW/L=Aachen/O=OPAL-RT Germany GmbH/OU=Research and Development"
-PKI_KEY_TYPE="rsa:4096"
+PKI_KEY_BITS=4096
+PKI_KEY_TYPE="rsa"
 PKI_EXPIRY_DAYS=3650
 
 function create_ssh_keys() {
   echo "=== Creating new SSH host key..."
-  ssh-keygen -N '' -t rsa -b 4096 -f /keys/ssh_host_rsa_key
+  ssh-keygen -N '' -t ${PKI_KEY_TYPE} -b ${PKI_KEY_BITS} -f /keys/ssh_host_rsa_key
   echo "Public host key: $(cat /keys/ssh_host_rsa_key.pub)"
   echo
 }
@@ -24,9 +25,9 @@ function create_pki_ca() {
     -nodes \
     -sha256 \
     -days ${PKI_EXPIRY_DAYS} \
-    -newkey ${PKI_KEY_TYPE} \
-    -keyout /keys/ca.key \
-    -out /certs/ca.crt \
+    -newkey "${PKI_KEY_TYPE}:${PKI_KEY_BITS}" \
+    -keyout "/keys/ca.key" \
+    -out "/certs/ca.crt" \
     -subj "${PKI_SUBJECT}/CN=SEGuRo Certificate Authority" 2> /dev/null
 }
 
@@ -63,7 +64,7 @@ EOF
     -new \
     -nodes \
     -out server.csr \
-    -newkey ${PKI_KEY_TYPE} \
+    -newkey "${PKI_KEY_TYPE}:${PKI_KEY_BITS}" \
     -keyout /keys/server.key \
     -subj "${PKI_SUBJECT}/CN=Server Certificate" 2> /dev/null
 
@@ -71,12 +72,12 @@ EOF
     -req \
     -days ${PKI_EXPIRY_DAYS} \
     -sha256 \
-    -extfile server.v3.ext \
-    -CA /certs/ca.crt \
-    -CAkey /keys/ca.key \
+    -extfile "server.v3.ext" \
+    -CA "/certs/ca.crt" \
+    -CAkey "/keys/ca.key" \
     -CAcreateserial \
-    -in server.csr \
-    -out /certs/server.crt 2> /dev/null
+    -in "server.csr" \
+    -out "/certs/server.crt" 2> /dev/null
 }
 
 function create_pki_client() {
@@ -93,26 +94,26 @@ EOF
   openssl req \
     -new \
     -nodes \
-    -out client-${CN}.csr \
-    -newkey ${PKI_KEY_TYPE} \
-    -keyout /keys/client-${CN}.key \
+    -out "client-${CN}.csr" \
+    -newkey "${PKI_KEY_TYPE}:${PKI_KEY_BITS}" \
+    -keyout "/keys/client-${CN}.key" \
     -subj "${PKI_SUBJECT}/CN=${CN}" 2> /dev/null
 
   openssl x509 \
     -req \
     -days ${PKI_EXPIRY_DAYS} \
     -sha256 \
-    -extfile client.v3.ext \
-    -CA /certs/ca.crt \
-    -CAkey /keys/ca.key \
+    -extfile "client.v3.ext" \
+    -CA "/certs/ca.crt" \
+    -CAkey "/keys/ca.key" \
     -CAcreateserial \
-    -in client-${CN}.csr \
-    -out /certs/client-${CN}.crt 2> /dev/null
+    -in "client-${CN}.csr" \
+    -out "/certs/client-${CN}.crt" 2> /dev/null
 }
 
-if [ ${SECRET} == "PLEASE-CHANGE-ME" ]; then
+if [ "${SECRET}" == "PLEASE-CHANGE-ME" ]; then
   echo "Please change the value of the envvar SECRET in your .env file."
-  exit -1
+  exit 1
 fi
 
 echo "== Checking SSH host keys..."
@@ -121,15 +122,15 @@ if ! [ -f /keys/ssh_host_rsa_key ]; then
 fi
 
 echo "== Checking PKI certificates..."
-[ -f /certs/ca.crt -a -f /keys/ca.key ] || \
+{ [ -f "/certs/ca.crt" ] && [ -f "/keys/ca.key" ]; } || \
 create_pki_ca
 
-[ -f /certs/server.crt -a -f /keys/server.key ] || \
+{ [ -f "/certs/server.crt" ] && [ -f "/keys/server.key" ]; } || \
 create_pki_server
 
 for CN in ${PKI_CLIENT_CERTS}; do
-  [ -f /certs/client-${CN}.crt -a -f /keys/client-${CN}.key ] || \
-  create_pki_client ${CN}
+  { [ -f "/certs/client-${CN}.crt" ] && [ -f "/keys/client-${CN}.key" ]; } || \
+  create_pki_client "${CN}"
 done
 
 # Copy clients certs to user accessible mount
