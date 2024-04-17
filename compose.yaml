@@ -363,13 +363,13 @@ services:
     - registry
 
     environment:
-    - REGISTRY_TITLE=SEGuRo Private Docker Registry
-    - REGISTRY_URL=https://registry.${DOMAIN}
-    - SINGLE_REGISTRY=true
-    - DELETE_IMAGES=true
-    - SHOW_CONTENT_DIGEST=true
-    - THEME=light
-    - REGISTRY_SECURED=true
+      REGISTRY_TITLE: SEGuRo Private Docker Registry
+      REGISTRY_URL: https://registry.${DOMAIN}
+      SINGLE_REGISTRY: "true"
+      DELETE_IMAGES: "true"
+      SHOW_CONTENT_DIGEST: "true"
+      THEME: light
+      REGISTRY_SECURED: "true"
 
   traefik:
     image: "traefik:v2.10"
