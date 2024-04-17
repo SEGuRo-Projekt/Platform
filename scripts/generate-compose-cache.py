@@ -7,6 +7,7 @@ import yaml
 import json
 
 OWNER = os.environ.get("GITHUB_REPOSITORY_OWNER", "SEGuRo-Projekt")
+REF_NAME = os.environ.get("GITHUB_REF_NAME")
 
 target: dict[str, dict] = {}
 cache = {"target": target}
@@ -19,10 +20,10 @@ for name, service in compose.get("services", {}).items():
         print(f"Skipping: {name}")
         continue  # Skip services with third-party images
 
-    c = f"type=registry,ref=ghcr.io/{OWNER.lower()}/{name}:cache"
+    image = f"ghcr.io/{OWNER.lower()}/{name}"
     target[name] = {
-        "cache-from": [c],
-        "cache-to": [c],
+        "cache-from": [f"type=registry,ref={image}:cache"],
+        "cache-to": [f"type=registry,ref={image}:cache"],
         "output": ["type=docker"],
     }
 

@@ -10,6 +10,10 @@ PKI_KEY_BITS=4096
 PKI_KEY_TYPE="rsa"
 PKI_EXPIRY_DAYS=3650
 
+if [ -n "${CI}" ]; then
+  PKI_KEY_BITS=2048
+fi
+
 function create_ssh_keys() {
   echo "=== Creating new SSH host key..."
   ssh-keygen -N '' -t ${PKI_KEY_TYPE} -b ${PKI_KEY_BITS} -f /keys/ssh_host_rsa_key
@@ -135,7 +139,8 @@ done
 
 # Copy clients certs to user accessible mount
 cp /certs/client-*.crt /keys/client-*.key /certs/ca.crt /keys/ca.key /keys-out/
-chmod go+r /keys-out/*
+chmod 777 /keys-out/*
+chmod 777 /keys/* /certs/*
 
 # Prepare Minio keys
 # See: https://min.io/docs/minio/linux/operations/network-encryption.html
@@ -146,12 +151,10 @@ cp /keys/server.key /keys/minio/private.key
 
 echo "== Checking DH parameters file..."
 if ! [ -f /keys/dhparam.pem ]; then
-  if [ -n "${CI}" ]; then
-    # Speed-up generation in CI by downloading a pre-generated set of DH params
-    curl https://2ton.com.au/dhparam/${PKI_KEY_BITS} > /keys/dhparam.pem
-  else
-    openssl dhparam -out /keys/dhparam.pem ${PKI_KEY_BITS}
-  fi
+  #openssl dhparam -out /keys/dhparam.pem ${PKI_KEY_BITS}
+  curl -s "https://2ton.com.au/dhparam/${PKI_KEY_BITS}" > /keys/dhparam.pem
+  chmod 700 /keys/dhparam.pem
+  chown 1883:1883 /keys/dhparam.pem
 fi
 
 echo "== Checking htpasswd for registry..."

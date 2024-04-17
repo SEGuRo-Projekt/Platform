@@ -4,6 +4,6 @@
 
 set -e
 
-rm -f /mosquitto/config/dynsec.json
+rm -f /mosquitto/data/dynsec.json
 
-mosquitto_ctrl dynsec init /mosquitto/config/dynsec.json "${ADMIN_USERNAME}" "${ADMIN_PASSWORD}"
+mosquitto_ctrl dynsec init /mosquitto/data/dynsec.json "${ADMIN_USERNAME}" "${ADMIN_PASSWORD}"

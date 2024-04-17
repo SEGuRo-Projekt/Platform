@@ -148,9 +148,7 @@ services:
     env_file:
     - .env
 
-    # command: minio-setup
-    command: /bin/bash -c "openssl x509 -in /certs/server.crt -text"
-
+    command: minio-setup
 
   pki-setup:
     build:
@@ -158,6 +156,10 @@ services:
       target: setup
 
     command: setup-pki.sh
+
+    environment:
+      # Pass-through CI envvar to tweak PKI config for CI environments
+      CI: ${CI}
 
     env_file:
     - .env
@@ -172,12 +174,14 @@ services:
     - type: bind
       source: scripts/setup-pki.sh
       target: /setup-pki.sh
+      read_only: true
     - type: bind
       source: ./keys
       target: /keys-out
 
   mosquitto:
-    image: eclipse-mosquitto:2
+    image: eclipse-mosquitto:2.0.18-openssl
+    user: "mosquitto:mosquitto"
     restart: unless-stopped
 
     volumes:
@@ -223,7 +227,8 @@ services:
     env_file:
     - .env
 
-    image: eclipse-mosquitto:2
+    image: eclipse-mosquitto:2.0.18-openssl
+    user: "mosquitto:mosquitto"
 
     entrypoint: /bin/sh
     command: /setup-mosquitto.sh
@@ -235,6 +240,10 @@ services:
     - type: bind
       source: scripts/setup-mosquitto.sh
       target: /setup-mosquitto.sh
+      read_only: true
+    - type: volume
+      source: mosquitto
+      target: /mosquitto/data/
 
   mosquitto-setup-acl:
     <<: *platform-service
@@ -247,7 +256,8 @@ services:
       mosquitto:
         condition: service_healthy
 
-    image: eclipse-mosquitto:2
+    image: eclipse-mosquitto:2.0.18-openssl
+    user: "mosquitto:mosquitto"
 
     entrypoint: /bin/sh
     command: /setup-mosquitto-acl.sh
