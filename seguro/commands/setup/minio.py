@@ -7,21 +7,37 @@ import logging
 import json
 import os
 import tempfile
+import urllib3
+from subprocess import check_call
 from pprint import pformat
 
 import minio
 import minio.credentials
 
+from seguro.common.config import (
+    S3_HOST,
+    S3_PORT,
+    S3_BUCKET,
+    TLS_CACERT,
+    TLS_KEY,
+    TLS_CERT,
+)
 
 POLICIES = {
     "admin": {
         "Version": "2012-10-17",
         "Statement": [
+            {"Effect": "Allow", "Action": ["admin:*"]},
             {
-                "Action": "s3:*",
+                "Action": [
+                    "s3:*",
+                ],
                 "Effect": "Allow",
-                "Resource": ["arn:aws:s3:::*"],
-            }
+                "Resource": [
+                    f"arn:aws:s3:::{S3_BUCKET}",
+                    f"arn:aws:s3:::{S3_BUCKET}/*",
+                ],
+            },
         ],
     }
 }
@@ -45,7 +61,31 @@ def create_policies(mca: minio.MinioAdmin):
             tf.flush
             tf.seek(0)
 
-        logging.info(f"Creating policy {name}")
+            logging.info(f"Creating policy {name}")
+            mca.policy_add(name, tf.name)
+
+
+def initialize_buckets(mc: minio.Minio):
+    logging.info("Copy initial data to bucket")
+
+    creds = mc._provider.retrieve()
+    url = mc._base_url
+
+    check_call(
+        [
+            "mc",
+            "--insecure",
+            "config",
+            "host",
+            "add",
+            "minio",
+            f"https://{url.host}",
+            creds.access_key,
+            creds.secret_key,
+        ]
+    )
+
+    # TODO
 
 
 def main() -> int:
@@ -56,31 +96,36 @@ def main() -> int:
 
     minio_user = os.environ.get("ADMIN_USERNAME", "")
     minio_pass = os.environ.get("ADMIN_PASSWORD", "")
-    minio_endpoint = "minio:9000"
+    minio_endpoint = f"{S3_HOST}:{S3_PORT}"
     minio_url = f"https://{minio_endpoint}"
 
-    logging.info("Create host alias")
-    os.system(
-        f"mc config host add minio {minio_url} {minio_user} {minio_pass}"
+    http_client = urllib3.PoolManager(
+        cert_reqs="CERT_REQUIRED", ca_certs=TLS_CACERT
     )
-
     creds_static = minio.credentials.StaticProvider(minio_user, minio_pass)
-    mc = minio.Minio(minio_endpoint, credentials=creds_static)
-    mca = minio.MinioAdmin(minio_endpoint, credentials=creds_static)
+    mc = minio.Minio(
+        minio_endpoint, credentials=creds_static, http_client=http_client
+    )
+    mca = minio.MinioAdmin(
+        minio_endpoint, credentials=creds_static, http_client=http_client
+    )
 
     logging.info("Server info: %s", pformat(json.loads(mca.info())))
 
     create_buckets(mc)
+    initialize_buckets(mc)
     create_policies(mca)
 
     # Validate mTLS authentication
     creds_cert = minio.credentials.CertificateIdentityProvider(
         sts_endpoint=minio_url,
-        cert_file="/certs/client-admin.crt",
-        key_file="/keys/client-admin.key",
-        ca_certs="/certs/ca.crt",
+        cert_file=TLS_CERT,
+        key_file=TLS_KEY,
+        ca_certs=TLS_CACERT,
     )
-    mc = minio.Minio(minio_endpoint, credentials=creds_cert)
+    mc = minio.Minio(
+        minio_endpoint, credentials=creds_cert, http_client=http_client
+    )
 
     if len(mc.list_buckets()) <= 0:
         raise RuntimeError("Failed to verify credentials setup")

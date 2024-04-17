@@ -67,13 +67,11 @@ class Client:
             client_id=uid,
             callback_api_version=mqtt.CallbackAPIVersion.VERSION2,
         )
-
-        if tls_cert is not None and tls_key is not None:
-            self.client.tls_set(
-                ca_certs=tls_cacert,
-                certfile=tls_cert,
-                keyfile=tls_key,
-            )
+        self.client.tls_set(
+            ca_certs=tls_cacert,
+            certfile=tls_cert,
+            keyfile=tls_key,
+        )
 
         self.client.connect(host, port, keepalive)
 
