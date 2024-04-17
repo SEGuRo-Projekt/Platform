@@ -4,10 +4,6 @@
 
 set -e
 
-rm -f /mosquitto/config/dynsec.json
-
-mosquitto_ctrl dynsec init /mosquitto/config/dynsec.json ${ADMIN_USERNAME} ${ADMIN_PASSWORD}
-
 # TODO: Remove once acl-syncer is ready
 OPTS="-h ${MQTT_HOST:-localhost} -p ${MQTT_PORT:-8883} --cafile ${TLS_CACERT} --cert ${TLS_CERT} --key ${TLS_KEY}"
 

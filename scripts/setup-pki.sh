@@ -10,14 +10,14 @@ PKI_KEY_TYPE="rsa:4096"
 PKI_EXPIRY_DAYS=3650
 
 function create_ssh_keys() {
-  echo "== Creating SSH host key..."
+  echo "=== Creating new SSH host key..."
   ssh-keygen -N '' -t rsa -b 4096 -f /keys/ssh_host_rsa_key
   echo "Public host key: $(cat /keys/ssh_host_rsa_key.pub)"
   echo
 }
 
 function create_pki_ca() {
-  echo "=== Creating CA certificate"
+  echo "=== Creating new CA certificate"
   openssl req \
     -x509 \
     -new \
@@ -31,7 +31,7 @@ function create_pki_ca() {
 }
 
 function create_pki_server() {
-  echo "=== Creating server certificate"
+  echo "=== Creating new server certificate"
   cat > server.v3.ext << EOF
 authorityKeyIdentifier = keyid, issuer
 basicConstraints = CA:FALSE
@@ -82,7 +82,7 @@ EOF
 function create_pki_client() {
   CN=$1
 
-  echo "=== Creating client certificate for ${CN}"
+  echo "=== Creating new client certificate for ${CN}"
   cat > client.v3.ext << EOF
 authorityKeyIdentifier = keyid, issuer
 basicConstraints = CA:FALSE
@@ -115,6 +115,7 @@ if [ ${SECRET} == "PLEASE-CHANGE-ME" ]; then
   exit -1
 fi
 
+echo "== Checking SSH host keys..."
 if ! [ -f /keys/ssh_host_rsa_key ]; then
   create_ssh_keys
 fi
@@ -142,7 +143,7 @@ cp /certs/ca.crt /keys/minio/CAs
 cp /certs/server.crt /keys/minio/public.crt
 cp /keys/server.key /keys/minio/private.key
 
-echo "== Managing htpasswd for registry..."
+echo "== Checking htpasswd for registry..."
 if [ -f /keys/registry_htpasswd ]; then
   if htpasswd -iv /keys/registry_htpasswd "${ADMIN_USERNAME}" <<< "${ADMIN_PASSWORD}" 2> /dev/null; then
     echo "Admin password unchanged"
