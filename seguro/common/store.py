@@ -93,9 +93,13 @@ class Client:
         self.storage_options = {
             "endpoint_url": f"https://{host}:{port}",
             "use_ssl": True,
-            "key": creds.access_key,
-            "secret": creds.secret_key,
-            "client_kwargs": {"region_name": region},
+            "client_kwargs": {
+                "aws_access_key_id": creds.access_key,
+                "aws_secret_access_key": creds.secret_key,
+                "aws_session_token": creds.session_token,
+                "region_name": region,
+                "verify": tls_cacert,
+            },
         }
 
         if not self.client.bucket_exists(self.bucket):

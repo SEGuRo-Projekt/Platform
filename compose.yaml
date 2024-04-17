@@ -13,8 +13,6 @@ x-platform-service: &platform-service
     TLS_CERT: /certs/client-admin.crt
     TLS_KEY: /keys/client-admin.key
 
-    SSL_CERT_FILE: /certs/ca.crt
-
   build:
     context: .
     tags:
