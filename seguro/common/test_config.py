@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import pytest
-from seguro.common.config import S3_BUCKET
+from seguro.common import config
 
 
 @pytest.mark.config
 def test_default_config():
-    assert S3_BUCKET == "seguro"
+    assert config.S3_BUCKET == "seguro"
