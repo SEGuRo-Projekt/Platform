@@ -68,7 +68,7 @@ def create_policies(mca: minio.MinioAdmin):
 def initialize_buckets(mc: minio.Minio):
     logging.info("Copy initial data to bucket")
 
-    creds = mc._provider.retrieve()
+    creds = mc._provider.retrieve()  # type: ignore
     url = mc._base_url
 
     check_call(
