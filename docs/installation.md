@@ -5,7 +5,8 @@
 pip install poetry
 poetry install
 ```
-2. Start platform via Docker Compose
+2. Create `.env` file including parameters for platform delpoyment. See: [Configuration](configuration.md).
+3. Start platform via Docker Compose
 ```bash
 docker compose up --detach --build
 ```

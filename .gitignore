@@ -6,6 +6,7 @@ build/
 data/
 .direnv/
 
+.env
 *.pyc
 *.egg-info/
 /venv/
