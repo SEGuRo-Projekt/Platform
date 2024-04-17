@@ -31,14 +31,10 @@ jobs:
             ${{ runner.os }}-buildx-
 
       - name: Create .env file
-        run: |
-          SOME_SECRET=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
-          sed "s/PLEASE-CHANGE-ME/${SOME_SECRET}/g" .env.example > .env
+        run: sed 's/PLEASE-CHANGE-ME/7418GOKUjD4npqnfBi3uDVsrIoqgiEJD/g' .env.example > .env
 
       - name: Start containers
-        run: docker compose up
-          --detach
-          --build
+        run: docker compose up --detach --build
 
       - name: Install Poetry
         run: pipx install poetry==1.7.1
@@ -50,8 +46,7 @@ jobs:
           cache: poetry
 
       - name: Install dependencies
-        run: |
-          poetry install --without docs
+        run: poetry install --without docs
 
       - name: Ensure S3 buckets exist
         run: docker compose up minio-setup
@@ -60,8 +55,7 @@ jobs:
         env:
           S3_HOST: localhost
           MQTT_HOST: localhost
-        run: |
-          poetry run pytest
+        run: poetry run pytest
 
       - name: Stop containers
         if: always()
