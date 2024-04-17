@@ -144,6 +144,15 @@ cp /certs/ca.crt /keys/minio/CAs
 cp /certs/server.crt /keys/minio/public.crt
 cp /keys/server.key /keys/minio/private.key
 
+echo "== Checking DH parameters file..."
+if ! [ -f /keys/dhparam.pem ]; then
+  if [ -n "${CI}" ]; then
+    DHPARAM_OPTS=-dsaparam
+  fi
+
+  openssl dhparam "${DHPARAM_OPTS}" -out dhparam.pem ${PKI_KEY_BITS}
+fi
+
 echo "== Checking htpasswd for registry..."
 if [ -f /keys/registry_htpasswd ]; then
   if htpasswd -iv /keys/registry_htpasswd "${ADMIN_USERNAME}" <<< "${ADMIN_PASSWORD}" 2> /dev/null; then
