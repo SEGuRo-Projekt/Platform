@@ -64,14 +64,20 @@ jobs:
 
       - name: Get Docker Compose log output
         if: always()
-        run: docker compose logs | tee docker-compose.log
+        run: |
+          mkdir logs
+          for SERVICE in $(docker compose ps --services); do
+            echo "::group::Service ${SERVICE}"
+            docker compose logs ${SERVICE} | tee logs/${SERVICE}.log
+            echo "::endgroup::"
+          done
 
       - name: Archive Docker Compose logs
         if: always()
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: compose-logs
-          path: docker-compose.log
+          path: logs
 
       - name: Stop containers
         if: always()
