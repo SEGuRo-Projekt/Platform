@@ -51,7 +51,7 @@ jobs:
           --file compose-cache.json
 
       - name: Start containers
-        run: docker compose up --detach
+        run: docker compose up --detach --quiet-pull
 
       - name: Ensure S3 buckets exist
         run: docker compose up minio-setup
