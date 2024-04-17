@@ -29,7 +29,7 @@ class Client:
       uid: An identifier of the client
       host: The MQTT hostname or IP address. Defaults to localhost.
       port: The port number used for connecting to the MQTT broker.
-            Defaults to 1883.
+            Defaults to 8883.
       tls_cert: File containing the TLS client certificate for mutual TLS
                 authentication.
       tls_key: File containing the TLS client key for mutual TLS
