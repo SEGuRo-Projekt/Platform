@@ -82,6 +82,8 @@ services:
     - traefik.http.routers.store-ui.service=store-ui
     - traefik.http.routers.store-ui.tls=true
     - traefik.http.services.store-ui.loadbalancer.server.port=9001
+    - traefik.http.services.store-ui.loadbalancer.server.scheme=https
+    - traefik.http.services.store-ui.loadbalancer.serversTransport=store-ui@file
 
     depends_on:
       setup:
