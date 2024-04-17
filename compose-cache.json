@@ -1,0 +1,59 @@
+{
+  "target": {
+    "docs": {
+      "cache-from": [
+        "type=registry,ref=ghcr.io/seguro-projekt/docs:cache"
+      ],
+      "cache-to": [
+        "type=registry,ref=ghcr.io/seguro-projekt/docs:cache"
+      ],
+      "output": [
+        "type=docker"
+      ]
+    },
+    "minio-setup": {
+      "cache-from": [
+        "type=registry,ref=ghcr.io/seguro-projekt/minio-setup:cache"
+      ],
+      "cache-to": [
+        "type=registry,ref=ghcr.io/seguro-projekt/minio-setup:cache"
+      ],
+      "output": [
+        "type=docker"
+      ]
+    },
+    "notifier": {
+      "cache-from": [
+        "type=registry,ref=ghcr.io/seguro-projekt/notifier:cache"
+      ],
+      "cache-to": [
+        "type=registry,ref=ghcr.io/seguro-projekt/notifier:cache"
+      ],
+      "output": [
+        "type=docker"
+      ]
+    },
+    "pki-setup": {
+      "cache-from": [
+        "type=registry,ref=ghcr.io/seguro-projekt/pki-setup:cache"
+      ],
+      "cache-to": [
+        "type=registry,ref=ghcr.io/seguro-projekt/pki-setup:cache"
+      ],
+      "output": [
+        "type=docker"
+      ]
+    },
+    "scheduler": {
+      "cache-from": [
+        "type=registry,ref=ghcr.io/seguro-projekt/scheduler:cache"
+      ],
+      "cache-to": [
+        "type=registry,ref=ghcr.io/seguro-projekt/scheduler:cache"
+      ],
+      "output": [
+        "type=docker"
+      ]
+    }
+  }
+}

@@ -14,14 +14,9 @@ from pprint import pformat
 import minio
 import minio.credentials
 
-from seguro.common.config import (
-    S3_HOST,
-    S3_PORT,
-    S3_BUCKET,
-    TLS_CACERT,
-    TLS_KEY,
-    TLS_CERT,
-)
+from seguro.common import config
+
+BUCKETS = ["seguro", "registry"]
 
 POLICIES = {
     "admin": {
@@ -33,16 +28,12 @@ POLICIES = {
                     "s3:*",
                 ],
                 "Effect": "Allow",
-                "Resource": [
-                    f"arn:aws:s3:::{S3_BUCKET}",
-                    f"arn:aws:s3:::{S3_BUCKET}/*",
-                ],
+                "Resource": [f"arn:aws:s3:::{b}" for b in BUCKETS]
+                + [f"arn:aws:s3:::{b}/*" for b in BUCKETS],
             },
         ],
     }
 }
-
-BUCKETS = ["seguro", "registry"]
 
 
 def create_buckets(mc: minio.Minio):
@@ -96,11 +87,11 @@ def main() -> int:
 
     minio_user = os.environ.get("ADMIN_USERNAME", "")
     minio_pass = os.environ.get("ADMIN_PASSWORD", "")
-    minio_endpoint = f"{S3_HOST}:{S3_PORT}"
+    minio_endpoint = f"{config.S3_HOST}:{config.S3_PORT}"
     minio_url = f"https://{minio_endpoint}"
 
     http_client = urllib3.PoolManager(
-        cert_reqs="CERT_REQUIRED", ca_certs=TLS_CACERT
+        cert_reqs="CERT_REQUIRED", ca_certs=config.TLS_CACERT
     )
     creds_static = minio.credentials.StaticProvider(minio_user, minio_pass)
     mc = minio.Minio(
@@ -119,9 +110,9 @@ def main() -> int:
     # Validate mTLS authentication
     creds_cert = minio.credentials.CertificateIdentityProvider(
         sts_endpoint=minio_url,
-        cert_file=TLS_CERT,
-        key_file=TLS_KEY,
-        ca_certs=TLS_CACERT,
+        cert_file=config.TLS_CERT,
+        key_file=config.TLS_KEY,
+        ca_certs=config.TLS_CACERT,
     )
     mc = minio.Minio(
         minio_endpoint, credentials=creds_cert, http_client=http_client

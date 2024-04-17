@@ -30,6 +30,10 @@ x-platform-service: &platform-service
     target: /certs
     read_only: true
 
+  depends_on:
+    pki-setup:
+      condition: service_completed_successfully
+
 services:
   docs:
     build:
@@ -82,7 +86,7 @@ services:
     - traefik.http.services.store-ui.loadbalancer.serversTransport=store-ui@file
 
     depends_on:
-      setup:
+      pki-setup:
         condition: service_completed_successfully
 
     environment:
@@ -135,21 +139,25 @@ services:
 
     restart: "no"
 
+    depends_on:
+      pki-setup:
+        condition: service_completed_successfully
+      minio:
+        condition: service_healthy
+
     env_file:
     - .env
 
-    depends_on:
-    - minio
-
-    command: ["minio-setup"]
+    # command: minio-setup
+    command: /bin/bash -c "openssl x509 -in /certs/server.crt -text"
 
 
-  setup:
+  pki-setup:
     build:
       context: .
       target: setup
 
-    command: setup-keys.sh
+    command: setup-pki.sh
 
     env_file:
     - .env
@@ -162,8 +170,8 @@ services:
       source: certs
       target: /certs
     - type: bind
-      source: setup-keys.sh
-      target: /setup-keys.sh
+      source: scripts/setup-pki.sh
+      target: /setup-pki.sh
     - type: bind
       source: ./keys
       target: /keys-out
@@ -204,14 +212,12 @@ services:
       start_period: 10s
 
     depends_on:
-      setup:
+      pki-setup:
         condition: service_completed_successfully
       mosquitto-setup:
         condition: service_completed_successfully
 
   mosquitto-setup:
-    <<: *platform-service
-
     restart: "no"
 
     env_file:
@@ -220,7 +226,31 @@ services:
     image: eclipse-mosquitto:2
 
     entrypoint: /bin/sh
-    command: /setup-broker.sh
+    command: /setup-mosquitto.sh
+
+    volumes:
+    - type: bind
+      source: etc/mosquitto/
+      target: /mosquitto/config/
+    - type: bind
+      source: scripts/setup-mosquitto.sh
+      target: /setup-mosquitto.sh
+
+  mosquitto-setup-acl:
+    <<: *platform-service
+
+    restart: "no"
+
+    depends_on:
+      pki-setup:
+        condition: service_completed_successfully
+      mosquitto:
+        condition: service_healthy
+
+    image: eclipse-mosquitto:2
+
+    entrypoint: /bin/sh
+    command: /setup-mosquitto-acl.sh
 
     volumes:
     - type: volume # TODO: Implement more fine-grained access to keys
@@ -232,11 +262,11 @@ services:
       target: /certs
       read_only: true
     - type: bind
-      source: ./etc/mosquitto/
+      source: etc/mosquitto/
       target: /mosquitto/config/
     - type: bind
-      source: ./setup-broker.sh
-      target: /setup-broker.sh
+      source: scripts/setup-mosquitto-acl.sh
+      target: /setup-mosquitto-acl.sh
 
   yacht:
     image: selfhostedpro/yacht
@@ -276,9 +306,10 @@ services:
     - traefik.enable=true
     - traefik.http.routers.registry.rule=Host(`registry.${DOMAIN}`)
     - traefik.http.routers.registry.tls=true
+    - traefik.http.middlewares.add-cors.headers.customresponseheaders.Access-Control-Allow-Origin=https://ui.registry.${DOMAIN}
 
     depends_on:
-      setup:
+      pki-setup:
         condition: service_completed_successfully
 
     ports:
@@ -294,18 +325,28 @@ services:
     - type: bind
       source: ./etc/registry
       target: /etc/docker/registry
+      read_only: true
+    - type: volume
+      source: keys
+      target: /keys
+      read_only: true
+    - type: volume
+      source: certs
+      target: /certs
+      read_only: true
+
+    env_file:
+    - .env
 
     environment:
-    - REGISTRY_STORAGE_S3_ACCESSKEY=${ADMIN_USERNAME}
-    - REGISTRY_STORAGE_S3_SECRETKEY=${ADMIN_PASSWORD}
-    - REGISTRY_HTTP_SECRET=${SECRET}
-    - REGISTRY_HTTP_HEADERS_Access-Control-Allow-Origin=[https://ui.registry.${DOMAIN}]
-    # See: https://distribution.github.io/distribution/#tls
-    # - REGISTRY_HTTP_TLS_CERTIFICATE=
-    # - REGISTRY_HTTP_TLS_KEY
+      SSL_CERT_FILE: /certs/ca.crt
+      REGISTRY_STORAGE_S3_ACCESSKEY: ${ADMIN_USERNAME}
+      REGISTRY_STORAGE_S3_SECRETKEY: ${ADMIN_PASSWORD}
+      REGISTRY_HTTP_SECRET: ${SECRET}
+      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Origin: "[https://ui.registry.${DOMAIN}]"
 
   registry-ui:
-    image: joxit/docker-registry-ui:latest
+    image: joxit/docker-registry-ui:2.5.7
     restart: unless-stopped
 
     labels:
@@ -328,6 +369,7 @@ services:
     - DELETE_IMAGES=true
     - SHOW_CONTENT_DIGEST=true
     - THEME=light
+    - REGISTRY_SECURED=true
 
   traefik:
     image: "traefik:v2.10"
@@ -357,7 +399,7 @@ services:
       read_only: true
 
     depends_on:
-      setup:
+      pki-setup:
         condition: service_completed_successfully
 
   scheduler:
