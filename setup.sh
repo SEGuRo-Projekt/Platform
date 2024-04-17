@@ -40,11 +40,23 @@ extendedKeyUsage = serverAuth
 subjectAltName = @alt_names
 [alt_names]
 DNS.1 = ${DOMAIN}
-DNS.2 = *.${DOMAIN}
+DNS.2 = ui.${DOMAIN}
+DNS.3 = store.${DOMAIN}
+DNS.4 = ui.store.${DOMAIN}
+DNS.5 = registry.${DOMAIN}
+DNS.6 = ui.registry.${DOMAIN}
+
+# For testing against localhost
+DNS.7 = localhost
+DNS.8 = ui.localhost
+DNS.9 = store.localhost
+DNS.10 = ui.store.localhost
+DNS.11 = registry.localhost
+DNS.12 = ui.registry.localhost
 
 # For platform internal communication only
-DNS.3 = minio
-DNS.4 = mosquitto
+DNS.13 = minio
+DNS.14 = mosquitto
 EOF
 
   openssl req \
