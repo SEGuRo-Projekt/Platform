@@ -147,10 +147,11 @@ cp /keys/server.key /keys/minio/private.key
 echo "== Checking DH parameters file..."
 if ! [ -f /keys/dhparam.pem ]; then
   if [ -n "${CI}" ]; then
-    DHPARAM_OPTS=-dsaparam
+    # Speed-up generation in CI by downloading a pre-generated set of DH params
+    curl https://2ton.com.au/dhparam/${PKI_KEY_BITS} > /keys/dhparam.pem
+  else
+    openssl dhparam -out /keys/dhparam.pem ${PKI_KEY_BITS}
   fi
-
-  openssl dhparam "${DHPARAM_OPTS}" -out dhparam.pem ${PKI_KEY_BITS}
 fi
 
 echo "== Checking htpasswd for registry..."
