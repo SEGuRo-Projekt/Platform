@@ -11,15 +11,7 @@ import urllib3
 import pandas as pd
 from typing import Callable
 
-from seguro.common.config import (
-    TLS_CACERT,
-    TLS_CERT,
-    TLS_KEY,
-    S3_HOST,
-    S3_PORT,
-    S3_REGION,
-    S3_BUCKET,
-)
+from seguro.common import config
 
 
 class Event(enum.Flag):
@@ -60,13 +52,13 @@ class Client:
 
     def __init__(
         self,
-        host: str = S3_HOST,
-        port: int = S3_PORT,
-        tls_cacert: str = TLS_CACERT,
-        tls_cert: str = TLS_CERT,
-        tls_key: str = TLS_KEY,
-        region: str = S3_REGION,
-        bucket: str = S3_BUCKET,
+        host: str = config.S3_HOST,
+        port: int = config.S3_PORT,
+        tls_cacert: str = config.TLS_CACERT,
+        tls_cert: str = config.TLS_CERT,
+        tls_key: str = config.TLS_KEY,
+        region: str = config.S3_REGION,
+        bucket: str = config.S3_BUCKET,
     ):
         self.logger = logging.getLogger(__name__)
         self.bucket = bucket

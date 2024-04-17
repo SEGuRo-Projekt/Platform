@@ -12,13 +12,7 @@ from paho.mqtt.client import PayloadType, MQTTMessageInfo
 from villas.node.sample import Sample, Timestamp  # noqa: F401
 from villas.node.formats import Protobuf
 
-from seguro.common.config import (
-    MQTT_HOST,
-    MQTT_PORT,
-    TLS_CACERT,
-    TLS_CERT,
-    TLS_KEY,
-)
+from seguro.common import config
 
 Message = mqtt.MQTTMessage
 
@@ -49,11 +43,11 @@ class Client:
     def __init__(
         self,
         uid=None,
-        host: str = MQTT_HOST,
-        port: int = MQTT_PORT,
-        tls_cert: str = TLS_CERT,
-        tls_key: str = TLS_KEY,
-        tls_cacert: str = TLS_CACERT,
+        host: str = config.MQTT_HOST,
+        port: int = config.MQTT_PORT,
+        tls_cert: str = config.TLS_CERT,
+        tls_key: str = config.TLS_KEY,
+        tls_cacert: str = config.TLS_CACERT,
         keepalive=60,
     ):
         # Create uid based onMAC address and time component
