@@ -8,6 +8,7 @@ import os
 import subprocess
 import tempfile
 import yaml
+from typing import Any
 
 from itertools import chain
 from contextlib import contextmanager, ExitStack
@@ -18,7 +19,7 @@ class Service:
         self,
         composer: "Composer",
         name: str,
-        spec: dict,
+        spec: dict[str, Any],
         scale: int = 1,
         force_recreate: bool = False,
     ):
@@ -131,7 +132,7 @@ class Composer:
             subprocess.run(args, pass_fds=compose_file_fds)
 
     @property
-    def spec(self) -> dict:
+    def spec(self) -> dict[str, Any]:
         return {
             "services": {svc.name: svc.spec for svc in self.services},
             "networks": {
@@ -177,7 +178,7 @@ class Composer:
                 self.logger.info(f"Event {action} of {name}[{image}]")
 
     @contextmanager
-    def _temp_file_fd(self, contents: dict):
+    def _temp_file_fd(self, contents: dict[str, Any]):
         """
 
         Args:

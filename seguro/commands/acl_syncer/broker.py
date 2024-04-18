@@ -19,7 +19,6 @@ from seguro.commands.acl_syncer import model
 
 
 class BaseModel(pydantic.BaseModel, frozen=True):
-
     def dump(self):
         return self.model_dump(mode="json", exclude_none=True)
 
@@ -244,7 +243,6 @@ class Config:
 
 
 class Command:
-
     def __init__(self, cmd: str, **attrs):
         self.command = cmd
         self.attrs = attrs
@@ -317,10 +315,9 @@ class Command:
 
 
 class Plugin:
-
     def __init__(self, b: cbroker.Client):
         self.client = b
-        self.queue: queue.Queue = queue.Queue()
+        self.queue: queue.Queue[cbroker.Message] = queue.Queue()
         self.client.subscribe(
             "$CONTROL/dynamic-security/v1/response", self._on_response
         )
