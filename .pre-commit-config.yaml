@@ -59,6 +59,7 @@ repos:
           - types-pyyaml==6.0.12.20240311
           - types-python-slugify==8.0.2.20240310
           - pandas-stubs==2.2.1.240316
+          - pydantic==2.7.0
 
   - repo: https://github.com/shellcheck-py/shellcheck-py
     rev: v0.10.0.1

@@ -94,7 +94,7 @@ def main() -> int:
         datefmt="%H:%M:%S",
     )
 
-    queue: SimpleQueue = SimpleQueue()
+    queue: SimpleQueue[Notification] = SimpleQueue()
     apprise = Apprise()
     config = AppriseConfig("config.yaml")
     client = broker.Client("notifier")
