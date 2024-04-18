@@ -1,0 +1,44 @@
+---
+# SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+clients:
+  mp1:
+    roles:
+      - measurement-point1
+
+    groups:
+      - measurement-points
+
+  mp2:
+    roles:
+      - measurement-point2
+
+    groups:
+      - measurement-points
+
+groups:
+  measurement-points:
+    roles:
+      - heartbeat-sender
+      - signature-sender
+
+roles:
+  heartbeat-sender:
+    broker:
+      - effect: Allow
+        topic: heartbeats
+        actions:
+          - Publish
+
+  signature-sender:
+    broker:
+    - topic: signatures
+      actions:
+      - Publish
+
+  measurement-point1:
+    broker:
+      - topic: data/measurements/mp1/#
+        actions:
+          - Publish

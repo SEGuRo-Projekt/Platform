@@ -24,6 +24,7 @@ signature-sender = "seguro.commands.signature_sender.main:main"
 heartbeat-sender = "seguro.commands.heartbeat_sender.main:main"
 signature-recorder = "seguro.commands.signature_recorder.main:main"
 notebook-executor = "seguro.commands.notebook_executor.main:main"
+acl-syncer = "seguro.commands.acl_syncer.main:main"
 demo-data = "seguro.commands.demo_data.main:main"
 
 [tool.poetry.urls]
@@ -56,6 +57,7 @@ fsspec = "^2024.3.1"
 pyusb = "^1.2.1"
 psutil = "^5.9.8"
 villas-node = "0.11.1"
+pydantic = "^2.7.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.2"

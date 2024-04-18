@@ -8,7 +8,7 @@
     {
       "label": "Setup Minio client",
       "type": "shell",
-      "command": "set -a && source \"${workspaceFolder}/.env\" && mc alias set minio \"http://${S3_HOST}:${S3_PORT}\" \"${ADMIN_USERNAME}\" \"${ADMIN_PASSWORD}\"; mc alias ls minio",
+      "command": "set -a && source \"${workspaceFolder}/.env\" && mc alias set --insecure minio \"https://${S3_HOST:-localhost}:${S3_PORT:-9000}\" \"${ADMIN_USERNAME}\" \"${ADMIN_PASSWORD}\"; mc alias ls minio",
       "problemMatcher": []
     },
     {
@@ -20,7 +20,7 @@
     {
       "label": "Sync file to datastore",
       "type": "shell",
-      "command": "REL=$(realpath --relative-to=\"${workspaceFolder}/store\" \"${file}\"); if [[ \"${REL}\" == ..* ]]; then echo \"File is not in store\"; else mc cp \"${file}\" \"minio/seguro/${REL}\"; fi",
+      "command": "REL=$(realpath --relative-to=\"${workspaceFolder}/store\" \"${file}\"); if [[ \"${REL}\" == ..* ]]; then echo \"File is not in store\"; else mc --insecure cp \"${file}\" \"minio/seguro/${REL}\"; fi",
       "problemMatcher": []
     }
   ]

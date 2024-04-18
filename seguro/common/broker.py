@@ -89,6 +89,7 @@ class Client:
         self.client.subscribe(topic)
 
         def callback(_client, _ctx, msg):
+            self.logger.debug("Recv msg: %s - %s", msg.topic, msg.payload)
             cb(self, msg)
 
         self.client.message_callback_add(topic, callback)
