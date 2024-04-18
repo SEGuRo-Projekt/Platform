@@ -1,0 +1,17 @@
+---
+# SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+triggers:
+  - id: acls-changed
+    type: created
+    prefix: config/acls/
+
+  - id: hourly
+    type: schedule
+    unit: hours
+    interval: 1
+
+container:
+  image: seguro/platform
+  command: ["acl-syncer"]

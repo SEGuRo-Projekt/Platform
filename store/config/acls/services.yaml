@@ -1,0 +1,89 @@
+---
+# SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+clients:
+  recorder:
+    roles:
+      - recorder
+
+    groups:
+      - services
+
+  signature-recorder:
+    roles:
+      - recorder
+
+    groups:
+      - services
+
+  scheduler:
+    roles:
+      - scheduler
+
+    groups:
+      - services
+
+  notifier:
+    roles:
+    - notifier
+
+    groups:
+    - services
+
+  notebook-executor:
+    roles:
+    - notebook-executor
+
+    groups:
+    - services
+
+groups:
+  services:
+
+roles:
+  scheduler:
+    broker:
+    - topic: '#'
+      actions:
+      - Subscribe
+
+    store:
+    - object: '*'
+      actions:
+      - '*' # TODO: be more restrictive here
+
+  notifier:
+    broker:
+    - topic: notifications
+      actions:
+      - Subscribe
+
+  recorder:
+    broker:
+      - topic: data/#
+        actions:
+          - Subscribe
+
+    store:
+      - object: data/*
+        actions:
+          - PutObject
+
+  signature-recorder:
+    broker:
+      - topic: signatures
+        actions:
+          - Subscribe
+
+    store:
+      - object: signatures/*
+        actions:
+          - PutObject
+
+  notebook-executor:
+    store:
+    - object: 'notebooks/#'
+      actions:
+      - GetObject
+      - PutObject
