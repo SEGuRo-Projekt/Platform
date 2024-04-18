@@ -3,37 +3,37 @@
 
 import functools
 import logging
-import json
+import datetime
 
-import time
-
-import seguro.common.store as store
-from seguro.commands.scheduler import scheduler, compose
+from seguro.common import store
+from seguro.commands.scheduler import scheduler, compose, model, compose_model
 
 
 class Job(compose.Service):
     def __init__(
-        self, name: str, spec: dict, scheduler: "scheduler.Scheduler"
+        self,
+        name: str,
+        job_spec: model.JobSpec,
+        scheduler: "scheduler.Scheduler",
     ):
-        self.job_spec = spec
+        self.job_spec: model.JobSpec = job_spec
         self.logger = logging.getLogger(__name__)
 
         super().__init__(
             scheduler,
             name,
-            spec.get("container", {}),
-            spec.get("scale", 1),
-            spec.get("recreate", False),
+            job_spec.container,
+            job_spec.scale,
+            job_spec.recreate,
         )
 
         self.scheduler = scheduler
         self.watchers: list[store.Watcher] = []
-        self.triggers = spec.get("triggers", [])
 
-        for trigger in self.triggers:
+        for trigger in self.job_spec.triggers:
             self._setup_trigger(trigger)
 
-    def _setup_trigger(self, trigger: dict[str, str]):
+    def _setup_trigger(self, trigger: model.Trigger):
         """Setup the trigger.
 
         Args:
@@ -41,28 +41,33 @@ class Job(compose.Service):
 
         """
 
-        typ = trigger.get("type")
-        if typ in ["created", "removed", "modified"]:
-            if typ == "created":
+        if isinstance(trigger, model.StoreTrigger):
+            if trigger.type == model.StoreTriggerType.CREATED:
                 event = store.Event.CREATED
-            elif typ == "removed":
+            elif trigger.type == model.StoreTriggerType.REMOVED:
                 event = store.Event.REMOVED
-            elif typ == "modified":
+            elif trigger.type == model.StoreTriggerType.MODIFIED:
                 event = store.Event.CREATED | store.Event.REMOVED
-
-            prefix = trigger.get("prefix", "/")
+            else:
+                raise RuntimeError(f"Unknown trigger type: {trigger.type}")
 
             cb = functools.partial(self._handle_trigger_event, trigger)
 
-            watcher = self.scheduler.store.watch_async(prefix, cb, event)
+            watcher = self.scheduler.store.watch_async(
+                trigger.prefix, cb, event
+            )
 
             self.watchers.append(watcher)
 
-        elif typ == "schedule":
+        elif isinstance(trigger, model.ScheduleTrigger):
             self._setup_schedule(trigger)
 
     def _handle_trigger_event(
-        self, trigger: dict, _s: store.Client, evt: store.Event, obj: str
+        self,
+        trigger: model.Trigger,
+        _s: store.Client,
+        evt: store.Event,
+        obj: str,
     ):
         """
 
@@ -75,81 +80,87 @@ class Job(compose.Service):
         Returns:
 
         """
-        triggered_by = {**trigger, "event": str(evt), "object": obj}
-        info = {"triggered_by": triggered_by}
+        self.start(trigger=trigger, event=evt, object=obj)
 
-        self.start(info)
-
-    def _setup_schedule(self, schedule: dict):
+    def _setup_schedule(self, schedule: model.ScheduleTrigger):
         """
 
         Args:
           schedule:
 
         """
-        interval = schedule.get("interval", 1)
-
-        job = self.scheduler.scheduler.every(interval)
+        job = self.scheduler.scheduler.every(schedule.interval)
         job.tag(self.name)
 
-        if latest := schedule.get("interval_to"):
+        if latest := schedule.interval_to:
             job.to(latest)
 
-        if at := schedule.get("at"):
+        if at := schedule.at:
             job.at(at)
 
-        if until := schedule.get("until"):
+        if until := schedule.until:
             job.until(until)
 
-        if unit := schedule.get("unit", "seconds"):
-            job.unit = unit
+        if unit := schedule.unit:
+            job.unit = unit.value
 
-            if job.unit == "weeks":
-                if start_day := schedule.get("start_day", "monday"):
-                    job.start_day = start_day
+            if unit == model.ScheduleUnit.WEEKS:
+                if start_day := schedule.start_day:
+                    job.start_day = start_day.value
 
-        info = {"triggered_by": schedule}
-
-        job.do(self.start, info)
+        job.do(self.start, trigger=schedule)
 
         self.logger.info(f"Started schedule {job}")
 
-    def start(self, info: dict | None = None):
+    def start(  # type: ignore[override]
+        self,
+        trigger: model.Trigger | None = None,
+        event: store.Event | None = None,
+        object: str | None = None,
+    ):
         """
 
         Args:
           info: dict | None:  (Default value = None)
 
         """
-        full_info = {
-            "name": self.name,
-            "triggered_at": time.time(),
-            **self.job_spec,
-        }
+        job_info = model.JobInfo(
+            name=self.name,
+            spec=self.job_spec,
+        )
 
-        if info is not None:
-            full_info.update(info)
+        if trigger is not None:
+            job_info.trigger = model.TriggerInfo(
+                id=trigger.id,
+                time=datetime.datetime.now(),
+                event=event,
+                object=object,
+            )
 
-        overlays = [
-            {
-                "services": {
-                    self.name: {
-                        "environment": {
-                            "SEGURO_JOB_INFO": json.dumps(full_info)
-                        }
-                    }
-                }
+        overlay = compose_model.ComposeSpecification(
+            services={
+                self.name: compose_model.Service(
+                    environment={
+                        "SEGURO_JOB_INFO": job_info.json(exclude_none=True),
+                        "S3_HOST": "minio",
+                        "MQTT_HOST": "mosquitto",
+                        "TLS_CACERT": "/certs/ca.crt",
+                        "TLS_CERT": "/certs/client-admin.crt",
+                        "TLS_KEY": "/keys/client-admin.key",
+                    }  # type: ignore
+                )
             }
-        ]
+        )
 
-        super().start(overlays)
+        super().start([overlay])
 
         self.logger.info(f"Started job: {self.name}")
 
-    def stop(self):
+    def stop(self, down: bool = False):
         self.scheduler.scheduler.clear(self.name)
 
-        super().stop()
+        if down:
+            super().stop()
 
         for watcher in self.watchers:
             watcher.stop()

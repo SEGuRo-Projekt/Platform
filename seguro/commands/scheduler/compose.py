@@ -13,23 +13,25 @@ from typing import Any
 from itertools import chain
 from contextlib import contextmanager, ExitStack
 
+from seguro.commands.scheduler import compose_model
+
 
 class Service:
     def __init__(
         self,
         composer: "Composer",
         name: str,
-        spec: dict[str, Any],
+        service_spec: compose_model.Service,
         scale: int = 1,
         force_recreate: bool = False,
     ):
         self.composer = composer
         self.name = name
-        self.service_spec = spec
+        self.service_spec = service_spec
         self.scale = scale
         self.force_recreate = force_recreate
 
-    def start(self, overlays=[]):
+    def start(self, overlays: list[compose_model.ComposeSpecification] = []):
         """
 
         Args:
@@ -63,7 +65,7 @@ class Service:
         # relatively to the compose.yml which in our case
         # is /self/proc/fd/X. So env_file's would be resolved as
         # /self/proc/fd/some_env_file
-        if env_files := spec.get("env_file"):
+        if env_files := spec.env_file:
             if isinstance(env_files, str):
                 env_files = [env_files]
 
@@ -73,7 +75,7 @@ class Service:
                     for f in env_files
                 ]
 
-                spec["env_file"] = env_files
+                spec.env_file = env_files
 
         return spec
 
@@ -88,7 +90,9 @@ class Composer:
     def services(self):
         return []
 
-    def compose(self, *args, overlays=[]):
+    def compose(
+        self, *args, overlays: list[compose_model.ComposeSpecification] = []
+    ):
         """
 
         Args:
@@ -98,12 +102,14 @@ class Composer:
         Returns:
 
         """
-        compose_file_contents = [self.spec] + overlays
+        compose_specs = [self.spec] + overlays
 
         with ExitStack() as stack:
             compose_file_fds = [
-                stack.enter_context(self._temp_file_fd(spec))
-                for spec in compose_file_contents
+                stack.enter_context(
+                    self._temp_file_fd(spec.dict(exclude_unset=True))
+                )
+                for spec in compose_specs
             ]
 
             args = tuple(
@@ -132,13 +138,15 @@ class Composer:
             subprocess.run(args, pass_fds=compose_file_fds)
 
     @property
-    def spec(self) -> dict[str, Any]:
-        return {
-            "services": {svc.name: svc.spec for svc in self.services},
-            "networks": {
-                "default": {"external": True, "name": "platform_default"}
+    def spec(self) -> compose_model.ComposeSpecification:
+        return compose_model.ComposeSpecification(
+            services={svc.name: svc.spec for svc in self.services},
+            networks={
+                "default": compose_model.Network(
+                    external=compose_model.External(name="platform_default")
+                )
             },
-        }
+        )
 
     def run(self):
         while True:
@@ -148,7 +156,7 @@ class Composer:
         self.compose("down", "--remove-orphans")
 
     def _watch_events(self):
-        with self._temp_file_fd(self.spec) as fd:
+        with self._temp_file_fd(self.spec.dict()) as fd:
             args = [
                 "docker",
                 "compose",

@@ -11,7 +11,7 @@ import slugify
 import yaml
 
 import seguro.common.store as store
-from . import job, compose
+from seguro.commands.scheduler import job, compose, model
 
 
 class Scheduler(compose.Composer):
@@ -31,18 +31,11 @@ class Scheduler(compose.Composer):
         self.jobs: dict[str, job.Job] = {}
 
         self.watcher = self.store.watch_async(
-            "config/jobs/",
-            self._handler,
-            store.Event.CREATED | store.Event.REMOVED,
+            prefix="config/jobs/",
+            cb=self._handler,
+            events=store.Event.CREATED | store.Event.REMOVED,
+            initial=True,
         )
-
-        self._get_jobs_from_store()
-
-    def _get_jobs_from_store(self):
-        objs = self.store.client.list_objects("seguro", "config/jobs/")
-
-        for obj in objs:
-            self._handler(self.store, store.Event.CREATED, obj.object_name)
 
     def _handler(self, _s: store.Client, event: store.Event, objname: str):
         """Callback for store events
@@ -64,12 +57,13 @@ class Scheduler(compose.Composer):
 
         if event == store.Event.CREATED:
             file = self.store.get_file_contents(objname)
-            spec = yaml.load(file, yaml.SafeLoader)
-            self._on_job_created(job_name, spec)
+            job_spec_dict = yaml.load(file, yaml.SafeLoader)
+            job_spec = model.JobSpec(**job_spec_dict)
+            self._on_job_created(job_name, job_spec)
         elif event == store.Event.REMOVED:
             self._on_job_removed(job_name)
 
-    def _on_job_created(self, name: str, spec: dict):
+    def _on_job_created(self, name: str, spec: model.JobSpec):
         """Callback which get called when a job specification is
         added to the store.
 
@@ -85,8 +79,17 @@ class Scheduler(compose.Composer):
         self.jobs[name] = new_job = job.Job(name, spec, self)
         self.logger.info(f"Added new job: {name}")
 
-        if len(new_job.triggers) == 0:
+        if len(new_job.job_spec.triggers) == 0:
             new_job.start()
+
+        for trigger in new_job.job_spec.triggers:
+            if not isinstance(trigger, model.EventTrigger):
+                continue
+
+            if trigger.type != model.EventTriggerType.STARTUP:
+                continue
+
+            new_job.start(trigger=trigger)
 
     def _on_job_removed(self, name: str):
         """Callback which get called when a job specification is removed
@@ -111,6 +114,9 @@ class Scheduler(compose.Composer):
             time.sleep(1)
 
     def stop(self):
+        for j in self.jobs.values():
+            j.stop()
+
         self._stopflag.set()
         self.watcher.stop()
 
