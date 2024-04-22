@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
 # SPDX-License-Identifier: Apache-2.0
 
-import copy
 import json
 import logging
 import os
@@ -58,24 +57,28 @@ class Service:
 
     @property
     def spec(self):
-        spec = copy.deepcopy(self.service_spec)
+        spec = self.service_spec.copy()
+
+        def make_abs(f: str) -> str:
+            return f if os.path.isabs(f) else os.path.abspath(f)
 
         # Ensure that all env_file's are passed as absolute
         # paths, as 'docker compose' would otherwise resolve them
         # relatively to the compose.yml which in our case
         # is /self/proc/fd/X. So env_file's would be resolved as
         # /self/proc/fd/some_env_file
-        if env_files := spec.env_file:
-            if isinstance(env_files, str):
-                env_files = [env_files]
+        if isinstance(spec.env_file, compose_model.EnvFile):
+            root = spec.env_file.root
 
-            if isinstance(env_files, list):
-                env_files = [
-                    f if os.path.isabs(f) else os.path.abspath(f)
-                    for f in env_files
-                ]
-
-                spec.env_file = env_files
+            if isinstance(root, str):
+                spec.env_file.root = make_abs(root)
+            elif isinstance(root, list):
+                for i, env_file in enumerate(root):
+                    entry = root[i]
+                    if isinstance(entry, str):
+                        root[i] = make_abs(entry)
+                    elif isinstance(entry, compose_model.EnvFile1):
+                        entry.path = make_abs(entry.path)
 
         return spec
 
@@ -85,6 +88,18 @@ class Composer:
         self.logger = logging.getLogger(__name__)
         self.watch_proc: subprocess.Popen[bytes] | None = None
         self.name = name
+
+    @staticmethod
+    def _fix_spec(spec: compose_model.ComposeSpecification) -> dict:
+        spec_dict = spec.dict(exclude_unset=True)
+
+        for name, network in spec_dict.get("networks", {}).items():
+            if isinstance(network, dict):
+                if external := network.get("external"):
+                    network["name"] = external.get("name", "default")
+                    network["external"] = True
+
+        return spec_dict
 
     @property
     def services(self):
@@ -102,14 +117,13 @@ class Composer:
         Returns:
 
         """
-        compose_specs = [self.spec] + overlays
+        specs = [self.spec] + overlays
+        specs_dict = [Composer._fix_spec(spec) for spec in specs]
 
         with ExitStack() as stack:
             compose_file_fds = [
-                stack.enter_context(
-                    self._temp_file_fd(spec.dict(exclude_unset=True))
-                )
-                for spec in compose_specs
+                stack.enter_context(self._temp_file_fd(spec))
+                for spec in specs_dict
             ]
 
             args = tuple(
