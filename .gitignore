@@ -4,6 +4,8 @@
 keys/
 build/
 data/
+docs/_autosummary/
+
 .direnv/
 
 .env
