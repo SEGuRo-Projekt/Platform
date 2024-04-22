@@ -1,0 +1,10 @@
+---
+# SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
+# SPDX-License-Identifier: Apache-2.0
+host: 0.0.0.0
+port: 3000
+timestamp-signer: file
+log-type: dev
+file-signer-key-path: /keys/tsa.key
+certificate-chain-path: /certs/tsa_chain.crt
+timestamp-signer-hash: sha256
