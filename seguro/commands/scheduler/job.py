@@ -147,9 +147,24 @@ class Job(compose.Service):
                         "TLS_CACERT": "/certs/ca.crt",
                         "TLS_CERT": "/certs/client-admin.crt",
                         "TLS_KEY": "/keys/client-admin.key",
-                    }  # type: ignore
+                    },  # type: ignore
+                    volumes=[
+                        compose_model.Volumes(
+                            type="volume",
+                            source=vol,
+                            target=f"/{vol}",
+                            read_only=True,
+                        )
+                        for vol in ["keys", "certs"]
+                    ],
                 )
-            }
+            },
+            volumes={
+                vol: compose_model.Volume(
+                    name=f"platform_{vol}", external=compose_model.External()
+                )
+                for vol in ["keys", "certs"]
+            },
         )
 
         super().start([overlay])
