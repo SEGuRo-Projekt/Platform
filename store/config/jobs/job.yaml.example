@@ -12,14 +12,17 @@
 #       immediately.
 triggers:
 
-  # Each triggers ID is passed in the TRIGGER_ID environment variable
+  # Each triggers ID via passed in the SEGURO_JOB_INFO environment variable
   # to the spawned container
 - id: measurements-received-ms1
 
   # The triggers type can be on of:
   # - created
   # - removed
+  # - modified
   # - schedule
+  # - startup
+  # - shutdown
   type: created
 
   # Triggers of type 'created' or 'removed' can specify
