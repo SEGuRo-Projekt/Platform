@@ -99,13 +99,16 @@ class Config:
     roles: dict[str, Role]
 
     def __str__(self):
-        client_names = " ".join(self.clients.keys())
-        group_names = " ".join(self.groups.keys())
-        role_names = " ".join(self.roles.keys())
+        client_names = ", ".join(sorted(self.clients.keys()))
+        group_names = ", ".join(sorted(self.groups.keys()))
+        role_names = ", ".join(sorted(self.roles.keys()))
 
-        return (
-            f"<Config clients=({client_names}) "
-            + f"groups=({group_names}) roles=({role_names})>"
+        return " ".join(
+            [
+                f"clients=[{client_names}]",
+                f"groups=[{group_names}]",
+                f"roles=[{role_names}]",
+            ]
         )
 
     def not_in(self, other: "Config") -> "Config":
@@ -417,12 +420,12 @@ def reconcile(
     new = Config.from_acl(acl)
     current = dsp.get_current_config()
 
-    logging.info("New config: %s", new)
-    logging.info("Current config: %s", current)
-
     # Remove system clients, groups and roles from changeset
     new = new.not_in(new.belonging_to(ignored_clients))
     current = current.not_in(current.belonging_to(ignored_clients))
+
+    logging.info("New broker ACL: %s", new)
+    logging.info("Current broker ACL: %s", current)
 
     unchanged = new.equal_to(current)
     modify = new.also_in(current).not_in(unchanged)
