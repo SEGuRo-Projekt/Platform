@@ -29,15 +29,15 @@ extensions = [
     "sphinx.ext.duration",
     "sphinx.ext.autodoc",
     "sphinx.ext.autodoc.typehints",
+    "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx",
     "sphinx.ext.linkcode",
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
-    # "sphinxcontrib.bibtex",
+    "sphinxcontrib.autodoc_pydantic",
     "sphinxext.opengraph",
     "sphinx_inline_tabs",
     "sphinx_copybutton",
-    "autoapi.extension",
     "myst_parser",
 ]
 
@@ -93,22 +93,24 @@ html_theme_options = {
 exclude_patterns = ["test_**.py"]
 
 # Auto API
+autosummary_generate = True
+
 autodoc_typehints = "description"
 
-autoapi_add_toctree_entry = False
-autoapi_dirs = ["../seguro"]
-autoapi_options = [
-    "members",
-    "undoc-members",
-    "private-members",
-    "show-inheritance",
-    "show-inheritance-diagram",
-    "show-module-summary",
-    "special-members",
-    "imported-members",
-]
-autoapi_ignore = ["*migrations*", "*/test_*"]
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": True,
+    "show-inheritance": True,
+}
 
+autodoc_pydantic_model_show_json = True
+autodoc_pydantic_settings_show_json = True
+autodoc_pydantic_model_erdantic_figure = False
+autodoc_pydantic_model_erdantic_figure_collapsed = False
+autodoc_pydantic_model_show_field_summary = False
+autodoc_pydantic_model_show_validator_members = False
+autodoc_pydantic_model_show_validator_summary = False
+autodoc_pydantic_model_show_config_summary = False
 
 # Link code
 commit = "master"
@@ -132,7 +134,7 @@ def linkcode_resolve(domain, info):
     try:
         file = inspect.getsourcefile(obj)
         lines = inspect.getsourcelines(obj)
-    except TypeError:
+    except Exception:
         return None
 
     if file is None:

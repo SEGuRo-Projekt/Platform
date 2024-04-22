@@ -15,6 +15,7 @@ Welcome to the home page of the SEGuRo platform.
 architecture
 installation
 configuration
+models
 access
 development
 api
