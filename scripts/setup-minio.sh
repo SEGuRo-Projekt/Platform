@@ -25,7 +25,7 @@ cp "${TLS_CACERT}" ~/.mc/certs/CAs/
 export MC_HOST_minio="https://${ADMIN_USERNAME}:${ADMIN_PASSWORD}@${S3_HOST}:${S3_PORT}"
 
 echo "== Create admin policy"
-CN=$(openssl x509 -noout -subject -nameopt multiline -in "${TLS_CERT}" | sed -n 's/ *commonName *=//p')
+CN=$(openssl x509 -noout -subject -nameopt multiline -in "${TLS_CERT}" | sed -n 's/ *commonName *= *//p')
 mc admin policy create minio "${CN}" <(cat <<-END
 {
     "Version": "2012-10-17",
