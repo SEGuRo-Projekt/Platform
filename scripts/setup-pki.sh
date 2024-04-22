@@ -50,18 +50,20 @@ DNS.3 = store.${DOMAIN}
 DNS.4 = ui.store.${DOMAIN}
 DNS.5 = registry.${DOMAIN}
 DNS.6 = ui.registry.${DOMAIN}
+DNS.7 = tsa.${DOMAIN}
 
 # For testing against localhost
-DNS.7 = localhost
-DNS.8 = ui.localhost
-DNS.9 = store.localhost
-DNS.10 = ui.store.localhost
-DNS.11 = registry.localhost
-DNS.12 = ui.registry.localhost
+DNS.8 = localhost
+DNS.9 = ui.localhost
+DNS.10 = store.localhost
+DNS.11 = ui.store.localhost
+DNS.12 = registry.localhost
+DNS.13 = ui.registry.localhost
+DNS.14 = tsa.localhost
 
 # For platform internal communication only
-DNS.13 = minio
-DNS.14 = mosquitto
+DNS.15 = minio
+DNS.16 = mosquitto
 EOF
 
   openssl req \
@@ -82,6 +84,47 @@ EOF
     -CAcreateserial \
     -in "server.csr" \
     -out "/certs/server.crt" 2> /dev/null
+}
+
+function create_pki_tsa() {
+  echo "=== Creating new TSA certificate"
+  cat > server.v3.ext << EOF
+authorityKeyIdentifier = keyid, issuer
+basicConstraints = CA:FALSE
+keyUsage = digitalSignature
+extendedKeyUsage =  critical, timeStamping
+subjectAltName = @alt_names
+[alt_names]
+DNS.1 = tsa.${DOMAIN}
+
+# For testing against localhost
+DNS.2 = tsa.localhost
+
+# For platform internal communication only
+DNS.3 = timestamp-server
+EOF
+
+  openssl req \
+    -new \
+    -nodes \
+    -out tsa.csr \
+    -newkey "${PKI_KEY_TYPE}:${PKI_KEY_BITS}" \
+    -keyout /keys/tsa.key \
+    -subj "${PKI_SUBJECT}/CN=SEGuRo Timestamping Authority" 2> /dev/null
+
+  openssl x509 \
+    -req \
+    -days ${PKI_EXPIRY_DAYS} \
+    -sha256 \
+    -extfile "server.v3.ext" \
+    -CA "/certs/ca.crt" \
+    -CAkey "/keys/ca.key" \
+    -CAcreateserial \
+    -in "tsa.csr" \
+    -out "/certs/tsa.crt" 2> /dev/null
+
+    # Create chain
+    cat /certs/tsa.crt /certs/ca.crt > /certs/tsa_chain.crt
 }
 
 function create_pki_client() {
@@ -132,13 +175,16 @@ create_pki_ca
 { [ -f "/certs/server.crt" ] && [ -f "/keys/server.key" ]; } || \
 create_pki_server
 
+{ [ -f "/certs/tsa.crt" ] && [ -f "/keys/tsa.key" ]; } || \
+create_pki_tsa
+
 for CN in ${PKI_CLIENT_CERTS}; do
   { [ -f "/certs/client-${CN}.crt" ] && [ -f "/keys/client-${CN}.key" ]; } || \
   create_pki_client "${CN}"
 done
 
 # Copy clients certs to user accessible mount
-cp /certs/client-*.crt /keys/client-*.key /certs/ca.crt /keys/ca.key /keys-out/
+cp /certs/client-*.crt /keys/client-*.key /certs/{tsa,tsa_chain,ca}.crt /keys/ca.key /keys-out/
 chmod 777 /keys-out/*
 chmod 777 /keys/* /certs/*
 
