@@ -36,14 +36,17 @@
           villas-node = [ "setuptools" ];
           types-python-slugify = [ "setuptools" ];
           paho-mqtt = [ "hatchling" ];
+          dnspython = [ "hatchling" ];
           pyxlsb = [ "setuptools" ];
           rfc3161ng = [ "setuptools" ];
+          datamodel-code-generator = [ "poetry-core" ];
         }
         // {
           python-calamine = prev.python-calamine.override { preferWheel = true; };
           apprise = prev.apprise.override { preferWheel = true; };
           pandas = prev.pandas.override { preferWheel = true; };
           mypy = prev.mypy.override { preferWheel = true; };
+          pyzmq = prev.pyzmq.override { preferWheel = true; };
         };
 
       packagesOverlay = final: prev: {
@@ -85,11 +88,14 @@
           seguro-platform = pkgs.mkShell {
             inputsFrom = [ pkgs.seguro-platform ];
 
+            buildInputs = [ pkgs.graphviz ];
+
             packages = with pkgs; [
               mypy
               poetry
               env
               mosquitto
+              graphviz
 
               (pkgs.poetry2nix.mkPoetryScriptsPackage { projectDir = ./.; })
 
