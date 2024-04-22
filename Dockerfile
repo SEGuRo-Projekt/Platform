@@ -16,7 +16,8 @@ ENV POETRY_NO_INTERACTION=1 \
 RUN apt-get update && \
     apt-get install --yes --no-install-recommends \
     texlive-xetex texlive-fonts-recommended texlive-plain-generic \
-    pandoc && \
+    pandoc \
+    libgraphviz-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Minio CLI client
