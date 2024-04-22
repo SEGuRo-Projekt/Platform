@@ -16,7 +16,6 @@ packages = [{ include = "seguro" }]
 [tool.poetry.scripts]
 poetry = "poetry.console.application:main"
 
-minio-setup = "seguro.commands.setup.minio:main"
 scheduler = "seguro.commands.scheduler.main:main"
 recorder = "seguro.commands.recorder.main:main"
 notifier = "seguro.commands.notifier.main:main"

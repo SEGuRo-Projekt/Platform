@@ -145,10 +145,22 @@ services:
       minio:
         condition: service_healthy
 
+    command: /setup-minio.sh
+
     env_file:
     - .env
 
-    command: minio-setup
+    volumes:
+    - type: volume # TODO: Implement more fine-grained access to keys
+      source: keys
+      target: /keys
+    - type: volume
+      source: certs
+      target: /certs
+    - type: bind
+      source: scripts/setup-minio.sh
+      target: /setup-minio.sh
+      read_only: true
 
   pki-setup:
     build:
