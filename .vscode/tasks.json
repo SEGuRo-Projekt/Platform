@@ -22,6 +22,12 @@
       "type": "shell",
       "command": "REL=$(realpath --relative-to=\"${workspaceFolder}/store\" \"${file}\"); if [[ \"${REL}\" == ..* ]]; then echo \"File is not in store\"; else mc --insecure cp \"${file}\" \"minio/seguro/${REL}\"; fi",
       "problemMatcher": []
+    },
+    {
+      "label": "Remove file from datastore",
+      "type": "shell",
+      "command": "REL=$(realpath --relative-to=\"${workspaceFolder}/store\" \"${file}\"); if [[ \"${REL}\" == ..* ]]; then echo \"File is not in store\"; else mc --insecure rm \"minio/seguro/${REL}\"; fi",
+      "problemMatcher": []
     }
   ]
 }
