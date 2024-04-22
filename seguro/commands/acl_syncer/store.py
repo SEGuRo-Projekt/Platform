@@ -26,13 +26,22 @@ def policy_from_acl(
 
     if client.groups is not None:
         for group_name in client.groups:
-            if group := acl.groups.get(group_name):
-                roles_names += group.roles
+            try:
+                group = acl.groups[group_name]
+            except KeyError:
+                raise Exception(
+                    f"Unknown group '{group_name}'",
+                )
+
+            roles_names += group.roles
 
     statements: list[model.StoreStatement] = []
 
     for role_name in roles_names:
-        role = acl.roles[role_name]
+        try:
+            role = acl.roles[role_name]
+        except KeyError:
+            raise Exception(f"Unknown role '{role_name}'")
 
         statements += role.store
 
