@@ -30,7 +30,7 @@ class Weekday(Enum):
     WEDNESDAY = "wednesday"
     THURSDAY = "thursday"
     FRIDAY = "friday"
-    STATURDAY = "staturday"
+    SATURDAY = "saturday"
     SUNDAY = "sunday"
 
 
