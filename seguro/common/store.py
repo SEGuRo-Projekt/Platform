@@ -248,7 +248,7 @@ class Client:
         cb: Callable[["Client", Event, str], None],
         events=Event.CREATED | Event.REMOVED,
         initial: bool = False,
-    ):
+    ) -> "Watcher":
         """
 
         Args:
@@ -305,6 +305,8 @@ class Watcher(threading.Thread):
         self.start()
 
     def run(self):
+        self.client.logger.debug("Started watcher")
+
         while True:
             try:
                 event = next(self.events)
@@ -322,6 +324,8 @@ class Watcher(threading.Thread):
                 self.cb(self.client, typ, filename)
             except StopIteration:
                 break
+
+        self.client.logger.debug("Stopped watcher")
 
     def stop(self):
         self._stopflag.set()
