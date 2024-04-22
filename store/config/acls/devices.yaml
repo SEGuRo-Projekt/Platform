@@ -33,12 +33,19 @@ roles:
 
   signature-sender:
     broker:
-    - topic: signatures
-      actions:
-      - Publish
+      - topic: signatures
+        actions:
+          - Publish
 
   measurement-point1:
     broker:
       - topic: data/measurements/mp1/#
         actions:
           - Publish
+
+  measurement-point2:
+    broker:
+      - topic: data/measurements/mp2/#
+        actions:
+          - Publish
+          - Subscribe
