@@ -58,7 +58,13 @@ class Scheduler(compose.Composer):
         if event == store.Event.CREATED:
             file = self.store.get_file_contents(objname)
             job_spec_dict = yaml.load(file, yaml.SafeLoader)
-            job_spec = model.JobSpec(**job_spec_dict)
+
+            try:
+                job_spec = model.JobSpec(**job_spec_dict)
+            except Exception as e:
+                self.logger.error("Failed to parse job description:\n%s", e)
+                return
+
             self._on_job_created(job_name, job_spec)
         elif event == store.Event.REMOVED:
             self._on_job_removed(job_name)
@@ -79,17 +85,19 @@ class Scheduler(compose.Composer):
         self.jobs[name] = new_job = job.Job(name, spec, self)
         self.logger.info(f"Added new job: {name}")
 
-        if len(new_job.job_spec.triggers) == 0:
+        if triggers := new_job.job_spec.triggers:
+            for trigger in triggers:
+                if not isinstance(trigger, model.EventTrigger):
+                    continue
+
+                if trigger.type != model.EventTriggerType.STARTUP:
+                    continue
+
+                new_job.start()
+                break
+
+        else:  # No triggers, configured -> start immediately
             new_job.start()
-
-        for trigger in new_job.job_spec.triggers:
-            if not isinstance(trigger, model.EventTrigger):
-                continue
-
-            if trigger.type != model.EventTriggerType.STARTUP:
-                continue
-
-            new_job.start(trigger=trigger)
 
     def _on_job_removed(self, name: str):
         """Callback which get called when a job specification is removed

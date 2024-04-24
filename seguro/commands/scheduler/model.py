@@ -71,7 +71,7 @@ Trigger = EventTrigger | StoreTrigger | ScheduleTrigger
 
 
 class JobSpec(BaseModel):
-    triggers: list[Trigger] = []
+    triggers: list[Trigger] | None = None
     scale: int = 1
     recreate: bool = False
     container: Service
