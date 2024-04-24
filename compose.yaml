@@ -113,7 +113,7 @@ services:
       mode: host
 
     healthcheck:
-      test: ["CMD", "curl", "--insecure", "--cacert", "/certs/ca.crt", "--fail", "https://localhost:9000/minio/health/live"]
+      test: ["CMD", "curl", "--cacert", "/certs/ca.crt", "--fail", "https://localhost:9000/minio/health/live"]
       interval: 10s
       timeout: 20s
       retries: 3
