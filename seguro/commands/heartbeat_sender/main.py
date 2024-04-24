@@ -11,7 +11,7 @@ import sys
 import time
 import usb.core
 
-from seguro.common import broker
+from seguro.common import broker, config
 
 
 def strip_none(d: dict) -> dict:
@@ -169,7 +169,7 @@ def main() -> int:
     parser.add_argument(
         "-l",
         "--log-level",
-        default="info",
+        default="debug" if config.DEBUG else "info",
         help="Logging level",
         choices=["debug", "info", "warn", "error", "critical"],
     )

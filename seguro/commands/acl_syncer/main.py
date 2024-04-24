@@ -10,7 +10,7 @@ import yaml
 import urllib3
 import pathlib
 import logging
-
+import argparse
 import minio
 import pydantic
 
@@ -38,10 +38,10 @@ def merge_acls(acls: list[model.AccessControlList]) -> model.AccessControlList:
     return acl_all
 
 
-def get_acls(s: cstore.Client):
+def get_acls(s: cstore.Client, prefix: str):
     acls: list[model.AccessControlList] = []
 
-    objs = s.client.list_objects(s.bucket, prefix=ACL_PREFIX, recursive=True)
+    objs = s.client.list_objects(s.bucket, prefix=prefix, recursive=True)
 
     # Apply ACLs in the order based on their object name
     objs = sorted(objs, key=lambda obj: obj.object_name)
@@ -68,8 +68,21 @@ def get_acls(s: cstore.Client):
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("-p", "--prefix", type=str, default=ACL_PREFIX)
+    parser.add_argument(
+        "-l",
+        "--log-level",
+        default="debug" if config.DEBUG else "info",
+        help="Logging level",
+        choices=["debug", "info", "warn", "error", "critical"],
+    )
+
+    args = parser.parse_args()
+
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=args.log_level.upper(),
         format="%(asctime)s.%(msecs)03d %(levelname)s %(name)s %(message)s",
         datefmt="%H:%M:%S",
     )
@@ -94,7 +107,7 @@ def main() -> int:
         minio_endpoint, credentials=creds, http_client=http_client
     )
 
-    acls = get_acls(s)
+    acls = get_acls(s, args.prefix)
     acl = merge_acls(acls)
 
     rc = 0

@@ -10,7 +10,7 @@ from queue import SimpleQueue
 
 from apprise import Apprise, AppriseConfig, NotifyType
 
-from seguro.common import broker
+from seguro.common import broker, config
 
 
 @dc.dataclass
@@ -81,7 +81,7 @@ def main() -> int:
     parser.add_argument(
         "-l",
         "--log-level",
-        default="info",
+        default="debug" if config.DEBUG else "info",
         help="Logging level",
         choices=["debug", "info", "warn", "error", "critical"],
     )
@@ -95,9 +95,9 @@ def main() -> int:
     )
 
     queue: SimpleQueue[Notification] = SimpleQueue()
-    apprise = Apprise()
-    config = AppriseConfig("config.yaml")
-    client = broker.Client("notifier")
+    ar = Apprise()
+    arcfg = AppriseConfig("config.yaml")
+    b = broker.Client("notifier")
 
     def notification_callback(_b: broker.Client, msg: broker.Message):
         """Callback which gets called for each message received on the
@@ -112,16 +112,16 @@ def main() -> int:
         tag = msg.topic.removeprefix(f"{args.prefix}/")
         queue.put(Notification(tag, msg.payload))
 
-    apprise.add(config)
-    apprise.notify("Started notification service", tag="debug")
-    client.subscribe(f"{args.prefix}/+", notification_callback)
+    ar.add(arcfg)
+    ar.notify("Started notification service", tag="debug")
+    b.subscribe(f"{args.prefix}/+", notification_callback)
 
     while True:
         try:
             notification: Notification = queue.get()
             logging.info(f"Received notification for tag: {notification.tag}")
             logging.debug(f"\t{notification}")
-            notification.publish(apprise)
+            notification.publish(ar)
         except Exception as err:
             logging.error(f"{err}")
         except KeyboardInterrupt:
