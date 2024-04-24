@@ -61,8 +61,12 @@ for BUCKET in ${BUCKETS}; do
     mc mb --ignore-existing "minio/${BUCKET}"
 done
 
-echo "== Buckets:"
+echo "=== Buckets:"
 mc ls minio
 
-echo "== Policies:"
+echo "=== Policies:"
 mc admin policy ls minio
+
+echo "== Copy initial contents to the '${S3_BUCKET}' bucket"
+mc mirror /store minio/${S3_BUCKET} 2>&1 | \
+    grep -v "Overwrite not allowed"

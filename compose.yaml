@@ -161,6 +161,10 @@ services:
       source: scripts/setup-minio.sh
       target: /setup-minio.sh
       read_only: true
+    - type: bind
+      source: store/
+      target: /store/
+      read_only: true
 
   pki-setup:
     build:
