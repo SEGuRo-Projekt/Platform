@@ -25,6 +25,7 @@ class Job(compose.Service):
             job_spec.container,
             job_spec.scale,
             job_spec.recreate,
+            job_spec.build,
         )
 
         self.scheduler = scheduler
