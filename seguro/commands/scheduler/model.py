@@ -74,6 +74,7 @@ class JobSpec(BaseModel):
     triggers: list[Trigger] | None = None
     scale: int = 1
     recreate: bool = False
+    build: bool = False
     container: Service
 
 

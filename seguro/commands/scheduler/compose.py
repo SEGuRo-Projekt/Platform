@@ -23,12 +23,14 @@ class Service:
         service_spec: compose_model.Service,
         scale: int = 1,
         force_recreate: bool = False,
+        build: bool = False,
     ):
         self.composer = composer
         self.name = name
         self.service_spec = service_spec
         self.scale = scale
         self.force_recreate = force_recreate
+        self.build = build
 
     def start(self, overlays: list[compose_model.ComposeSpecification] = []):
         """
@@ -47,6 +49,9 @@ class Service:
 
         if self.force_recreate:
             args += ["--force-recreate"]
+
+        if self.build:
+            args += ["--build"]
 
         args += [self.name]
 
