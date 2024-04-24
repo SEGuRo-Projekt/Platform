@@ -6,7 +6,7 @@ tls:
     default:
       defaultCertificate:
         certFile: /certs/server.crt
-        keyFile: /keys/server.key
+        keyFile: /keys/server/server.key
 
   options:
     default:
@@ -28,9 +28,9 @@ http:
   serversTransports:
     default:
       rootCAs:
-      - /certs/ca.crt
+        - /certs/ca.crt
 
     store-ui:
       serverName: ui.store.localhost
       rootCAs:
-      - /certs/ca.crt
+        - /certs/ca.crt

@@ -9,8 +9,8 @@ ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
 ADMIN_PASSWORD=${ADMIN_PASSWORD:-s3gur0herne}
 
 TLS_CACERT=${TLS_CACERT:-keys/ca.crt}
-TLS_KEY=${TLS_KEY:-keys/client-admin.key}
-TLS_CERT=${TLS_CERT:-keys/client-admin.crt}
+TLS_KEY=${TLS_KEY:-keys/clients/admin.key}
+TLS_CERT=${TLS_CERT:-keys/clients/admin.crt}
 
 S3_HOST=${S3_HOST:-localhost}
 S3_PORT=${S3_PORT:-9000}

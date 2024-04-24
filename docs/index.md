@@ -15,7 +15,7 @@ Welcome to the home page of the SEGuRo platform.
 architecture
 installation
 configuration
-models
+examples
 access
 development
 api
@@ -32,7 +32,15 @@ Please visit the public documentation here:
 
 ## Code
 
-- [GitHub](https://github.com/SEGuRo-Projekt/Platform)
+- [GitHub](https://github.com/SEGuRo-Projekt)
+
+
+## Authors & License
+
+- SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
+- SPDX-FileCopyrightText: 2023 Felix Wege, EONERC-ACS, RWTH Aachen University
+- SPDX-License-Identifier: Apache-2.0
+
 
 ## Partners
 
@@ -94,9 +102,3 @@ We are grateful for the financial support of the [BMWK (Federal Ministry of Econ
 ```{image} _static/bmwk_funding.png
 :width: 250px
 ```
-
-## License
-
-- SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
-- SPDX-FileCopyrightText: 2023 Felix Wege, EONERC-ACS, RWTH Aachen University
-- SPDX-License-Identifier: Apache-2.0

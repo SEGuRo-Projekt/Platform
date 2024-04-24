@@ -10,8 +10,8 @@ x-platform-service: &platform-service
     S3_HOST: minio
     MQTT_HOST: mosquitto
     TLS_CACERT: /certs/ca.crt
-    TLS_CERT: /certs/client-admin.crt
-    TLS_KEY: /keys/client-admin.key
+    TLS_CERT: /certs/clients/admin.crt
+    TLS_KEY: /keys/clients/admin.key
 
   build:
     context: .
@@ -19,16 +19,6 @@ x-platform-service: &platform-service
     - seguro/platform
 
   restart: unless-stopped
-
-  volumes:
-  - type: volume # TODO: Implement more fine-grained access to keys
-    source: keys
-    target: /keys
-    read_only: true
-  - type: volume
-    source: certs
-    target: /certs
-    read_only: true
 
   depends_on:
     pki-setup:
@@ -63,11 +53,10 @@ services:
       --ftp="address=:2021"
       --ftp="passive-port-range=30000-40000"
       --sftp="address=:2022"
-      --sftp="ssh-private-key=/keys/ssh_host_rsa_key"
-      --ftp="tls-private-key=/keys/server.key"
-      --ftp="tls-public-cert=/certs/server.crt"
+      --sftp="ssh-private-key=/keys/minio/ssh_host_rsa_key"
+      --ftp="tls-private-key=/keys/minio/private.key"
+      --ftp="tls-public-cert=/keys/minio/public.crt"
       /data
-
 
     labels:
     - traefik.enable=true
@@ -113,7 +102,7 @@ services:
       mode: host
 
     healthcheck:
-      test: ["CMD", "curl", "--cacert", "/certs/ca.crt", "--fail", "https://localhost:9000/minio/health/live"]
+      test: ["CMD", "curl", "--cacert", "/keys/minio/CAs/ca.crt", "--fail", "https://localhost:9000/minio/health/live"]
       interval: 10s
       timeout: 20s
       retries: 3
@@ -123,15 +112,9 @@ services:
     - type: volume
       source: store
       target: /data/
-
-    # TODO: Implement more fine-grained access to keys
     - type: volume
-      source: keys
-      target: /keys
-      read_only: true
-    - type: volume
-      source: certs
-      target: /certs
+      source: key_minio
+      target: /keys/minio
       read_only: true
 
   minio-setup:
@@ -151,9 +134,9 @@ services:
     - .env
 
     volumes:
-    - type: volume # TODO: Implement more fine-grained access to keys
-      source: keys
-      target: /keys
+    - type: volume
+      source: key_clients
+      target: /keys/clients
     - type: volume
       source: certs
       target: /certs
@@ -181,9 +164,24 @@ services:
     - .env
 
     volumes:
-    - type: volume # TODO: Implement more fine-grained access to keys
-      source: keys
-      target: /keys
+    - type: volume
+      source: key_ca
+      target: /keys/ca
+    - type: volume
+      source: key_tsa
+      target: /keys/tsa
+    - type: volume
+      source: key_server
+      target: /keys/server
+    - type: volume
+      source: key_clients
+      target: /keys/clients
+    - type: volume
+      source: key_ssh
+      target: /keys/ssh
+    - type: volume
+      source: key_minio
+      target: /keys/minio
     - type: volume
       source: certs
       target: /certs
@@ -193,7 +191,7 @@ services:
       read_only: true
     - type: bind
       source: ./keys
-      target: /keys-out
+      target: /keys/out
 
   mosquitto:
     image: eclipse-mosquitto:2.0.18-openssl
@@ -208,10 +206,13 @@ services:
       source: mosquitto
       target: /mosquitto/data/
 
-    # TODO: Implement more fine-grained access to keys
     - type: volume
-      source: keys
-      target: /keys
+      source: key_server
+      target: /keys/server
+      read_only: true
+    - type: volume
+      source: key_clients
+      target: /keys/clients
       read_only: true
     - type: volume
       source: certs
@@ -225,7 +226,7 @@ services:
       mode: host
 
     healthcheck:
-      test: ["CMD", "mosquitto_sub", "--cafile", "/certs/ca.crt", "--cert", "/certs/client-admin.crt", "--key", "/keys/client-admin.key", "-L", "mqtts://mosquitto:8883/$$SYS/#", "-C", "1", "-i", "healthcheck", "-W", "3"]
+      test: ["CMD", "mosquitto_sub", "--cafile", "/certs/ca.crt", "--cert", "/certs/clients/admin.crt", "--key", "/keys/clients/admin.key", "-L", "mqtts://mosquitto:8883/$$SYS/#", "-C", "1", "-i", "healthcheck", "-W", "3"]
       interval: 10s
       timeout: 10s
       retries: 3
@@ -262,7 +263,11 @@ services:
       target: /mosquitto/data/
 
   mosquitto-setup-acl:
-    <<: *platform-service
+    environment:
+      MQTT_HOST: mosquitto
+      TLS_CACERT: /certs/ca.crt
+      TLS_CERT: /certs/clients/admin.crt
+      TLS_KEY: /keys/clients/admin.key
 
     restart: "no"
 
@@ -279,9 +284,9 @@ services:
     command: /setup-mosquitto-acl.sh
 
     volumes:
-    - type: volume # TODO: Implement more fine-grained access to keys
-      source: keys
-      target: /keys
+    - type: volume
+      source: key_clients
+      target: /keys/clients
       read_only: true
     - type: volume
       source: certs
@@ -318,7 +323,7 @@ services:
 
     volumes:
     - type: volume
-      source: yacht-config
+      source: yacht_config
       target: /config
     - type: bind
       source: /var/run/docker.sock
@@ -353,8 +358,8 @@ services:
       target: /etc/docker/registry
       read_only: true
     - type: volume
-      source: keys
-      target: /keys
+      source: key_server
+      target: /keys/server
       read_only: true
     - type: volume
       source: certs
@@ -414,10 +419,9 @@ services:
       target: /etc/traefik/
       read_only: true
 
-    # TODO: Implement more fine-grained access to keys
     - type: volume
-      source: keys
-      target: /keys
+      source: key_server
+      target: /keys/server
       read_only: true
     - type: volume
       source: certs
@@ -436,9 +440,9 @@ services:
     working_dir: /workspace
 
     volumes:
-    - type: volume # TODO: Implement more fine-grained access to keys
-      source: keys
-      target: /keys
+    - type: volume
+      source: key_clients
+      target: /keys/clients
       read_only: true
     - type: volume
       source: certs
@@ -489,9 +493,9 @@ services:
       source: ./etc/timestamp-server/
       target: /etc/timestamp-server/
       read_only: true
-    - type: volume # TODO: Implement more fine-grained access to keys
-      source: keys
-      target: /keys
+    - type: volume
+      source: key_tsa
+      target: /keys/tsa
       read_only: true
     - type: volume
       source: certs
@@ -499,9 +503,14 @@ services:
       read_only: true
 
 volumes:
-  keys:
+  key_ca:
+  key_server:
+  key_tsa:
+  key_clients:
+  key_minio:
+  key_ssh:
   certs:
   store:
   registry:
   mosquitto:
-  yacht-config:
+  yacht_config:

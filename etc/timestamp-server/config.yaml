@@ -5,6 +5,6 @@ host: 0.0.0.0
 port: 3000
 timestamp-signer: file
 log-type: dev
-file-signer-key-path: /keys/tsa.key
+file-signer-key-path: /keys/tsa/tsa.key
 certificate-chain-path: /certs/tsa_chain.crt
 timestamp-signer-hash: sha256

@@ -12,19 +12,19 @@
       "problemMatcher": []
     },
     {
-      "label": "Watch datastore objects",
+      "label": "Keep mirroring files to the datastore",
       "type": "shell",
-      "command": "mc --watch --overwrite ${workspaceFolder}/store minio/seguro",
+      "command": "mc --insecure mirror --watch ${workspaceFolder}/store minio/seguro",
       "problemMatcher": []
     },
     {
-      "label": "Sync file to datastore",
+      "label": "Sync the current file to the datastore",
       "type": "shell",
       "command": "REL=$(realpath --relative-to=\"${workspaceFolder}/store\" \"${file}\"); if [[ \"${REL}\" == ..* ]]; then echo \"File is not in store\"; else mc --insecure cp \"${file}\" \"minio/seguro/${REL}\"; fi",
       "problemMatcher": []
     },
     {
-      "label": "Remove file from datastore",
+      "label": "Remove the current file from the datastore",
       "type": "shell",
       "command": "REL=$(realpath --relative-to=\"${workspaceFolder}/store\" \"${file}\"); if [[ \"${REL}\" == ..* ]]; then echo \"File is not in store\"; else mc --insecure rm \"minio/seguro/${REL}\"; fi",
       "problemMatcher": []
