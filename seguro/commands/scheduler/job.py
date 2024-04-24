@@ -30,8 +30,9 @@ class Job(compose.Service):
         self.scheduler = scheduler
         self.watchers: list[store.Watcher] = []
 
-        for trigger in self.job_spec.triggers:
-            self._setup_trigger(trigger)
+        if triggers := self.job_spec.triggers:
+            for trigger in triggers:
+                self._setup_trigger(trigger)
 
     def _setup_trigger(self, trigger: model.Trigger):
         """Setup the trigger.
