@@ -40,6 +40,7 @@ clients:
 
 groups:
   services:
+    roles: []
 
 roles:
   scheduler:
