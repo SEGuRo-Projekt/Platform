@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # shellcheck disable=SC2086
 
 # SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
