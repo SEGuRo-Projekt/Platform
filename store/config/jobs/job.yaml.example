@@ -8,100 +8,100 @@
 # an object is created or removed from the data store at the
 # given prefix
 #
-# Note: Jobs without any configured triggers will be started
-#       immediately.
-triggers:
+# Note: Jobs without configured triggers will be started
+#       immediately when the scheduler is started.
 
+triggers:
   # Each triggers ID via passed in the SEGURO_JOB_INFO environment variable
   # to the spawned container
-- id: measurements-received-ms1
+  - id: measurements-received-ms1
 
-  # The triggers type can be on of:
-  # - created
-  # - removed
-  # - modified
-  # - schedule
-  # - startup
-  # - shutdown
-  type: created
+    # The triggers type can be on of:
+    # - created
+    # - removed
+    # - modified
+    # - schedule
+    # - startup
+    # - shutdown
+    type: created
 
-  # Triggers of type 'created' or 'removed' can specify
-  # a prefix to restrict which modified objects will trigger the
-  # job to be executed.
-  prefix: data/measurements/ms_1/
+    # Triggers of type 'created' or 'removed' can specify
+    # a prefix to restrict which modified objects will trigger the
+    # job to be executed.
+    prefix: data/measurements/ms_1/
 
-- id: removed-data
-  type: removed
-  prefix: data/ba/
+  - id: removed-data
+    type: removed
+    prefix: data/ba/
 
-- id: schedule-every-5-seconds
-  type: schedule
+  - id: schedule-every-5-seconds
+    type: schedule
 
-  # Run the job every 'interval' of 'units'
-  #
-  # Defaults to 1
-  interval: 5
+    # Run the job every 'interval' of 'units'
+    #
+    # Defaults to 1
+    interval: 5
 
-  # Unit of time interval
-  # Should be one of:
-  # - seconds
-  # - minutes
-  # - hours
-  # - days
-  # - weeks
-  #
-  # Defaults to 'seconds'
-  unit: seconds
+    # Unit of time interval
+    # Should be one of:
+    # - seconds
+    # - minutes
+    # - hours
+    # - days
+    # - weeks
+    #
+    # Defaults to 'seconds'
+    unit: seconds
 
-  # Day of the week for weekly jobs
-  #
-  # Defaults to 'monday'
-  start_day: monday
+    # Day of the week for weekly jobs
+    #
+    # Defaults to 'monday'
+    start_day: monday
 
-  # Schedule the job to run at an irregular (randomized) interval.
-  # The job’s interval will randomly vary from the value given to
-  # every to latest. The range defined is inclusive on both ends.
-  # For example:
-  #
-  #   unit: seconds
-  #   interval: A
-  #   interval_to: B
-  #
-  # Executes the job function every N seconds such that A <= N <= B.
-  #
-  # Defaults to 'interval'
-  interval_to: 10
+    # Schedule the job to run at an irregular (randomized) interval.
+    # The job’s interval will randomly vary from the value given to
+    # every to latest. The range defined is inclusive on both ends.
+    # For example:
+    #
+    #   unit: seconds
+    #   interval: A
+    #   interval_to: B
+    #
+    # Executes the job function every N seconds such that A <= N <= B.
+    #
+    # Defaults to 'interval'
+    interval_to: 10
 
-  # Run the job exactly once
-  #
-  # Defaults to false
-  once: true
+    # Run the job exactly once
+    #
+    # Defaults to false
+    once: true
 
-  # Specify a particular time that the job should be run at.
-  #
-  # A string in one of the following formats:
-  # - For daily jobs -> HH:MM:SS or HH:MM
-  # - For hourly jobs -> MM:SS or :MM
-  # - For minute jobs -> :SS
-  # The format must make sense given how often the job is repeating;
-  # for example, a job that repeats every minute should not be given
-  # a string in the form HH:MM:SS. The difference between :MM and :SS
-  # is inferred from the selected time-unit.
-  #
-  # Defaults to the beginning of the respective 'unit'
-  at: 11:11
+    # Specify a particular time that the job should be run at.
+    #
+    # A string in one of the following formats:
+    # - For daily jobs -> HH:MM:SS or HH:MM
+    # - For hourly jobs -> MM:SS or :MM
+    # - For minute jobs -> :SS
+    # The format must make sense given how often the job is repeating;
+    # for example, a job that repeats every minute should not be given
+    # a string in the form HH:MM:SS. The difference between :MM and :SS
+    # is inferred from the selected time-unit.
+    #
+    # Defaults to the beginning of the respective 'unit'
+    at: 11:11
 
-  # Schedule job to run until the specified moment.
-  #
-  # The job is canceled whenever the next run is calculated and it
-  # turns out the next run is after 'until'.
-  # The job is also canceled right before it runs, if the current
-  # time is after until_time.
-  # This latter case can happen when the the job was scheduled to
-  # run before 'until', but runs after until_time.
-  #
-  # Jobs run indefinitely by default.
-  until: 2024-02-06 09:09
+    # Schedule job to run until the specified moment.
+    #
+    # The job is canceled whenever the next run is calculated and it
+    # turns out the next run is after 'until'.
+    # The job is also canceled right before it runs, if the current
+    # time is after until_time.
+    # This latter case can happen when the the job was scheduled to
+    # run before 'until', but runs after until_time.
+    #
+    # Jobs run indefinitely by default.
+    until: 2024-02-06 09:09
 
 # An optional number which determines how many instances of the container
 # shall be started.

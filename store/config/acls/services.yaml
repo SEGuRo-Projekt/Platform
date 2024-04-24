@@ -26,17 +26,17 @@ clients:
 
   notifier:
     roles:
-    - notifier
+      - notifier
 
     groups:
-    - services
+      - services
 
   notebook-executor:
     roles:
-    - notebook-executor
+      - notebook-executor
 
     groups:
-    - services
+      - services
 
 groups:
   services:
@@ -44,20 +44,20 @@ groups:
 roles:
   scheduler:
     broker:
-    - topic: '#'
-      actions:
-      - Subscribe
+      - topic: "#"
+        actions:
+          - Subscribe
 
     store:
-    - object: '*'
-      actions:
-      - '*' # TODO: be more restrictive here
+      - object: "*"
+        actions:
+          - "*" # TODO: be more restrictive here
 
   notifier:
     broker:
-    - topic: notifications
-      actions:
-      - Subscribe
+      - topic: notifications
+        actions:
+          - Subscribe
 
   recorder:
     broker:
@@ -83,7 +83,7 @@ roles:
 
   notebook-executor:
     store:
-    - object: 'notebooks/#'
-      actions:
-      - GetObject
-      - PutObject
+      - object: "notebooks/#"
+        actions:
+          - GetObject
+          - PutObject
