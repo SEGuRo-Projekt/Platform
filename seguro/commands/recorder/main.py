@@ -7,7 +7,7 @@ import logging
 import time
 import functools as ft
 
-from seguro.common import store, broker
+from seguro.common import store, broker, config
 from seguro.common.broker import Sample
 from seguro.commands.recorder.recorder import Recorder
 
@@ -42,7 +42,7 @@ def main() -> int:
     parser.add_argument(
         "-l",
         "--log-level",
-        default="info",
+        default="debug" if config.DEBUG else "info",
         help="Logging level",
         choices=["debug", "info", "warn", "error", "critical"],
     )

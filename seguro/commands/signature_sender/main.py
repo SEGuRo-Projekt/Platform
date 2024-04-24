@@ -12,7 +12,7 @@ from pyasn1.codec import der
 from rfc3161ng import RemoteTimestamper
 from villas.node.digest import Digest
 
-from seguro.common import broker
+from seguro.common import broker, config
 
 
 @dc.dataclass
@@ -79,7 +79,7 @@ def main() -> int:
     parser.add_argument(
         "-l",
         "--log-level",
-        default="info",
+        default="debug" if config.DEBUG else "info",
         help="Logging level",
         choices=["debug", "info", "warn", "error", "critical"],
     )

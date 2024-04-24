@@ -9,7 +9,8 @@ from dataclasses import dataclass
 from queue import Queue
 from pyasn1.codec import der
 from rfc3161ng import TimeStampResp, oid_to_hash
-from seguro.common import broker, store
+
+from seguro.common import broker, store, config
 
 
 @dataclass
@@ -45,7 +46,7 @@ def main() -> int:
     parser.add_argument(
         "-l",
         "--log-level",
-        default="info",
+        default="debug" if config.DEBUG else "info",
         help="Logging level",
         choices=["debug", "info", "warn", "error", "critical"],
     )
