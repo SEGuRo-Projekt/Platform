@@ -20,8 +20,8 @@ BACKUP_COUNT = 5
 
 # Authentication
 TLS_CACERT = env.str("TLS_CACERT", "keys/ca.crt")
-TLS_CERT = env.str("TLS_CERT", "keys/client-admin.crt")
-TLS_KEY = env.str("TLS_KEY", "keys/client-admin.key")
+TLS_CERT = env.str("TLS_CERT", "keys/clients/admin.crt")
+TLS_KEY = env.str("TLS_KEY", "keys/clients/admin.key")
 
 # Object storage
 S3_HOST = env.str("S3_HOST", "localhost")

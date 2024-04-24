@@ -16,8 +16,8 @@ fi
 
 function create_ssh_keys() {
   echo "=== Creating new SSH host key..."
-  ssh-keygen -N '' -t ${PKI_KEY_TYPE} -b ${PKI_KEY_BITS} -f /keys/ssh_host_rsa_key
-  echo "Public host key: $(cat /keys/ssh_host_rsa_key.pub)"
+  ssh-keygen -N '' -t ${PKI_KEY_TYPE} -b ${PKI_KEY_BITS} -f /keys/ssh/ssh_host_rsa_key
+  echo "Public host key: $(cat /keys/ssh/ssh_host_rsa_key.pub)"
   echo
 }
 
@@ -30,7 +30,7 @@ function create_pki_ca() {
     -sha256 \
     -days ${PKI_EXPIRY_DAYS} \
     -newkey "${PKI_KEY_TYPE}:${PKI_KEY_BITS}" \
-    -keyout "/keys/ca.key" \
+    -keyout "/keys/ca/ca.key" \
     -out "/certs/ca.crt" \
     -subj "${PKI_SUBJECT}/CN=SEGuRo Certificate Authority" 2> /dev/null
 }
@@ -71,7 +71,7 @@ EOF
     -nodes \
     -out server.csr \
     -newkey "${PKI_KEY_TYPE}:${PKI_KEY_BITS}" \
-    -keyout /keys/server.key \
+    -keyout /keys/server/server.key \
     -subj "${PKI_SUBJECT}/CN=Server Certificate" 2> /dev/null
 
   openssl x509 \
@@ -80,7 +80,7 @@ EOF
     -sha256 \
     -extfile "server.v3.ext" \
     -CA "/certs/ca.crt" \
-    -CAkey "/keys/ca.key" \
+    -CAkey "/keys/ca/ca.key" \
     -CAcreateserial \
     -in "server.csr" \
     -out "/certs/server.crt" 2> /dev/null
@@ -109,7 +109,7 @@ EOF
     -nodes \
     -out tsa.csr \
     -newkey "${PKI_KEY_TYPE}:${PKI_KEY_BITS}" \
-    -keyout /keys/tsa.key \
+    -keyout /keys/tsa/tsa.key \
     -subj "${PKI_SUBJECT}/CN=SEGuRo Timestamping Authority" 2> /dev/null
 
   openssl x509 \
@@ -118,7 +118,7 @@ EOF
     -sha256 \
     -extfile "server.v3.ext" \
     -CA "/certs/ca.crt" \
-    -CAkey "/keys/ca.key" \
+    -CAkey "/keys/ca/ca.key" \
     -CAcreateserial \
     -in "tsa.csr" \
     -out "/certs/tsa.crt" 2> /dev/null
@@ -128,6 +128,7 @@ EOF
 }
 
 function create_pki_client() {
+  mkdir -p /{keys,certs}/clients
   CN=$1
 
   echo "=== Creating new client certificate for ${CN}"
@@ -141,9 +142,9 @@ EOF
   openssl req \
     -new \
     -nodes \
-    -out "client-${CN}.csr" \
+    -out "/certs/clients/${CN}.csr" \
     -newkey "${PKI_KEY_TYPE}:${PKI_KEY_BITS}" \
-    -keyout "/keys/client-${CN}.key" \
+    -keyout "/keys/clients/${CN}.key" \
     -subj "${PKI_SUBJECT}/CN=${CN}" 2> /dev/null
 
   openssl x509 \
@@ -152,10 +153,10 @@ EOF
     -sha256 \
     -extfile "client.v3.ext" \
     -CA "/certs/ca.crt" \
-    -CAkey "/keys/ca.key" \
+    -CAkey "/keys/ca/ca.key" \
     -CAcreateserial \
-    -in "client-${CN}.csr" \
-    -out "/certs/client-${CN}.crt" 2> /dev/null
+    -in "/certs/clients/${CN}.csr" \
+    -out "/certs/clients/${CN}.crt" 2> /dev/null
 }
 
 if [ "${SECRET}" == "PLEASE-CHANGE-ME" ]; then
@@ -164,52 +165,55 @@ if [ "${SECRET}" == "PLEASE-CHANGE-ME" ]; then
 fi
 
 echo "== Checking SSH host keys..."
-if ! [ -f /keys/ssh_host_rsa_key ]; then
+if ! [ -f /keys/ssh/ssh_host_rsa_key ]; then
   create_ssh_keys
 fi
 
 echo "== Checking PKI certificates..."
-{ [ -f "/certs/ca.crt" ] && [ -f "/keys/ca.key" ]; } || \
+{ [ -f "/certs/ca.crt" ] && [ -f "/keys/ca/ca.key" ]; } || \
 create_pki_ca
 
-{ [ -f "/certs/server.crt" ] && [ -f "/keys/server.key" ]; } || \
+{ [ -f "/certs/server.crt" ] && [ -f "/keys/server/server.key" ]; } || \
 create_pki_server
 
-{ [ -f "/certs/tsa.crt" ] && [ -f "/keys/tsa.key" ]; } || \
+{ [ -f "/certs/tsa.crt" ] && [ -f "/keys/tsa/tsa.key" ]; } || \
 create_pki_tsa
 
 for CN in ${PKI_CLIENT_CERTS}; do
-  { [ -f "/certs/client-${CN}.crt" ] && [ -f "/keys/client-${CN}.key" ]; } || \
+  { [ -f "/certs/clients/${CN}.crt" ] && [ -f "/keys/clients/${CN}.key" ]; } || \
   create_pki_client "${CN}"
 done
 
 # Copy clients certs to user accessible mount
-cp /certs/client-*.crt /keys/client-*.key /certs/{tsa,tsa_chain,ca}.crt /keys/ca.key /keys-out/
-chmod 777 /keys-out/*
-chmod 777 /keys/* /certs/*
+mkdir -p /keys/out/clients
+cp /certs/clients/*.crt /keys/out/clients
+cp /keys/clients/*.key /keys/out/clients
+cp /certs/{tsa,tsa_chain,ca}.crt /keys/ca/ca.key /keys/out/
+chmod -R 777 /keys/{ca,server,clients,tsa,out}/* /certs/*
 
 # Prepare Minio keys
 # See: https://min.io/docs/minio/linux/operations/network-encryption.html
 mkdir -p /keys/minio/CAs
 cp /certs/ca.crt /keys/minio/CAs
 cp /certs/server.crt /keys/minio/public.crt
-cp /keys/server.key /keys/minio/private.key
+cp /keys/server/server.key /keys/minio/private.key
+cp /keys/ssh/ssh_host_rsa_key{.pub,} /keys/minio/
 
 echo "== Checking DH parameters file..."
-if ! [ -f /keys/dhparam.pem ]; then
-  #openssl dhparam -out /keys/dhparam.pem ${PKI_KEY_BITS}
-  curl -s "https://2ton.com.au/dhparam/${PKI_KEY_BITS}" > /keys/dhparam.pem
-  chmod 700 /keys/dhparam.pem
-  chown 1883:1883 /keys/dhparam.pem
+if ! [ -f /keys/server/dhparam.pem ]; then
+  #openssl dhparam -out /keys/server/dhparam.pem ${PKI_KEY_BITS}
+  curl -s "https://2ton.com.au/dhparam/${PKI_KEY_BITS}" > /keys/server/dhparam.pem
+  chmod 700 /keys/server/dhparam.pem
+  chown 1883:1883 /keys/server/dhparam.pem
 fi
 
 echo "== Checking htpasswd for registry..."
-if [ -f /keys/registry_htpasswd ]; then
-  if htpasswd -iv /keys/registry_htpasswd "${ADMIN_USERNAME}" <<< "${ADMIN_PASSWORD}" 2> /dev/null; then
+if [ -f /keys/server/registry_htpasswd ]; then
+  if htpasswd -iv /keys/server/registry_htpasswd "${ADMIN_USERNAME}" <<< "${ADMIN_PASSWORD}" 2> /dev/null; then
     echo "Admin password unchanged"
   else
-    htpasswd -iB /keys/registry_htpasswd "${ADMIN_USERNAME}" <<< "${ADMIN_PASSWORD}"
+    htpasswd -iB /keys/server/registry_htpasswd "${ADMIN_USERNAME}" <<< "${ADMIN_PASSWORD}"
   fi
 else
-  htpasswd -iBc /keys/registry_htpasswd "${ADMIN_USERNAME}" <<< "${ADMIN_PASSWORD}"
+  htpasswd -iBc /keys/server/registry_htpasswd "${ADMIN_USERNAME}" <<< "${ADMIN_PASSWORD}"
 fi

@@ -147,17 +147,22 @@ class Job(compose.Service):
                         "S3_HOST": "minio",
                         "MQTT_HOST": "mosquitto",
                         "TLS_CACERT": "/certs/ca.crt",
-                        "TLS_CERT": "/certs/client-admin.crt",
-                        "TLS_KEY": "/keys/client-admin.key",
+                        "TLS_CERT": "/certs/clients/admin.crt",
+                        "TLS_KEY": "/keys/clients/admin.key",
                     },  # type: ignore
                     volumes=[
                         compose_model.Volumes(
                             type="volume",
-                            source=vol,
-                            target=f"/{vol}",
+                            source="key_clients",
+                            target="/keys/clients",
                             read_only=True,
-                        )
-                        for vol in ["keys", "certs"]
+                        ),
+                        compose_model.Volumes(
+                            type="volume",
+                            source="certs",
+                            target="/certs",
+                            read_only=True,
+                        ),
                     ],
                 )
             },
