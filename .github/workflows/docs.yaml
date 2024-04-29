@@ -27,8 +27,8 @@ jobs:
 
       - name: Install Graphviz deps
         run: |
-          apt-get update && \
-          apt-get install --yes --no-install-recommends \
+          sudo apt-get update && \
+          sudo apt-get install --yes --no-install-recommends \
             graphviz \
             libgraphviz-dev \
             pkg-config
