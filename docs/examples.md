@@ -24,11 +24,11 @@ Two examples for such services are shipped as standalone Docker images in [`imag
 ### Job Worker
 
 ```{note}
-**ToDo:** This section still needs to be written. 
+**ToDo:** This section still needs to be written.
 ```
 
 ### Streaming Worker
 
 ```{note}
-**ToDo:** This section still needs to be written. 
+**ToDo:** This section still needs to be written.
 ```

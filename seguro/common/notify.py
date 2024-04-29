@@ -29,7 +29,10 @@ def notify(
     # Upload attachments to store
     for i, att in enumerate(attachments):
         if isinstance(att, RawAttachment):
-            att_obj = f"attachments/{uuid.uuid4()}/{att.name if att.name else 'raw.bin'}"
+            att_obj = (
+                f"attachments/{uuid.uuid4()}/"
+                + "{att.name if att.name else 'raw.bin'}"
+            )
             obj = s.put_file_contents(att_obj, att.contents)
 
         elif isinstance(att, FileAttachment):
