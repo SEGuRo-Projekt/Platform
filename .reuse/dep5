@@ -4,9 +4,9 @@ Upstream-Contact: Steffen Vogel <steffen.vogel@opal-rt.com>
 Source: https://github.com/SEGuRo-Projekt/Platform
 
 Files: *.drawio *.png store/* flake.lock poetry.lock docs/*.md docs/*.rst compose-cache.json
-Copyright: 2023 Steffen Vogel, OPAL-RT Germany GmbH
+Copyright: 2023-2024 Steffen Vogel, OPAL-RT Germany GmbH
 License: Apache-2.0
 
 Files: docs/_static/*
-Copyright: 2023 Steffen Vogel, OPAL-RT Germany GmbH
+Copyright: 2023-2024 Steffen Vogel, OPAL-RT Germany GmbH
 License: Apache-2.0
