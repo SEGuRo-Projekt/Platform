@@ -9,15 +9,21 @@ from nbconvert import PDFExporter
 from nbconvert.preprocessors import ExecutePreprocessor
 
 from seguro.common import store, job
+from seguro.commands.scheduler.model import StoreTriggerType
 
 
 def main() -> int:
     s = store.Client()
 
-    if job.info.triggered_by.event != "created":
+    if (
+        job.info is None
+        or job.info.trigger is None
+        or job.info.trigger.type != StoreTriggerType.CREATED
+        or job.info.trigger.object is None
+    ):
         return -1
 
-    nb_obj = job.info.notebook
+    nb_obj = job.info.trigger.object
 
     # Fetch Notebook from store
     nb_contents = s.get_file_contents(nb_obj).read()

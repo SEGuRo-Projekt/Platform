@@ -3,9 +3,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 triggers:
-  - id: initial
+  startup:
     type: startup
-  - id: every-minute
+
+  every-minute:
     type: schedule
     interval: 5
     unit: minutes

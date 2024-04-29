@@ -1,0 +1,13 @@
+---
+# SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+container:
+  image: seguro/platform
+  environment:
+    CONFIG: s3://config/notifications.yaml
+
+  env_file:
+    - .env
+
+  command: ["notifier"]

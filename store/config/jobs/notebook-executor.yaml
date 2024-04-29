@@ -5,15 +5,12 @@
 notebook: notebooks/example.ipynb
 
 triggers:
-  - id: notebook-changed
-
-    type: modified
+  notebook-changed:
+    type: created
 
     prefix: notebooks/
+    initial: true
 
 container:
   image: seguro/platform
-
-  env_file: .env
-
   command: ["notebook-executor"]

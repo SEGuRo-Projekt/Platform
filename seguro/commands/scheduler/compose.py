@@ -62,30 +62,7 @@ class Service:
 
     @property
     def spec(self):
-        spec = self.service_spec.copy()
-
-        def make_abs(f: str) -> str:
-            return f if os.path.isabs(f) else os.path.abspath(f)
-
-        # Ensure that all env_file's are passed as absolute
-        # paths, as 'docker compose' would otherwise resolve them
-        # relatively to the compose.yml which in our case
-        # is /self/proc/fd/X. So env_file's would be resolved as
-        # /self/proc/fd/some_env_file
-        if isinstance(spec.env_file, compose_model.EnvFile):
-            root = spec.env_file.root
-
-            if isinstance(root, str):
-                spec.env_file.root = make_abs(root)
-            elif isinstance(root, list):
-                for i, env_file in enumerate(root):
-                    entry = root[i]
-                    if isinstance(entry, str):
-                        root[i] = make_abs(entry)
-                    elif isinstance(entry, compose_model.EnvFile1):
-                        entry.path = make_abs(entry.path)
-
-        return spec
+        return self.service_spec
 
 
 class Composer:
@@ -96,7 +73,27 @@ class Composer:
 
     @staticmethod
     def _fix_spec(spec: compose_model.ComposeSpecification) -> dict:
+        spec = spec.copy()
+
+        def make_abs(f: str) -> str:
+            return f if os.path.isabs(f) else os.path.abspath(f)
+
         spec_dict = spec.dict(exclude_unset=True)
+
+        for name, service in spec_dict.get("services", {}).items():
+            # Ensure that all env_file's are passed as absolute
+            # paths, as 'docker compose' would otherwise resolve them
+            # relatively to the compose.yml which in our case
+            # is /self/proc/fd/X. So env_file's would be resolved as
+            # /self/proc/fd/some_env_file
+
+            if env_file := service.get("env_file"):
+                if isinstance(env_file, str):
+                    service["env_file"] = make_abs(env_file)
+                elif isinstance(env_file, list):
+                    for i, env_file_entry in enumerate(env_file):
+                        if isinstance(env_file_entry, str):
+                            env_file[i] = make_abs(env_file_entry)
 
         for name, network in spec_dict.get("networks", {}).items():
             if isinstance(network, dict):
@@ -124,6 +121,14 @@ class Composer:
         """
         specs = [self.spec] + overlays
         specs_dict = [Composer._fix_spec(spec) for spec in specs]
+
+        for i, spec_dict in enumerate(specs_dict):
+            self.logger.debug(
+                "Compose spec %d of %d:\n%s",
+                i + 1,
+                len(specs_dict),
+                yaml.dump(spec_dict),
+            )
 
         with ExitStack() as stack:
             compose_file_fds = [
@@ -217,6 +222,5 @@ class Composer:
         """
         with tempfile.NamedTemporaryFile(mode="w+") as file:
             yaml.dump(contents, file)
-            self.logger.info("Compose file:\n" + yaml.dump(contents))
             file.flush()
             yield file.fileno()

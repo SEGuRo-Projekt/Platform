@@ -3,14 +3,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 triggers:
-  - id: initial-startup
+  initial-startup:
     type: startup
 
-  - id: when-acls-changed
+  when-acls-changed:
     type: created
     prefix: config/acls/
 
-  - id: regular-reconciliation
+  regular-reconciliation:
     type: schedule
     unit: hours
     interval: 1

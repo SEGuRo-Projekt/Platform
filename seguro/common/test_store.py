@@ -5,9 +5,11 @@
 import os
 import threading
 import pytest
+import urllib3
 import pandas as pd
 
 from seguro.common.store import Client, Event
+from seguro.common import config
 
 
 @pytest.mark.store
@@ -114,3 +116,39 @@ def test_frame():
     df2 = store.get_frame("test_frame.parquet")
 
     assert df1.equals(df2)
+
+
+@pytest.mark.store
+def test_presigned_url():
+    store = Client()
+
+    store.put_file_contents("test_data", b"Hello World")
+
+    url = store.get_file_url("test_data")
+
+    http = urllib3.PoolManager(
+        cert_reqs="CERT_REQUIRED",
+        ca_certs=config.TLS_CACERT,
+    )
+    resp = http.request("GET", url)
+
+    assert resp.status == 200
+    assert resp.data == b"Hello World"
+
+
+@pytest.mark.store
+def test_presigned_url_public():
+    store = Client()
+
+    store.put_file_contents("test_data", b"Hello World")
+
+    url = store.get_file_url("test_data", public=True)
+
+    http = urllib3.PoolManager(
+        cert_reqs="CERT_REQUIRED",
+        ca_certs=config.TLS_CACERT,
+    )
+    resp = http.request("GET", url)
+
+    assert resp.status == 200
+    assert resp.data == b"Hello World"

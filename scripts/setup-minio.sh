@@ -68,5 +68,5 @@ echo "=== Policies:"
 mc admin policy ls minio
 
 echo "== Copy initial contents to the '${S3_BUCKET}' bucket"
-mc mirror "/store minio/${S3_BUCKET}" 2>&1 | \
+mc mirror /store "minio/${S3_BUCKET}" 2>&1 | \
     grep -v "Overwrite not allowed"

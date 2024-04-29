@@ -1,0 +1,57 @@
+---
+# SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+# See: https://github.com/caronc/apprise/wiki/Config_yaml
+version: 1
+
+groups:
+  - admins:
+      - steffen-vogel
+      # - felix-wege
+      - zulip
+
+  - opal-rt:
+      - steffen-vogel
+
+  - rwth:
+      - felix-wege
+      - martin-moraga
+
+  - stwh:
+      - erik-rathje
+      - daniel-lampa
+
+  - hsbo:
+      - simeon-kremzow-tennie
+
+  - gridhound:
+      - artur-loewen
+
+  - utimaco:
+      - ingo-ludemann
+
+  - rhebo:
+      - shane-moloney
+
+  - consortium:
+      - opal-rt
+      - rwth
+      - stwh
+      - hsbo
+      - gridhound
+      - utimaco
+      - rhebo
+
+urls:
+  - ? mailtos://${MAIL_HOST}?user=${MAIL_USER}&pass=${MAIL_PASS}&from=${MAIL_FROM}&to=steffen.vogel@opal-rt.com
+    : - tag: steffen-vogel
+
+  - ? mailtos://${MAIL_HOST}?user=${MAIL_USER}&pass=${MAIL_PASS}&from=${MAIL_FROM}&to=felix.wege@rwth-aachen.de
+    : - tag: felix-wege
+
+  - ? mailtos://${MAIL_HOST}?user=${MAIL_USER}&pass=${MAIL_PASS}&from=${MAIL_FROM}&to=shane.moloney@rhebo.com
+    : - tag: shane-moloney
+
+  - ? zulip://${ZULIP_BOTNAME}@${ZULIP_ORGANIZATION}/${ZULIP_TOKEN}/${ZULIP_RECIPIENT}
+    : - tag: zulip

@@ -32,10 +32,10 @@ class Job(compose.Service):
         self.watchers: list[store.Watcher] = []
 
         if triggers := self.job_spec.triggers:
-            for trigger in triggers:
-                self._setup_trigger(trigger)
+            for id, trigger in triggers.items():
+                self._setup_trigger(id, trigger)
 
-    def _setup_trigger(self, trigger: model.Trigger):
+    def _setup_trigger(self, id: str, trigger: model.Trigger):
         """Setup the trigger.
 
         Args:
@@ -53,10 +53,10 @@ class Job(compose.Service):
             else:
                 raise RuntimeError(f"Unknown trigger type: {trigger.type}")
 
-            cb = functools.partial(self._handle_trigger_event, trigger)
+            cb = functools.partial(self._handle_trigger_event, id)
 
             watcher = self.scheduler.store.watch_async(
-                trigger.prefix, cb, event
+                trigger.prefix, cb, event, trigger.initial
             )
 
             self.watchers.append(watcher)
@@ -66,7 +66,7 @@ class Job(compose.Service):
 
     def _handle_trigger_event(
         self,
-        trigger: model.Trigger,
+        trigger_id: str,
         _s: store.Client,
         evt: store.Event,
         obj: str,
@@ -82,7 +82,7 @@ class Job(compose.Service):
         Returns:
 
         """
-        self.start(trigger=trigger, event=evt, object=obj)
+        self.start(trigger_id=trigger_id, event=evt, object=obj)
 
     def _setup_schedule(self, schedule: model.ScheduleTrigger):
         """
@@ -116,7 +116,7 @@ class Job(compose.Service):
 
     def start(  # type: ignore[override]
         self,
-        trigger: model.Trigger | None = None,
+        trigger_id: str | None = None,
         event: store.Event | None = None,
         object: str | None = None,
     ):
@@ -131,9 +131,12 @@ class Job(compose.Service):
             spec=self.job_spec,
         )
 
-        if trigger is not None:
+        if trigger_id is not None and self.job_spec.triggers is not None:
+            trigger = self.job_spec.triggers[trigger_id]
+
             job_info.trigger = model.TriggerInfo(
-                id=trigger.id,
+                id=trigger_id,
+                type=trigger.type,
                 time=datetime.datetime.now(),
                 event=event,
                 object=object,
@@ -150,6 +153,7 @@ class Job(compose.Service):
                         "TLS_CERT": "/certs/clients/admin.crt",
                         "TLS_KEY": "/keys/clients/admin.key",
                     },  # type: ignore
+                    env_file=compose_model.EnvFile(root=[".env"]),
                     volumes=[
                         compose_model.Volumes(
                             type="volume",
@@ -170,7 +174,7 @@ class Job(compose.Service):
                 vol: compose_model.Volume(
                     name=f"platform_{vol}", external=compose_model.External()
                 )
-                for vol in ["keys", "certs"]
+                for vol in ["key_clients", "certs"]
             },
         )
 

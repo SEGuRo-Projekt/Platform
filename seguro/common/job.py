@@ -4,20 +4,16 @@
 import sys
 import os
 import json
-from types import SimpleNamespace
+
+from seguro.commands.scheduler import model
 
 
-def _get_job_info():
+def _get_job_info() -> model.JobInfo | None:
     info_raw = os.environ.get("SEGURO_JOB_INFO")
-    if info_raw is None:
-        if "sphinx" in sys.modules:
-            return None
+    if info_raw is None or "sphinx" in sys.modules:
+        return None
 
-        raise Exception("Missing job details")
-
-    return json.loads(
-        info_raw, object_hook=lambda item: SimpleNamespace(**item)
-    )
+    return model.JobInfo(**json.loads(info_raw))
 
 
-info = _get_job_info()
+info: model.JobInfo | None = _get_job_info()

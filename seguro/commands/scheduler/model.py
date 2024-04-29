@@ -24,6 +24,9 @@ class EventTriggerType(Enum):
     SHUTDOWN = "shutdown"
 
 
+TriggerType = StoreTriggerType | ScheduleTriggerType | EventTriggerType
+
+
 class Weekday(Enum):
     MONDAY = "monday"
     TUESDAY = "tuesday"
@@ -43,19 +46,17 @@ class ScheduleUnit(Enum):
 
 
 class EventTrigger(BaseModel):
-    id: str
     type: EventTriggerType
 
 
 class StoreTrigger(BaseModel):
-    id: str
     type: StoreTriggerType
 
     prefix: str = "/"
+    initial: bool = False
 
 
 class ScheduleTrigger(BaseModel):
-    id: str
     type: ScheduleTriggerType
 
     interval: int = 1
@@ -71,7 +72,7 @@ Trigger = EventTrigger | StoreTrigger | ScheduleTrigger
 
 
 class JobSpec(BaseModel):
-    triggers: list[Trigger] | None = None
+    triggers: dict[str, Trigger] | None = None
     scale: int = 1
     recreate: bool = False
     build: bool = False
@@ -80,6 +81,7 @@ class JobSpec(BaseModel):
 
 class TriggerInfo(BaseModel):
     id: str
+    type: TriggerType
     time: datetime.datetime
     event: store.Event | None = None
     object: str | None = None
@@ -89,3 +91,10 @@ class JobInfo(BaseModel):
     name: str
     spec: JobSpec
     trigger: TriggerInfo | None = None
+
+    @property
+    def trigger_obj(self):
+        if self.trigger is None or self.spec.triggers is None:
+            return None
+
+        return self.spec.triggers[self.trigger.id]
