@@ -32,7 +32,6 @@ def env_substitute(s: str) -> str:
 
 
 class AttachHTTP(AppriseAttachHTTP):
-
     def __init__(self, url, verify_certificate=True):
         result = AppriseAttachHTTP.parse_url(url)
 
