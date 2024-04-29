@@ -1,6 +1,6 @@
 # Configuration file for the Sphinx documentation builder.
 #
-# SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
+# SPDX-FileCopyrightText: 2023-2024 Steffen Vogel, OPAL-RT Germany GmbH
 # SPDX-License-Identifier: Apache-2.0
 #
 # For the full list of built-in configuration values, see the documentation:

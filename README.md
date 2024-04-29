@@ -31,6 +31,6 @@ We are grateful for the financial support of the [BMWK (Federal Ministry of Econ
 
 ## License
 
-- SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
-- SPDX-FileCopyrightText: 2023 Felix Wege, EONERC-ACS, RWTH Aachen  University
+- SPDX-FileCopyrightText: 2023-2024 Steffen Vogel, OPAL-RT Germany GmbH
+- SPDX-FileCopyrightText: 2023-2024 Felix Wege, EONERC-ACS, RWTH Aachen  University
 - SPDX-License-Identifier: Apache-2.0

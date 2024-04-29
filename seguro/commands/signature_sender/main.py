@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023 Philipp Jungkamp, OPAL-RT Germany GmbH
+# SPDX-FileCopyrightText: 2023-2024Philipp Jungkamp, OPAL-RT Germany GmbH
 # SPDX-License-Identifier: Apache-2.0
 
 import sys
