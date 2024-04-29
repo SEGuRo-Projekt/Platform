@@ -8,11 +8,12 @@ RUN pip install --no-cache-dir poetry==1.7.1
 RUN mkdir /src
 WORKDIR /src
 
-RUN apt-get -y update && \
-    apt-get -y install --no-install-recommends \
+RUN apt-get update && \
+    apt-get install --yes --no-install-recommends \
+    graphviz \
     libgraphviz-dev \
-    pkg-config \
-    graphviz
+    pkg-config && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml poetry.lock /src/
 
