@@ -14,7 +14,7 @@
 triggers:
   # Each triggers ID via passed in the SEGURO_JOB_INFO environment variable
   # to the spawned container
-  - id: measurements-received-ms1
+  measurements-received-ms1:
 
     # The triggers type can be on of:
     # - created
@@ -30,7 +30,12 @@ triggers:
     # job to be executed.
     prefix: data/measurements/ms_1/
 
-  - id: removed-data
+    # Trigger job for all existing objects under the prefix
+    # whenever the scheduler is restarted or the job specification
+    # has been changed.
+    initial: true
+
+  removed-data:
     type: removed
     prefix: data/ba/
 
@@ -106,6 +111,12 @@ triggers:
 # An optional number which determines how many instances of the container
 # shall be started.
 scale: 1
+
+# Force a recreation of the container whenever the job is triggered
+recreate: true
+
+# Build the container image whenever the container is triggered
+build: true
 
 container:
   # The section corresponds to a service in the Docker Compose specification:

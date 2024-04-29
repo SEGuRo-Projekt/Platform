@@ -18,6 +18,8 @@ LOG_LEVEL = logging.DEBUG
 MAX_BYTES = 20000
 BACKUP_COUNT = 5
 
+DOMAIN = env.str("DOMAIN", "localhost")
+
 # Authentication
 TLS_CACERT = env.str("TLS_CACERT", "keys/ca.crt")
 TLS_CERT = env.str("TLS_CERT", "keys/clients/admin.crt")

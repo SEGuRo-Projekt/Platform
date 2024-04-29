@@ -8,6 +8,7 @@ import logging
 import minio
 import minio.credentials
 import urllib3
+import datetime
 import pandas as pd
 from typing import Callable
 
@@ -63,7 +64,7 @@ class Client:
         self.logger = logging.getLogger(__name__)
         self.bucket = bucket
 
-        http_client = urllib3.PoolManager(
+        self.http_client = urllib3.PoolManager(
             cert_reqs="CERT_REQUIRED", ca_certs=tls_cacert
         )
 
@@ -77,7 +78,7 @@ class Client:
             endpoint=f"{host}:{port}",
             region=region,
             credentials=self.creds,
-            http_client=http_client,
+            http_client=self.http_client,
         )
 
         # Used by Pandas
@@ -107,9 +108,30 @@ class Client:
           file: str:
 
         Returns:
+            Object Information
 
         """
         return self.client.fget_object(self.bucket, file, filename)
+
+    def get_file_url(
+        self,
+        filename: str,
+        expires=datetime.timedelta(days=7),
+        public: bool = True,
+    ) -> str:
+
+        if public:
+            client = minio.Minio(
+                endpoint=f"store.{config.DOMAIN}",
+                credentials=self.creds,
+                http_client=self.http_client,
+            )
+        else:
+            client = self.client
+
+        return client.get_presigned_url(
+            "GET", self.bucket, filename, expires=expires
+        )
 
     def put_file(self, filename: str, file: str):
         """Upload local file and store it in the S3Storage.

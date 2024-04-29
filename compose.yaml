@@ -13,6 +13,9 @@ x-platform-service: &platform-service
     TLS_CERT: /certs/clients/admin.crt
     TLS_KEY: /keys/clients/admin.key
 
+  env_file:
+  - .env
+
   build:
     context: .
     tags:
@@ -456,11 +459,6 @@ services:
       source: /var/run/docker.sock
       target: /var/run/docker.sock
       read_only: true
-
-  notifier:
-    <<: *platform-service
-
-    command: notifier
 
   timestamp-server:
     image: ghcr.io/sigstore/timestamp-server@sha256:f4dcc96092a1b1fb5ca36d776f92a7cc62cdb1a8866c5120340f919141a3cd58
