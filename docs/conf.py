@@ -34,7 +34,7 @@ extensions = [
     "sphinx.ext.linkcode",
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
-    "sphinxcontrib.autodoc_pydantic",
+    # "sphinxcontrib.autodoc_pydantic",
     "sphinxext.opengraph",
     "sphinx_inline_tabs",
     "sphinx_copybutton",
