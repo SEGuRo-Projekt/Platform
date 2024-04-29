@@ -3,11 +3,11 @@
 
 import pytest
 
-from seguro.common.notify import (
+from seguro.common.notify import (  # noqa: F401
     notify,
-    StoreAttachment,
     RawAttachment,
     FileAttachment,
+    StoreAttachment,
 )
 
 

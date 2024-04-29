@@ -3,7 +3,7 @@
 **Code:** [github.com/SEGuRo-Projekt/Platform](https://github.com/SEGuRo-Projekt/Platform)
 
 
-The SEGuRo platform is based on a [microservice architecture](https://en.wikipedia.org/wiki/Microservices). 
+The SEGuRo platform is based on a [microservice architecture](https://en.wikipedia.org/wiki/Microservices).
 
 Microservice architecture is a software design approach where an application is composed of a collection of small, independent services, each focusing on a specific business capability.
 These services can be developed, deployed, and maintained independently, enabling greater flexibility, scalability, and resilience.
@@ -14,7 +14,7 @@ Additionally, microservices promote modularity and can simplify the overall syst
 Services in the SEGuRo platform are categorized into two groups:
 
 - **Platform services** provide core functionality of the platform itself and enable _application services_.
-- **Application services** provide application-specific functionality and are usually provided by the user. 
+- **Application services** provide application-specific functionality and are usually provided by the user.
 
 
 ## Data Store
@@ -88,7 +88,7 @@ These timestamps are digital receipts providing proof that a certain piece of da
 They are a critical part of establishing non-repudiation, the concept that guarantees that the creator of certain data cannot deny the authenticity of their production or transmission.
 TSAs work by taking in a piece of data, generating a timestamp that reflects the exact time it received the data, and then signing both the data and the timestamp with a trusted digital certificate.
 This process creates a digital proof that the data existed in the specific state at the specific time the timestamp indicates.
-Timestamping is widely used in industries like law, finance, digital forensics, and any other situation where proving the existence of data at a specific time is important. 
+Timestamping is widely used in industries like law, finance, digital forensics, and any other situation where proving the existence of data at a specific time is important.
 However, the TSA itself doesn't inspect or even store the actual data—it only confirms the time of its existence.
 This makes it suitable for a variety of applications while maintaining data privacy and confidentiality.
 
