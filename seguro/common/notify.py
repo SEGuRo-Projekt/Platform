@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2023 Steffen Vogel, OPAL-RT Germany GmbH
 # SPDX-License-Identifier: Apache-2.0
 
-import logging
 import uuid
 
 from seguro.common import broker, store
@@ -61,9 +60,3 @@ def notify(
             exclude_unset=True, exclude_defaults=True, exclude_none=True
         ),
     )
-
-
-class Handler(logging.Handler):
-
-    def __init__(self):
-        super().__init__()
