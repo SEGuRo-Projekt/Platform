@@ -39,13 +39,13 @@ roles:
 
   measurement-point1:
     broker:
-      - topic: data/measurements/mp1/#
+      - topic: data/measurements/loc1/md1/mp1/#
         actions:
           - Publish
 
   measurement-point2:
     broker:
-      - topic: data/measurements/mp2/#
+      - topic: data/measurements/loc1/md1/mp2/#
         actions:
           - Publish
           - Subscribe
