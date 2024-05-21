@@ -86,9 +86,7 @@ class Scheduler(compose.Composer):
         self.logger.info(f"Added new job: {name}")
 
         if triggers := new_job.job_spec.triggers:
-            for trigger in triggers:
-                if not isinstance(trigger, model.EventTrigger):
-                    continue
+            for trigger in triggers.values():
 
                 if trigger.type != model.EventTriggerType.STARTUP:
                     continue
