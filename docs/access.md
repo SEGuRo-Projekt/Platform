@@ -1,12 +1,10 @@
 # Access
 
-The components compromising the SEGuRo platform are accessible via various sub-domains of `seguro`:
+The SEGuRo platform is accessible via web-interfaces for the various components
 
 - [`localhost`](https://localhost) Platform Landing Page
 - [`ui.localhost`](https://ui.localhost) Docker Web-Interface ([Yacht](https://yacht.sh/))
-- [`store.localhost`](https://store.localhost) S3 Datastore ([Minio](https://min.io/))
-- [`ui.store.localhost`](https://ui.store.localhost) S3 Datastore Web-Interface
-- [`registry.localhost`](https://registry.localhost) Docker Image Registry ([distribution](https://distribution.github.io/distribution/about/))
+- [`ui.store.localhost`](https://ui.store.localhost) S3 Datastore Web-Interface ([Minio](https://min.io))
 - [`ui.registry.localhost`](https://ui.registry.localhost) Docker Image Registry Web-Interface ([docker-registry-ui](https://github.com/Joxit/docker-registry-ui))
 
 ```{note}
