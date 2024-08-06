@@ -25,6 +25,7 @@ signature-recorder = "seguro.commands.signature_recorder.main:main"
 notebook-executor = "seguro.commands.notebook_executor.main:main"
 acl-syncer = "seguro.commands.acl_syncer.main:main"
 demo-data = "seguro.commands.demo_data.main:main"
+protobuf-subscriber = "seguro.commands.protobuf_subscriber.main:main"
 
 [tool.poetry.urls]
 "Homepage" = "https://github.com/SEGuRo-Projekt/Platform"
