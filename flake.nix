@@ -38,21 +38,30 @@
           paho-mqtt = [ "hatchling" ];
           dnspython = [ "hatchling" ];
           pyxlsb = [ "setuptools" ];
-          rfc3161ng = [ "setuptools" ];
+          email-validator = [ "flit-core" ];
           datamodel-code-generator = [ "poetry-core" ];
+          aiohappyeyeballs = ["poetry-core"];
         }
         // {
-          python-calamine = prev.python-calamine.override { preferWheel = true; };
+          python-calamine = prev.python-calamine.override {
+            # buildInputs = [ prev.maturin ] ++ (prev.python-calamine.buildInputs or []);
+            preferWheel = true;
+          };
           apprise = prev.apprise.override { preferWheel = true; };
-          pandas = prev.pandas.override { preferWheel = true; };
-          mypy = prev.mypy.override { preferWheel = true; };
-          pyzmq = prev.pyzmq.override { preferWheel = true; };
+          docker = prev.docker.override { preferWheel = true; };
+          fsspec = prev.fsspec.override { preferWheel = true; };
+          pyarrow = prev.pyarrow.override { preferWheel = true; };
+          numpy = prev.numpy.override { preferWheel = true; };
         };
 
       packagesOverlay = final: prev: {
         seguro-platform = final.poetry2nix.mkPoetryApplication {
           projectDir = ./.;
           groups = [ "dev" ];
+          propogatedBuildInputs = with final; [
+            openssl
+            tpm2-openssl
+          ];
           overrides = final.poetry2nix.overrides.withDefaults poetryOverrrides;
         };
       };
@@ -96,6 +105,8 @@
               env
               mosquitto
               graphviz
+
+              openssl
 
               (pkgs.poetry2nix.mkPoetryScriptsPackage { projectDir = ./.; })
 
@@ -143,6 +154,7 @@
             ];
             shellHook = ''
               export PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring
+              export OPENSSL_MODULES=${pkgs.tpm2-openssl}/lib/ossl-modules
             '';
           };
 

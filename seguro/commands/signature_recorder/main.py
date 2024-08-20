@@ -7,7 +7,7 @@ import argparse
 from io import BytesIO
 from dataclasses import dataclass
 from queue import Queue
-from pyasn1.codec import der
+from asn1crypto import tsp
 from rfc3161ng import TimeStampResp, oid_to_hash
 
 from seguro.common import broker, store, config
@@ -20,8 +20,8 @@ class TSRMessage:
     tsr: TimeStampResp
     payload: bytes
 
-    @staticmethod
-    def decode(msg: broker.Message) -> "TSRMessage":
+    @classmethod
+    def decode(cls, msg: broker.Message) -> "TSRMessage":
         """Decode a MQTT message into a TSR message
 
         Args:
@@ -29,20 +29,27 @@ class TSRMessage:
 
         Returns:
             TSRMessage: The decoded TSR message
-
         """
-        tsr, tail = der.decoder.decode(msg.payload, asn1Spec=TimeStampResp())
-        assert not tail
-        imprint = tsr.time_stamp_token.tst_info.message_imprint
-        algorithm: str = oid_to_hash[imprint["hashAlgorithm"]["algorithm"]]
-        digest: bytes = imprint["hashedMessage"].asOctets()
-        return TSRMessage(algorithm, digest, tsr, msg.payload)
+
+        tsr = tsp.TimeStampResp.load(msg.payload, strict=True)
+        tst_info = tsr["time_stamp_token"]["signed_data"][
+            "encap_content_info"
+        ].parsed
+        imprint: tsp.MessageImprint = tst_info["message_imprint"]
+
+        return cls(
+            imprint["hash_algorithm"],
+            imprint["hashed_message"],
+            tsr,
+            msg.payload,
+        )
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-t", "--topic", type=str, default="signatures/tsr")
+    parser.add_argument("-t", "--topic", type=str, default="signatures")
+    parser.add_argument("-p", "--prefix", type=str, default="signatures")
     parser.add_argument(
         "-l",
         "--log-level",
@@ -64,19 +71,19 @@ def main() -> int:
     s = store.Client()
 
     def tsr_callback(_b: broker.Client, msg: broker.Message):
-        """
-
-        Args:
-          _b:
-          msg:
-
-        """
         try:
             queue.put(TSRMessage.decode(msg))
         except Exception as err:
             logging.error(f"Failed to receive TSR: {err}")
 
-    b.subscribe(args.topic, tsr_callback)
+    def sig_callback(_b: broker.Client, msg: broker.Message):
+        try:
+            queue.put(TSRMessage.decode(msg))
+        except Exception as err:
+            logging.error(f"Failed to receive TSR: {err}")
+
+    b.subscribe(args.topic + "/tsr", tsr_callback)
+    b.subscribe(args.topic + "/sig", sig_callback)
 
     msg: TSRMessage
     while (msg := queue.get()) is not None:

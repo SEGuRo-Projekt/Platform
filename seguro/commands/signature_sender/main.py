@@ -1,30 +1,26 @@
 # SPDX-FileCopyrightText: 2023-2024Philipp Jungkamp, OPAL-RT Germany GmbH
 # SPDX-License-Identifier: Apache-2.0
 
+import os
 import sys
 import argparse
-import dataclasses as dc
 import logging
 import multiprocessing as mp
 from pathlib import Path
 
-from pyasn1.codec import der
-from rfc3161ng import RemoteTimestamper
 from villas.node.digest import Digest
 
 from seguro.common import broker, config
+from seguro.common import openssl
 
 
-@dc.dataclass
 class PipeWorker:
-    path: Path
-    queue: mp.Queue = dc.field(default_factory=mp.Queue)
-    worker: mp.Process = dc.field(init=False)
-
-    def __post_init__(self):
+    def __init__(self, path: Path):
         def run():
             self.__run()
 
+        self.path = path
+        self.queue: mp.Queue = mp.Queue()
         self.worker = mp.Process(target=run)
 
     def __run(self):
@@ -53,7 +49,7 @@ def main() -> int:
         "--topic",
         type=str,
         help="MQTT topic for publishing signatures",
-        default="signatures/tsr",
+        default="signatures",
     )
     parser.add_argument(
         "-f",
@@ -64,17 +60,23 @@ def main() -> int:
     )
     parser.add_argument(
         "-u",
-        "--uri",
+        "--tsa-url",
         type=str,
-        help="URL of Time Stamp Authority server ",
+        help="URL of Time Stamp Authority server",
         default="https://freetsa.org/tsr",
     )
     parser.add_argument(
-        "-d",
-        "--digest",
+        "-p",
+        "--private-key",
         type=str,
-        help="Frame digest algorithm",
-        default="sha256",
+        help="PEM-encoded private key",
+    )
+    parser.add_argument(
+        "-T",
+        "--tpm2",
+        type=bool,
+        action="store_true",
+        help="Enable TPM2 support",
     )
     parser.add_argument(
         "-l",
@@ -94,7 +96,18 @@ def main() -> int:
 
     pipe = PipeWorker(Path(args.fifo))
     b = broker.Client("signature-sender")
-    tsa = RemoteTimestamper(args.uri, hashname=args.digest)
+    providers = ["default"]
+
+    if args.tpm:
+        providers.append("tpm2")
+
+    ssl = openssl.OpenSSL(providers)
+
+    if args.private_key:
+        with open(args.private_key, "rb") as f:
+            private_key = openssl.PrivateKey.read_pem(f)
+    else:
+        private_key = None
 
     with pipe:
         while (digest := pipe.queue.get()) is not None:
@@ -104,21 +117,26 @@ def main() -> int:
             algorithm = digest.algorithm
             digest_hex = digest.bytes.hex().upper()
 
-            try:
-                assert digest.algorithm == tsa.hashname
-                # Adding return_tsr=True makes this function return the whole
-                # timestamp response instead of just the timestamp token.
-                tsr = tsa(digest=digest.bytes, return_tsr=True)
+            if args.tsa_url:
+                try:
+                    tsr = ssl.timestamp_query(args.tsa_url, digest.bytes)
 
-                logging.info(f"Received TSR for {algorithm}:{digest_hex}")
+                    logging.info(f"Received TSR for {algorithm}:{digest_hex}")
 
-                b.publish(args.topic, der.encoder.encode(tsr))
-            except Exception as err:
-                logging.error(
-                    f"Failed to produce TSR for {algorithm}:{digest_hex} {err}"  # noqa: E501
-                )
+                    b.publish(args.topic + "/tsr", tsr)
+                except Exception as err:
+                    logging.error(
+                        f"Failed to produce TSR for {algorithm}:{digest_hex} {err}"  # noqa: E501
+                    )
 
-                continue
+            if private_key:
+                try:
+                    ssl.sign(private_key, digest.bytes, digest.algorithm)
+
+                except Exception as err:
+                    logging.error(
+                        f"Failed to produce MP signature for {algorithm}:{digest_hex} {err}"  # noqa: E501
+                    )
 
         logging.debug("Closing pipe")
 
