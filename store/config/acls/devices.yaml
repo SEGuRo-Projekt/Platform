@@ -42,6 +42,7 @@ roles:
       - topic: data/measurements/loc1/md1/mp1/#
         actions:
           - Publish
+          - Subscribe
 
   measurement-point2:
     broker:
