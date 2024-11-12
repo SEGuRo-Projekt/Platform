@@ -54,7 +54,7 @@ jobs:
         run: docker compose up --detach --quiet-pull
 
       - name: Ensure S3 buckets exist
-        run: docker compose up minio-setup
+        run: docker compose up setup-minio
 
       - name: Test with pytest
         env:
