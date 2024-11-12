@@ -32,11 +32,15 @@ class ACLType(Enum):
     UNSUBSCRIBE_PATTERN = "unsubscribePattern"
 
     @classmethod
-    def from_broker_action(cls, act: model.BrokerAction) -> "ACLType":
+    def from_broker_action(cls, act: model.BrokerAction) -> list["ACLType"]:
         if act == model.BrokerAction.PUBLISH:
-            return cls.PUBLISH_CLIENT_SEND
+            return [cls.PUBLISH_CLIENT_SEND]
         elif act == model.BrokerAction.SUBSCRIBE:
-            return cls.SUBSCRIBE_PATTERN
+            return [
+                cls.SUBSCRIBE_PATTERN,
+                cls.UNSUBSCRIBE_PATTERN,
+                cls.PUBLISH_CLIENT_RECEIVE,
+            ]
         else:
             raise RuntimeError(f"Unsupported broker action: {act}")
 
@@ -55,7 +59,7 @@ class ACL(BaseModel, frozen=True):
     acltype: ACLType
     topic: str
     priority: int = -1
-    allow: bool
+    allow: bool = True
 
 
 class Group(BaseModel, frozen=True):
@@ -224,19 +228,25 @@ class Config:
                     rolename=name,
                     acls=frozenset(
                         chain.from_iterable(
-                            [
-                                (
-                                    ACL(
-                                        acltype=ACLType.from_broker_action(
-                                            act
-                                        ),
-                                        topic=acl.topic,
-                                        allow=acl.effect == model.Effect.ALLOW,
+                            chain.from_iterable(
+                                [
+                                    (
+                                        (
+                                            ACL(
+                                                acltype=acl_type,
+                                                topic=acl.topic,
+                                                allow=acl.effect
+                                                == model.Effect.ALLOW,
+                                            )
+                                            for acl_type in ACLType.from_broker_action(
+                                                act
+                                            )
+                                        )
+                                        for act in acl.actions
                                     )
-                                    for act in acl.actions
-                                )
-                                for acl in role.broker
-                            ]
+                                    for acl in role.broker
+                                ]
+                            )
                         )
                     ),
                 )
