@@ -238,7 +238,7 @@ class Config:
                                                 allow=acl.effect
                                                 == model.Effect.ALLOW,
                                             )
-                                            for acl_type in ACLType.from_broker_action(
+                                            for acl_type in ACLType.from_broker_action(  # noqa
                                                 act
                                             )
                                         )
