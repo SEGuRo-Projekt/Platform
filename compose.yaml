@@ -24,7 +24,7 @@ x-platform-service: &platform-service
   restart: unless-stopped
 
   depends_on:
-    pki-setup:
+    setup-pki:
       condition: service_completed_successfully
 
 services:
@@ -76,7 +76,7 @@ services:
     - traefik.http.services.store-ui.loadbalancer.serversTransport=store-ui@file
 
     depends_on:
-      pki-setup:
+      setup-pki:
         condition: service_completed_successfully
 
     environment:
@@ -118,13 +118,13 @@ services:
       target: /keys/minio
       read_only: true
 
-  minio-setup:
+  setup-minio:
     <<: *platform-service
 
     restart: "no"
 
     depends_on:
-      pki-setup:
+      setup-pki:
         condition: service_completed_successfully
       minio:
         condition: service_healthy
@@ -150,7 +150,7 @@ services:
       target: /store/
       read_only: true
 
-  pki-setup:
+  setup-pki:
     build:
       context: .
       target: setup
@@ -234,7 +234,7 @@ services:
       start_period: 10s
 
     depends_on:
-      pki-setup:
+      setup-pki:
         condition: service_completed_successfully
       setup-mosquitto-dynsec-init:
         condition: service_completed_successfully
@@ -250,7 +250,6 @@ services:
 
     entrypoint: /bin/sh
     command: /setup-mosquitto-dynsec-init.sh
-
 
     volumes:
     - type: bind
@@ -348,7 +347,7 @@ services:
     - traefik.http.middlewares.add-cors.headers.customresponseheaders.Access-Control-Allow-Origin=https://ui.registry.${DOMAIN}
 
     depends_on:
-      pki-setup:
+      setup-pki:
         condition: service_completed_successfully
 
     ports:
@@ -437,7 +436,7 @@ services:
       read_only: true
 
     depends_on:
-      pki-setup:
+      setup-pki:
         condition: service_completed_successfully
 
   scheduler:
