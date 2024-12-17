@@ -62,7 +62,7 @@ class Job(compose.Service):
             self.watchers.append(watcher)
 
         elif isinstance(trigger, model.ScheduleTrigger):
-            self._setup_schedule(trigger)
+            self._setup_schedule(id, trigger)
 
     def _handle_trigger_event(
         self,
@@ -84,7 +84,7 @@ class Job(compose.Service):
         """
         self.start(trigger_id=trigger_id, event=evt, object=obj)
 
-    def _setup_schedule(self, schedule: model.ScheduleTrigger):
+    def _setup_schedule(self, trigger_id: str, schedule: model.ScheduleTrigger):
         """
 
         Args:
@@ -110,7 +110,7 @@ class Job(compose.Service):
                 if start_day := schedule.start_day:
                     job.start_day = start_day.value
 
-        job.do(self.start, trigger=schedule)
+        job.do(self.start, trigger_id=trigger_id)
 
         self.logger.info(f"Started schedule {job}")
 
