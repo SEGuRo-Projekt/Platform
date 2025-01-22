@@ -17,8 +17,8 @@ from seguro.common import broker, config
 env = environ.Env()
 
 URL = env.str("FIWARE_URL", "http://localhost:80/post")
-API_KEY = env.str("FIWARE_API_KEY", "myapikey")
-ID = env.str("DEVICE_ID", "loc1/md1/mp1")
+API_KEY = env.str("API_KEY", "myapikey")
+ID = env.str("ID", "loc1/md1/mp1")
 TOPIC = env.str("TOPIC", "data/measurements/loc1/md1/mp1")
 
 HTTPS_CERT = env.str("HTTPS_CERT", None)
@@ -68,6 +68,7 @@ def post_sample(
         data=message,
         timeout=5,
         cert=(HTTPS_CERT, HTTPS_KEY),
+        params=[("k", API_KEY), ("i", ID)],
     )
 
 
@@ -107,7 +108,7 @@ def main() -> int:
             samples[0].data,
             samples[0],
         )
-        print(type(samples[0].ts_origin))
+
         ret = post_sample(
             URL,
             samples[0].ts_origin,
