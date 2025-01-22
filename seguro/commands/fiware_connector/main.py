@@ -33,7 +33,7 @@ FORMAT_STRING = (
     + "frequency|{frequency}"
 )
 
-FORMAT_JSON = "L1:{L1},L2:{L2},L3:{L3}"
+FORMAT_JSON = "{{L1:{L1},L2:{L2},L3:{L3}}}"
 
 
 def post_sample(
