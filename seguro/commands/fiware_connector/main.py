@@ -21,8 +21,8 @@ API_KEY = env.str("FIWARE_API_KEY", "myapikey")
 ID = env.str("DEVICE_ID", "loc1/md1/mp1")
 TOPIC = env.str("TOPIC", "data/measurements/loc1/md1/mp1")
 
-TLS_CERT = env.str("TLS_CERT", None)
-TLS_KEY = env.str("TLS_KEY", None)
+HTTPS_CERT = env.str("HTTPS_CERT", None)
+HTTPS_KEY = env.str("HTTPS_KEY", None)
 
 FORMAT_STRING = (
     "{timestamp}|"
@@ -64,7 +64,10 @@ def post_sample(
     )
 
     return requests.post(
-        url, data=message, timeout=5, cert=(TLS_CERT, TLS_KEY)
+        url,
+        data=message,
+        timeout=5,
+        cert=(HTTPS_CERT, HTTPS_KEY),
     )
 
 
