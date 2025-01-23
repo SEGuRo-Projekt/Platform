@@ -18,11 +18,12 @@ env = environ.Env()
 
 URL = env.str("FIWARE_URL", "http://localhost:80/post")
 API_KEY = env.str("API_KEY", "myapikey")
-ID = env.str("ID", "loc1/md1/mp1")
 TOPIC = env.str("TOPIC", "data/measurements/loc1/md1/mp1")
 
-HTTPS_CERT = env.str("HTTPS_CERT", None)
-HTTPS_KEY = env.str("HTTPS_KEY", None)
+FIWARE_TLS_CERT = env.str("FIWARE_TLS_CERT", None)
+FIWARE_TLS_KEY = env.str("FIWARE_TLS_KEY", None)
+
+ID = env.str("ID", "loc1/md1/mp1")
 
 FORMAT_STRING = (
     "{timestamp}|"
@@ -33,7 +34,7 @@ FORMAT_STRING = (
     + "frequency|{frequency}"
 )
 
-FORMAT_JSON = "{{L1:{L1},L2:{L2},L3:{L3}}}"
+FORMAT_JSON = '{{"L1":"{L1}","L2":"{L2}","L3":"{L3}"}}'
 
 
 def post_sample(
@@ -67,7 +68,7 @@ def post_sample(
         url,
         data=message,
         timeout=5,
-        cert=(HTTPS_CERT, HTTPS_KEY),
+        cert=(FIWARE_TLS_CERT, FIWARE_TLS_KEY),
         params=[("k", API_KEY), ("i", ID)],
     )
 
@@ -137,6 +138,7 @@ def main() -> int:
     b.subscribe_samples(TOPIC, callback)
 
     logging.info("Subscribed to %s", TOPIC)
+    logging.info("FIWARE URL: %s/?k=%s&i-%s", URL, API_KEY, ID)
 
     while True:
         try:
