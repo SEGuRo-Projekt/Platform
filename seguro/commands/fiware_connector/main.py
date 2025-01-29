@@ -3,6 +3,7 @@
 
 import argparse
 import datetime
+import json
 import logging
 import time
 
@@ -16,9 +17,9 @@ from seguro.common import broker, config
 
 env = environ.Env()
 
-URL = env.str("FIWARE_URL", "http://localhost:80/post")
-API_KEY = env.str("API_KEY", "myapikey")
-TOPIC = env.str("TOPIC", "data/measurements/loc1/md1/mp1")
+URL = env.str("FIWARE_URL", None)
+API_KEY = env.str("API_KEY", None)
+TOPIC = env.str("TOPIC", None)
 
 FIWARE_TLS_CERT = env.str("FIWARE_TLS_CERT", None)
 FIWARE_TLS_KEY = env.str("FIWARE_TLS_KEY", None)
@@ -33,8 +34,6 @@ FORMAT_STRING = (
     + "apparentPower|{apparentPower}|"
     + "frequency|{frequency}"
 )
-
-FORMAT_JSON = '{{"L1":"{L1}","L2":"{L2}","L3":"{L3}"}}'
 
 
 def post_sample(
@@ -113,22 +112,31 @@ def main() -> int:
         ret = post_sample(
             URL,
             samples[0].ts_origin,
-            FORMAT_JSON.format(  # voltage
-                L1=samples[0].data[0],
-                L2=samples[0].data[1],
-                L3=samples[0].data[2],
+            json.dumps(  # Voltage
+                {
+                    "L1": str(samples[-1].data[0]),
+                    "L2": str(samples[-1].data[1]),
+                    "L3": str(samples[-1].data[2]),
+                },
+                separators=(",", ":"),
             ),
-            FORMAT_JSON.format(  # current
-                L1=samples[0].data[3],
-                L2=samples[0].data[4],
-                L3=samples[0].data[5],
+            json.dumps(  # Current
+                {
+                    "L1": str(samples[-1].data[3]),
+                    "L2": str(samples[-1].data[4]),
+                    "L3": str(samples[-1].data[5]),
+                },
+                separators=(",", ":"),
             ),
-            FORMAT_JSON.format(  # power
-                L1=samples[0].data[6],
-                L2=samples[0].data[7],
-                L3=samples[0].data[8],
+            json.dumps(  # Power
+                {
+                    "L1": str(samples[-1].data[6]),
+                    "L2": str(samples[-1].data[7]),
+                    "L3": str(samples[-1].data[8]),
+                },
+                separators=(",", ":"),
             ),
-            samples[0].data[9],  # frequency
+            samples[-1].data[9],  # Frequency
         )
 
         logging.debug(ret.text)
