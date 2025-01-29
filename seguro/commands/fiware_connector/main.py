@@ -93,7 +93,7 @@ def main() -> int:
     )
 
     def callback(b: broker.Client, topic: str, samples: list[Sample]):
-        """Callback which gets called for each received MQTT message
+        """Callback which gets called for each received MQTT message.
 
         Args:
             client: The broker client
