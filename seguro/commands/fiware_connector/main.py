@@ -102,11 +102,11 @@ def main() -> int:
         """
         logging.debug(
             "%s, %s - %s - %s%s",
-            samples[0].ts_origin.seconds,
-            samples[0].ts_origin.nanoseconds,
+            samples[-1].ts_origin.seconds,
+            samples[-1].ts_origin.nanoseconds,
             topic,
-            samples[0].data,
-            samples[0],
+            samples[-1].data,
+            samples[-1],
         )
 
         ret = post_sample(
