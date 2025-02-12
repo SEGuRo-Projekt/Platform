@@ -72,6 +72,13 @@ def post_sample(
     )
 
 
+def convert_complex(complexVal: complex) -> dict:
+    return {
+        "re": complexVal.real,
+        "im": complexVal.imag,
+    }
+
+
 def main() -> int:
 
     parser = argparse.ArgumentParser()
@@ -114,25 +121,25 @@ def main() -> int:
             samples[0].ts_origin,
             json.dumps(  # Voltage
                 {
-                    "L1": str(samples[-1].data[0]),
-                    "L2": str(samples[-1].data[1]),
-                    "L3": str(samples[-1].data[2]),
+                    "L1": convert_complex(samples[-1].data[0]),
+                    "L2": convert_complex(samples[-1].data[1]),
+                    "L3": convert_complex(samples[-1].data[2]),
                 },
                 separators=(",", ":"),
             ),
             json.dumps(  # Current
                 {
-                    "L1": str(samples[-1].data[3]),
-                    "L2": str(samples[-1].data[4]),
-                    "L3": str(samples[-1].data[5]),
+                    "L1": convert_complex(samples[-1].data[3]),
+                    "L2": convert_complex(samples[-1].data[4]),
+                    "L3": convert_complex(samples[-1].data[5]),
                 },
                 separators=(",", ":"),
             ),
             json.dumps(  # Power
                 {
-                    "L1": str(samples[-1].data[6]),
-                    "L2": str(samples[-1].data[7]),
-                    "L3": str(samples[-1].data[8]),
+                    "L1": convert_complex(samples[-1].data[6]),
+                    "L2": convert_complex(samples[-1].data[7]),
+                    "L3": convert_complex(samples[-1].data[8]),
                 },
                 separators=(",", ":"),
             ),
