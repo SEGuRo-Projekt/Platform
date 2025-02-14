@@ -7,8 +7,8 @@ container:
 
   environment:
     RATE: "10.0"
-    VALUES: "6"
     BLOCK_INTERVAL: "1m"
-    TOPIC: data/measurements/mp1
+    SAMPLE_TYPE: "measurement"
+    TOPIC: data/measurements/demo-data
 
   command: ["demo-data"]
