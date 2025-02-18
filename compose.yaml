@@ -240,7 +240,7 @@ services:
         condition: service_completed_successfully
 
   setup-mosquitto-dynsec-init:
-    restart: no
+    restart: "no"
 
     env_file:
     - .env
@@ -261,7 +261,7 @@ services:
       target: /mosquitto/data/
 
   setup-mosquitto-dynsec-config:
-    restart: no
+    restart: "no"
 
     env_file:
     - .env
