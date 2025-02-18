@@ -240,7 +240,7 @@ services:
         condition: service_completed_successfully
 
   setup-mosquitto-dynsec-init:
-    restart: no
+    restart: "no"
 
     env_file:
     - .env
@@ -261,7 +261,7 @@ services:
       target: /mosquitto/data/
 
   setup-mosquitto-dynsec-config:
-    restart: no
+    restart: "no"
 
     env_file:
     - .env
@@ -481,7 +481,7 @@ services:
     - traefik.http.routers.timestamp-server.service=tsa-api
     - traefik.http.services.tsa-api.loadbalancer.server.port=3000
     ports:
-      - "3000:3000"
+    #  - "3000:3000"
       - "2112:2112"
 
     # healthcheck:
