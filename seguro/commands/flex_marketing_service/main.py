@@ -4,12 +4,19 @@ from datetime import datetime, timedelta
 
 from villas.node.formats import Sample
 
+from seguro.common import broker
+
 
 def cb(smp):
     print(smp)
 
 
 def main():
+    # Initialize broker
+    b = broker.Client("flex-marketing-service")
+    # Subscribe to topic of demo-data
+    b.subscribe(topic="data/measurements/demo-data")
+
     data = [
         (234.0500030517578 + 5.555959224700928j),
         (231.57659912109375 + 9.166434288024902j),
