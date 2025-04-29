@@ -26,14 +26,13 @@ groups:
 roles:
   heartbeat-sender:
     broker:
-      - effect: Allow
-        topic: heartbeats
+      - topic: heartbeats
         actions:
           - Publish
 
   signature-sender:
     broker:
-      - topic: signatures
+      - topic: signatures/+
         actions:
           - Publish
 
