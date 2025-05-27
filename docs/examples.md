@@ -77,7 +77,7 @@ The [example job worker](../images/examples/job-worker/job_worker/main.py) is a 
 For accesing the store, it uses the [store helper class](https://github.com/SEGuRo-Projekt/Platform/blob/main/seguro/common/store.py).
 
 **Dockerfile:**
-```{literalinclude} ../images/job-worker/Dockerfile
+```{literalinclude} ../images/examples/job-worker/Dockerfile
 ```
 
 **Job Specification:**
