@@ -50,10 +50,10 @@ def main() -> int:
 
     parser.add_argument(
         "-t",
-        "--topic",
+        "--topic-prefix",
         type=str,
         help="MQTT topic for publishing signatures",
-        default="signatures/tsr",
+        default="signatures",
     )
     parser.add_argument(
         "-f",
@@ -99,7 +99,7 @@ def main() -> int:
     with pipe:
         while (digest := pipe.queue.get()) is not None:
             logging.info(f"Received {digest.dump()=}")
-            b.publish("signatures/digest", digest.dump())
+            b.publish(f"{args.topic_prefix}/digest", digest.dump())
 
             algorithm = digest.algorithm
             digest_hex = digest.bytes.hex().upper()
@@ -112,7 +112,7 @@ def main() -> int:
 
                 logging.info(f"Received TSR for {algorithm}:{digest_hex}")
 
-                b.publish(args.topic, der.encoder.encode(tsr))
+                b.publish(f"{args.topic_prefix}/tsr", der.encoder.encode(tsr))
             except Exception as err:
                 logging.error(
                     f"Failed to produce TSR for {algorithm}:{digest_hex} {err}"  # noqa: E501
