@@ -81,11 +81,19 @@ For accesing the store, it uses the [store helper class](https://github.com/SEGu
 ```
 
 **Job Specification:**
-```{literalinclude} ../store/config/jobs/example-job.worker.yaml
+```{literalinclude} ../store/config/jobs/example-job-worker.yaml
 ```
 
 ### Streaming Worker
 
-```{note}
-**ToDo:** This section still needs to be written.
+The [example streaming worker](../images/examples/streaming-worker/streaming_worker/main.py) is a script that processes all incoming samples on a given topic (`data/measurements/mp1`) at the broker. When triggered, it scales the values based on their index within the sample, and publishes the resulting scaled samples to another topic (`data/measurements/processed_by_streaming_worker/mp1`).
+
+For accessing the broker, it uses the [broker helper class]((https://github.com/SEGuRo-Projekt/Platform/blob/main/seguro/common/broker.py))
+
+**Dockerfile:**
+```{literalinclude} ../images/examples/streaming-worker/Dockerfile
+```
+
+**Job Specification:**
+```{literalinclude} ../store/config/jobs/examples-streaming-worker.yaml
 ```
