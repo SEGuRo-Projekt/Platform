@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: 2023-2024 Steffen Vogel, OPAL-RT Germany GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+[project]
+name = "seguro-hb-mon"
+version = "0.1.0"
+dependencies = [    
+    "nicegui==2.21.1"
+]
+
+requires-python = ">= 3.11"
+
+[project.scripts]
+hb-mon-ui = "hb_monitor.main:main"
+
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["hb_monitor"]
