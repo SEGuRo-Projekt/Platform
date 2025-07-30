@@ -84,7 +84,9 @@ class Job(compose.Service):
         """
         self.start(trigger_id=trigger_id, event=evt, object=obj)
 
-    def _setup_schedule(self, trigger_id: str, schedule: model.ScheduleTrigger):
+    def _setup_schedule(
+        self, trigger_id: str, schedule: model.ScheduleTrigger
+    ):
         """
 
         Args:
