@@ -61,24 +61,28 @@ class Recorder:
 
         for i in range(self.max_values):
             if isinstance(self.samples[0].data[i], complex):
-                data.update({
-                    f"signal{i}.real": [
-                        smp.data[i].real if i < len(smp.data) else math.nan
-                        for smp in self.samples
-                    ],
-                    f"signal{i}.imag": [
-                        smp.data[i].imag if i < len(smp.data) else math.nan
-                        for smp in self.samples
-                    ],
-                })
+                data.update(
+                    {
+                        f"signal{i}.real": [
+                            smp.data[i].real if i < len(smp.data) else math.nan
+                            for smp in self.samples
+                        ],
+                        f"signal{i}.imag": [
+                            smp.data[i].imag if i < len(smp.data) else math.nan
+                            for smp in self.samples
+                        ],
+                    }
+                )
 
             else:
-                data.update({
-                    f"signal{i}": [
-                        smp.data[i] if i < len(smp.data) else math.nan
-                        for smp in self.samples
-                    ]
-                })
+                data.update(
+                    {
+                        f"signal{i}": [
+                            smp.data[i] if i < len(smp.data) else math.nan
+                            for smp in self.samples
+                        ]
+                    }
+                )
 
         df = pd.DataFrame(data, index)
 

@@ -83,7 +83,7 @@ class Client:
 
         # Used by Pandas
         creds = self.creds.retrieve()
-        self.storage_options = {
+        self._storage_options = {
             "endpoint_url": f"https://{host}:{port}",
             "use_ssl": True,
             "client_kwargs": {
@@ -97,6 +97,21 @@ class Client:
 
         if not self.client.bucket_exists(self.bucket):
             raise Exception(f"Error: Bucket {self.bucket} does not exist...")
+
+    def storage_options(self):
+
+        creds = self.creds.retrieve()
+        self._storage_options["client_kwargs"][
+            "aws_access_key_id"
+        ] = creds.access_key
+        self._storage_options["client_kwargs"][
+            "aws_secret_access_key"
+        ] = creds.secret_key
+        self._storage_options["client_kwargs"][
+            "aws_session_token"
+        ] = creds.session_token
+
+        return self._storage_options
 
     def get_file(self, filename: str, file: str):
         """Download file from the S3 object store and store it locally.
@@ -210,7 +225,7 @@ class Client:
         df.to_parquet(
             f"s3://{self.bucket}/{filename}",
             compression="zstd",
-            storage_options=self.storage_options,
+            storage_options=self.storage_options(),
         )
 
     def get_frame(self, filename: str) -> pd.DataFrame:
@@ -224,7 +239,7 @@ class Client:
         """
         return pd.read_parquet(
             f"s3://{self.bucket}/{filename}",
-            storage_options=self.storage_options,
+            storage_options=self.storage_options(),
         )
 
     def watch(
