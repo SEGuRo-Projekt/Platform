@@ -99,17 +99,16 @@ class Client:
             raise Exception(f"Error: Bucket {self.bucket} does not exist...")
 
     def storage_options(self):
-
         creds = self.creds.retrieve()
         self._storage_options["client_kwargs"][
             "aws_access_key_id"
-        ] = creds.access_key
+        ] = creds.access_key  # type: ignore
         self._storage_options["client_kwargs"][
             "aws_secret_access_key"
-        ] = creds.secret_key
+        ] = creds.secret_key  # type: ignore
         self._storage_options["client_kwargs"][
             "aws_session_token"
-        ] = creds.session_token
+        ] = creds.session_token  # type: ignore
 
         return self._storage_options
 
