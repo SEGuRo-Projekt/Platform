@@ -24,7 +24,7 @@ TOPIC = env.str("TOPIC", None)
 FIWARE_TLS_CERT = env.str("FIWARE_TLS_CERT", None)
 FIWARE_TLS_KEY = env.str("FIWARE_TLS_KEY", None)
 
-ID = env.str("ID", "loc1/md1/mp1")
+CONNECTOR_ID = env.str("CONNECTOR_ID", "fiware-connector")
 
 FORMAT_STRING = (
     "{timestamp}|"
@@ -38,6 +38,7 @@ FORMAT_STRING = (
 
 def post_sample(
     url: str,
+    identifier: str,
     sample_ts: str,
     voltage: str,
     current: str,
@@ -68,7 +69,7 @@ def post_sample(
         data=message,
         timeout=5,
         cert=(FIWARE_TLS_CERT, FIWARE_TLS_KEY),
-        params=[("k", API_KEY), ("i", ID)],
+        params=[("k", API_KEY), ("i", identifier)],
     )
 
 
@@ -118,7 +119,8 @@ def main() -> int:
 
         ret = post_sample(
             URL,
-            samples[0].ts_origin,
+            topic,
+            samples[-1].ts_origin,
             json.dumps(  # Voltage
                 {
                     "L1": convert_complex(samples[-1].data[0]),
@@ -148,12 +150,13 @@ def main() -> int:
 
         logging.debug(ret.text)
 
-    b = broker.Client(f"fiware-connector-{ID}")
+    b = broker.Client(CONNECTOR_ID)
 
-    b.subscribe_samples(TOPIC, callback)
+    for topic in TOPIC.split(","):
+        b.subscribe_samples(topic, callback)
 
     logging.info("Subscribed to %s", TOPIC)
-    logging.info("FIWARE URL: %s/?k=%s&i-%s", URL, API_KEY, ID)
+    logging.info("FIWARE URL: %s/?k=%s&i=%s", URL, API_KEY, "<topic>")
 
     while True:
         try:
