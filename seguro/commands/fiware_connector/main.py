@@ -64,6 +64,8 @@ def post_sample(
         .encode()
     )
 
+    logging.debug("[%s] Sending message: %s", identifier, message)
+    # return True
     return requests.post(
         url,
         data=message,
@@ -117,38 +119,64 @@ def main() -> int:
             samples[-1],
         )
 
-        ret = post_sample(
-            URL,
-            topic,
-            samples[-1].ts_origin,
-            json.dumps(  # Voltage
-                {
-                    "L1": convert_complex(samples[-1].data[0]),
-                    "L2": convert_complex(samples[-1].data[1]),
-                    "L3": convert_complex(samples[-1].data[2]),
-                },
-                separators=(",", ":"),
-            ),
-            json.dumps(  # Current
-                {
-                    "L1": convert_complex(samples[-1].data[3]),
-                    "L2": convert_complex(samples[-1].data[4]),
-                    "L3": convert_complex(samples[-1].data[5]),
-                },
-                separators=(",", ":"),
-            ),
-            json.dumps(  # Power
-                {
-                    "L1": convert_complex(samples[-1].data[6]),
-                    "L2": convert_complex(samples[-1].data[7]),
-                    "L3": convert_complex(samples[-1].data[8]),
-                },
-                separators=(",", ":"),
-            ),
-            samples[-1].data[9],  # Frequency
-        )
+        sample_index = 1
+        sample_start = 3  # First three elements are always the voltages
+        sample_end = len(samples[-1].data) - 1
+        curr_end = sample_start + 6
 
-        logging.debug(ret.text)
+        while curr_end <= sample_end:
+            # Note: This currently does not send incomplete samples.
+            # I.e., at least 3 Currents and 3 Power values have to be present.
+            sample_range = list(range(sample_start, curr_end))
+
+            ret = post_sample(
+                URL,
+                f"{topic}/currentgroup{sample_index}",
+                samples[-1].ts_origin,
+                json.dumps(  # Voltage
+                    {
+                        "L1": convert_complex(samples[-1].data[0]),
+                        "L2": convert_complex(samples[-1].data[1]),
+                        "L3": convert_complex(samples[-1].data[2]),
+                    },
+                    separators=(",", ":"),
+                ),
+                json.dumps(  # Current
+                    {
+                        "L1": convert_complex(
+                            samples[-1].data[sample_range[0]]
+                        ),
+                        "L2": convert_complex(
+                            samples[-1].data[sample_range[1]]
+                        ),
+                        "L3": convert_complex(
+                            samples[-1].data[sample_range[2]]
+                        ),
+                    },
+                    separators=(",", ":"),
+                ),
+                json.dumps(  # Power
+                    {
+                        "L1": convert_complex(
+                            samples[-1].data[sample_range[3]]
+                        ),
+                        "L2": convert_complex(
+                            samples[-1].data[sample_range[4]]
+                        ),
+                        "L3": convert_complex(
+                            samples[-1].data[sample_range[5]]
+                        ),
+                    },
+                    separators=(",", ":"),
+                ),
+                samples[-1].data[-1],  # Frequency
+            )
+
+            sample_start = curr_end
+            curr_end += 6
+            sample_index += 1
+
+            logging.debug(ret.text)
 
     b = broker.Client(CONNECTOR_ID)
 
