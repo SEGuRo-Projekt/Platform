@@ -86,7 +86,7 @@ def main() -> int:
 
         s.client.put_object(
             bucket_name=s.bucket,
-            object_name=f"tsr/{digest_hex}.{algorithm}.tsr",
+            object_name=f"data/signatures/tsr/{digest_hex}.{algorithm}.tsr",
             data=BytesIO(msg.payload),
             length=len(msg.payload),
         )
