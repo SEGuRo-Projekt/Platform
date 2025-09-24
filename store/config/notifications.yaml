@@ -7,51 +7,18 @@ version: 1
 
 groups:
   - admins:
-      - steffen-vogel
-      # - felix-wege
+      - admin1
       - zulip
 
-  - opal-rt:
-      - steffen-vogel
-
-  - rwth:
-      - felix-wege
-      - martin-moraga
-
-  - stwh:
-      - erik-rathje
-      - daniel-lampa
-
-  - hsbo:
-      - simeon-kremzow-tennie
-
-  - gridhound:
-      - artur-loewen
-
-  - utimaco:
-      - ingo-ludemann
-
-  - rhebo:
-      - shane-moloney
-
-  - consortium:
-      - opal-rt
-      - rwth
-      - stwh
-      - hsbo
-      - gridhound
-      - utimaco
-      - rhebo
+  - users:
+      - user1
 
 urls:
-  - ? mailtos://${MAIL_HOST}?user=${MAIL_USER}&pass=${MAIL_PASS}&from=${MAIL_FROM}&to=steffen.vogel@opal-rt.com
-    : - tag: steffen-vogel
+  - ? mailtos://${MAIL_HOST}?user=${MAIL_USER}&pass=${MAIL_PASS}&from=${MAIL_FROM}&to=admin1@example.com
+    : - tag: admin1
 
-  - ? mailtos://${MAIL_HOST}?user=${MAIL_USER}&pass=${MAIL_PASS}&from=${MAIL_FROM}&to=felix.wege@rwth-aachen.de
-    : - tag: felix-wege
-
-  - ? mailtos://${MAIL_HOST}?user=${MAIL_USER}&pass=${MAIL_PASS}&from=${MAIL_FROM}&to=shane.moloney@rhebo.com
-    : - tag: shane-moloney
+  - ? mailtos://${MAIL_HOST}?user=${MAIL_USER}&pass=${MAIL_PASS}&from=${MAIL_FROM}&to=user1@example.com
+    : - tag: user1
 
   - ? zulip://${ZULIP_BOTNAME}@${ZULIP_ORGANIZATION}/${ZULIP_TOKEN}/${ZULIP_RECIPIENT}
     : - tag: zulip
