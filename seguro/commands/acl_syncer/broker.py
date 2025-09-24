@@ -230,8 +230,8 @@ class Config:
                         chain.from_iterable(
                             chain.from_iterable(
                                 [
-                                    (
-                                        (
+                                    [
+                                        [
                                             ACL(
                                                 acltype=acl_type,
                                                 topic=acl.topic,
@@ -241,9 +241,9 @@ class Config:
                                             for acl_type in ACLType.from_broker_action(  # noqa
                                                 act
                                             )
-                                        )
+                                        ]
                                         for act in acl.actions
-                                    )
+                                    ]
                                     for acl in role.broker
                                 ]
                             )
@@ -410,6 +410,8 @@ class Plugin:
         cmd_payload = json.dumps({"commands": [cmd.to_dict() for cmd in cmds]})
         self.client.publish("$CONTROL/dynamic-security/v1", cmd_payload)
 
+        logging.info("Sent command to dynsec plugin: %s", cmd_payload)
+
         msg = self.queue.get(True, timeout=timeout)
 
         resp = json.loads(msg.payload)
@@ -441,6 +443,11 @@ def reconcile(
     modify = new.also_in(current).not_in(unchanged)
     create = new.not_in(current)
     delete = current.not_in(new)
+
+    logging.info("Unchanged broker ACL: %s", unchanged)
+    logging.info("Modify broker ACL: %s", modify)
+    logging.info("Create broker ACL: %s", create)
+    logging.info("Delete broker ACL: %s", delete)
 
     cmds = dsp.create(create) + dsp.modify(modify) + dsp.delete(delete)
 
