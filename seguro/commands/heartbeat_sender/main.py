@@ -10,6 +10,7 @@ import logging
 import sys
 import time
 import usb.core
+import yaml
 
 from seguro.common import broker, config
 
@@ -30,7 +31,7 @@ def strip_none(d: dict) -> dict:
 def get_nix() -> dict:
     nix = {}
 
-    if os.stat("/var/run/current-system"):
+    if os.path.exists("/var/run/current-system"):
         nix["current_system"] = os.readlink("/var/run/current-system")
 
     return nix
@@ -118,7 +119,6 @@ def get_sensors() -> dict:
 
 
 def get_status() -> dict:
-
     freq = psutil.cpu_freq()
     uname = os.uname()
     proc = psutil.Process()
@@ -173,6 +173,13 @@ def main() -> int:
         help="Logging level",
         choices=["debug", "info", "warn", "error", "critical"],
     )
+    parser.add_argument(
+        "--static",
+        "-s",
+        type=str,
+        help="Path to YAML/JSON file containing static information which will "
+        + "be merged into the status message",
+    )
 
     args = parser.parse_args()
 
@@ -182,8 +189,16 @@ def main() -> int:
         datefmt="%H:%M:%S",
     )
 
+    status = get_status()
+
+    if args.static:
+        with open(args.static, "r") as f:
+            static = yaml.safe_load(f)
+
+        status.update(static)
+
     b = broker.Client("heartbeat")
-    msg_info = b.publish(args.topic, json.dumps(get_status()))
+    msg_info = b.publish(args.topic, json.dumps(status))
     msg_info.wait_for_publish(10)
 
     return 0
