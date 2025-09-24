@@ -40,7 +40,7 @@ markers = ["broker", "store", "logger", "config"]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-apprise = "^1.7.2"
+apprise = "^1.9.4"
 boto3 = "^1.34.50"
 django-environ = "^0.11.2"
 docker = "^7.0.0"
