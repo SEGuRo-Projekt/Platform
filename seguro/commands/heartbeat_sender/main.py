@@ -11,6 +11,7 @@ import sys
 import time
 import usb.core
 import yaml
+from datetime import datetime
 
 from seguro.common import broker, config
 
@@ -126,6 +127,7 @@ def get_status() -> dict:
     with proc.oneshot():
 
         return {
+            "time": datetime.now().isoformat(),
             "boottime": psutil.boot_time(),
             "processes": len(psutil.pids()),
             "usb": get_usb(),
@@ -196,6 +198,8 @@ def main() -> int:
             static = yaml.safe_load(f)
 
         status.update(static)
+
+    logging.debug("Status: %s", json.dumps(status, indent=2))
 
     b = broker.Client("heartbeat")
     msg_info = b.publish(args.topic, json.dumps(status))
