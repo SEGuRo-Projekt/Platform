@@ -41,13 +41,7 @@ def main() -> int:
           msg: The MQTT message
 
         """
-        # print(samples)
-        print(
-            f"{samples[0].ts_origin.seconds}, "
-            f"{samples[0].ts_origin.nanoseconds} - "
-            f"{topic} - "
-            f"{samples[0].data}"
-        )
+        print(samples)
 
     b.subscribe_samples(args.topic, callback)
 
