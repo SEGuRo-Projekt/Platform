@@ -1,0 +1,24 @@
+---
+# SPDX-FileCopyrightText: 2023-2024 Steffen Vogel, OPAL-RT Germany GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+# See: https://github.com/caronc/apprise/wiki/Config_yaml
+version: 1
+
+groups:
+  - admins:
+      - admin1
+      - zulip
+
+  - users:
+      - user1
+
+urls:
+  - ? mailtos://${MAIL_HOST}?user=${MAIL_USER}&pass=${MAIL_PASS}&from=${MAIL_FROM}&to=admin1@example.com
+    : - tag: admin1
+
+  - ? mailtos://${MAIL_HOST}?user=${MAIL_USER}&pass=${MAIL_PASS}&from=${MAIL_FROM}&to=user1@example.com
+    : - tag: user1
+
+  - ? zulip://${ZULIP_BOTNAME}@${ZULIP_ORGANIZATION}/${ZULIP_TOKEN}/${ZULIP_RECIPIENT}
+    : - tag: zulip

@@ -10,7 +10,7 @@ import logging
 import environ
 import urllib.parse
 import apprise
-from apprise.attachment.AttachHTTP import AttachHTTP as AppriseAttachHTTP
+from apprise.attachment.http import AttachHTTP as AppriseAttachHTTP
 from pathlib import Path
 from queue import SimpleQueue
 
