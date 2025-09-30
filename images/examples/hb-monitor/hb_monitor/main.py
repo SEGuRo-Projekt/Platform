@@ -84,15 +84,15 @@ class autoArchive_t(TypedDict):
 
 auto_archive = {"enable": False, "interval": 0}
 # Routes that don't require authentication.
-unrestricted_page_routes = {"/login"}
+unrestricted_page_routes = {"login", "_nicegui" }
 logged_in = False
 
 
 # Middleware to restrict access only to authenticated users.
 class AuthMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        if not app.storage.user.get("authenticated", False):
-            if request.url.path not in unrestricted_page_routes:
+    async def dispatch(self, request: Request, call_next):        
+        if not app.storage.user.get("authenticated", False):            
+            if request.url.path.split('/')[1] not in unrestricted_page_routes:                
                 return RedirectResponse(
                     f"/login?redirect_to={request.url.path}"
                 )
@@ -115,8 +115,8 @@ def update_device_state():
             time_diff = (time_now - last_ping).total_seconds()
 
             if time_diff > d["hb_interval"]:  # HB_INTERVAL:
-                if d["id"] == "plink":
-                    print(f" plink off {time_diff} hb:{d['hb_interval']} ")
+                # if d["id"] == "plink":
+                #     print(f" plink off {time_diff} hb:{d['hb_interval']} ")
                 d["ping_status"] = (
                     "offline" if d["ping_status"] != "archived" else "archived"
                 )
@@ -374,14 +374,12 @@ def handle_archive(event: events.GenericEventArguments):
     ui.notify(f"Archiving device: {event.args}")
     for d in devices:
         if d["id"] == event.args:
-            d["ping_status"] = "archived"  # DevStatus.ARCHIVED
-    print(devices)
+            d["ping_status"] = "archived"  # DevStatus.ARCHIVED    
     update_device_state()
 
 
 def handle_view_json(event: events.GenericEventArguments):
-    id = event.args
-    # print(device_hb_json_dict)
+    id = event.args    
     if id in device_hb_json_dict.keys():
         ui.navigate.to(f"/hb_json/{id}", new_tab=True)
     else:
