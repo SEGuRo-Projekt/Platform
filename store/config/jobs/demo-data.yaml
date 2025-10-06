@@ -10,5 +10,6 @@ container:
     BLOCK_INTERVAL: "1m"
     SAMPLE_TYPE: "measurement"
     TOPIC: data/measurements/demo-data
+    DEBUG: True
 
   command: ["demo-data"]

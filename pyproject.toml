@@ -27,6 +27,7 @@ acl-syncer = "seguro.commands.acl_syncer.main:main"
 demo-data = "seguro.commands.demo_data.main:main"
 protobuf-subscriber = "seguro.commands.protobuf_subscriber.main:main"
 fiware-connector = "seguro.commands.fiware_connector.main:main"
+flex-marketing-service = "seguro.commands.flex_marketing_service.main:main"
 
 [tool.poetry.urls]
 "Homepage" = "https://github.com/SEGuRo-Projekt/Platform"
@@ -62,6 +63,7 @@ pydantic = "^2.7.0"
 pyarrow = "^15"
 pytimeparse = "^1.1.8"
 requests = ">=2.31.0"
+pyvolt = { git = "https://github.com/sogno-platform/pyvolt" }
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.2"
