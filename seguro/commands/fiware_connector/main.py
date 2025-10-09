@@ -3,6 +3,7 @@
 
 import argparse
 import datetime
+from functools import partial
 import json
 import logging
 import time
@@ -37,6 +38,7 @@ FORMAT_STRING = (
 
 
 def post_sample(
+    session: requests.Session,
     url: str,
     identifier: str,
     sample_ts: str,
@@ -66,7 +68,7 @@ def post_sample(
 
     logging.debug("[%s] Sending message: %s", identifier, message)
     # return True
-    return requests.post(
+    return session.post(
         url,
         data=message,
         timeout=5,
@@ -102,7 +104,12 @@ def main() -> int:
         datefmt="%H:%M:%S",
     )
 
-    def callback(b: broker.Client, topic: str, samples: list[Sample]):
+    def callback(
+        session: requests.Session,
+        b: broker.Client,
+        topic: str,
+        samples: list[Sample],
+    ):
         """Callback which gets called for each received MQTT message.
 
         Args:
@@ -130,6 +137,7 @@ def main() -> int:
             sample_range = list(range(sample_start, curr_end))
 
             ret = post_sample(
+                session,
                 URL,
                 f"{topic}/currentgroup{sample_index}",
                 samples[-1].ts_origin,
@@ -179,9 +187,10 @@ def main() -> int:
             logging.debug(ret.text)
 
     b = broker.Client(CONNECTOR_ID)
+    session = requests.Session()
 
     for topic in TOPIC.split(","):
-        b.subscribe_samples(topic, callback)
+        b.subscribe_samples(topic, partial(callback, session))
 
     logging.info("Subscribed to %s", TOPIC)
     logging.info("FIWARE URL: %s/?k=%s&i=%s", URL, API_KEY, "<topic>")
