@@ -29,7 +29,7 @@ FIWARE_TLS_KEY = env.str("FIWARE_TLS_KEY", None)
 
 CONNECTOR_ID = env.str("CONNECTOR_ID", "fiware-connector")
 
-MAPPING_JSON = env.str("MAPPING_JSON", None)
+ID_MAPPING_JSON = env.str("ID_MAPPING_JSON", None)
 
 FORMAT_STRING = (
     "{timestamp}|"
@@ -88,7 +88,7 @@ def convert_complex(complexVal: complex) -> dict:
     }
 
 
-def prettify_identifier(
+def substitute_identifier(
     topic: str, sample_index: int, identifier_map: Union[dict, None]
 ) -> str:
     if (
@@ -110,13 +110,11 @@ def flatten_dict(nested_dict: dict, separator="/") -> dict:
             flat_dict[name[:-1]] = obj
 
     _flatten(nested_dict)
-
     logging.debug("Flattened dict: %s", flat_dict)
-
     return flat_dict
 
 
-def parse_identfier_map(mapping: str = MAPPING_JSON) -> dict:
+def parse_identfier_map(mapping: str = ID_MAPPING_JSON) -> dict:
     if mapping is not None:
         if os.path.exists(mapping):
             with open(mapping, encoding="utf-8") as file:
@@ -181,7 +179,7 @@ def main() -> int:
             ret = post_sample(
                 session,
                 URL,
-                prettify_identifier(topic, sample_index, identifier_map),
+                substitute_identifier(topic, sample_index, identifier_map),
                 samples[-1].ts_origin,
                 json.dumps(  # Voltage
                     {
@@ -231,7 +229,9 @@ def main() -> int:
     b = broker.Client(CONNECTOR_ID)
     session = requests.Session()
     identifier_map = (
-        None if MAPPING_JSON is None else parse_identfier_map(MAPPING_JSON)
+        None
+        if ID_MAPPING_JSON is None
+        else parse_identfier_map(ID_MAPPING_JSON)
     )
 
     for topic in TOPIC.split(","):
