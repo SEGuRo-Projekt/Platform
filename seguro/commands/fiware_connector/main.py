@@ -217,7 +217,11 @@ def main() -> int:
                     },
                     separators=(",", ":"),
                 ),
-                samples[-1].data[-1],  # Frequency
+                (  # Frequency
+                    samples[-1].data[-1]
+                    if isinstance(samples[-1].data[-1], float)
+                    else samples[-1].data[-1].real
+                ),
             )
 
             sample_start = curr_end
