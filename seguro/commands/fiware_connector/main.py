@@ -242,7 +242,7 @@ def main() -> int:
         b.subscribe_samples(topic, partial(callback, session, identifier_map))
 
     logging.info("Subscribed to %s", TOPIC)
-    logging.info("FIWARE URL: %s/?k=%s&i=%s", URL, API_KEY, "<topic>")
+    logging.info("FIWARE URL: %s/?k=%s&i=%s", URL, API_KEY, "<identifier>")
 
     while True:
         try:
