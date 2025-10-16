@@ -23,9 +23,11 @@ HB_INTERVAL = env.int("HB_INTERVAL", 10)
 CRITICAL_PCT = env.int("CRITICAL_RESOURCE_PCT", 95)
 WARNING_PCT = env.int("WARNING_RESOURCE_PCT", 75)
 # Login credentials.
-ENV_PASSWORD = env.int("HBMON_PSWD", "pass1")
-ENV_USERNAME = env.int("HBMON_UNAME", "user1")
-ENV_APPSECRET = env.int("HBMON_APPSECRET", "fdc8d08ab5c839582aa9")
+ENV_PASSWORD = env.str("HBMON_PSWD", env.str("ADMIN_PASSWORD", "pass1"))
+ENV_USERNAME = env.str("HBMON_UNAME", env.str("ADMIN_USERNAME", "user1"))
+ENV_APPSECRET = env.str(
+    "HBMON_APPSECRET", env.str("SECRET", "fdc8d08ab5c839582aa9")
+)
 EXPIRY_SECONDS = env.int("SESSION_EXPIRY_SEC", 200)
 
 
