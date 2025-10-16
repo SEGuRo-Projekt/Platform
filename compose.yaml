@@ -506,6 +506,46 @@ services:
       target: /certs
       read_only: true
 
+  heartbeat-monitor:
+    <<: *platform-service
+
+    environment:
+      PORT: 9099
+      HB_INTERVAL: 310
+      MQTT_HOST: mosquitto
+      TLS_CACERT: /certs/ca.crt
+      TLS_CERT: /certs/clients/admin.crt
+      TLS_KEY: /keys/clients/admin.key
+
+    env_file:
+    - .env
+
+    command: heartbeat-monitor
+
+    volumes:
+    - type: volume
+      source: certs
+      target: /certs
+      read_only: true
+    - type: volume
+      source: key_clients
+      target: /keys/clients
+      read_only: true
+
+    ports:
+    - target: 9099
+      published: 9099
+      protocol: tcp
+      mode: host
+
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.heartbeat-monitor.rule=Host(`heartbeats.${DOMAIN}`)
+    - traefik.http.routers.heartbeat-monitor.service=heartbeat-monitor
+    - traefik.http.routers.heartbeat-monitor.tls=true
+    - traefik.http.services.heartbeat-monitor.loadbalancer.server.port=9099
+
+
 volumes:
   key_ca:
   key_server:
