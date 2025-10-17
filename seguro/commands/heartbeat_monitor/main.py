@@ -1,19 +1,21 @@
 # SPDX-FileCopyrightText: 2025 Jones Chakkalakkal, RWTH Aachen University
 # SPDX-License-Identifier: Apache-2.0
 
+import argparse
 import json
 import logging
-import environ
-import argparse
-from enum import IntEnum, Enum
-from nicegui import ui, app, events
-from fastapi import Request
 from datetime import datetime
+from enum import Enum, IntEnum
 from functools import partial
-from seguro.common import broker, config
-from typing import TypedDict, Dict, Optional, Any
+from typing import Any, Dict, Optional, TypedDict
+
+import environ
+from fastapi import Request
 from fastapi.responses import RedirectResponse
+from nicegui import app, events, ui
 from starlette.middleware.base import BaseHTTPMiddleware
+
+from seguro.common import broker, config
 
 env = environ.Env()
 PORT = env.int("HB_MON_PORT", 9099)
