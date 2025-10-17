@@ -27,6 +27,7 @@ acl-syncer = "seguro.commands.acl_syncer.main:main"
 demo-data = "seguro.commands.demo_data.main:main"
 protobuf-subscriber = "seguro.commands.protobuf_subscriber.main:main"
 fiware-connector = "seguro.commands.fiware_connector.main:main"
+heartbeat-monitor = "seguro.commands.heartbeat_monitor.main:main"
 
 [tool.poetry.urls]
 "Homepage" = "https://github.com/SEGuRo-Projekt/Platform"
@@ -62,6 +63,7 @@ pydantic = "^2.7.0"
 pyarrow = "^15"
 pytimeparse = "^1.1.8"
 requests = ">=2.31.0"
+nicegui = "^2.21.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.2"
