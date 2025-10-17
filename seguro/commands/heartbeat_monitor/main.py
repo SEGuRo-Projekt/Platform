@@ -682,7 +682,7 @@ def main(rload=False):
             datefmt="%H:%M:%S",
         )
 
-        client_broker = broker.Client("hb-mon-ui")
+        client_broker = broker.Client("heartbeat-monitor")
         client_broker.subscribe(args.topic, partial(new_device_hb, logger))
         ui.run(
             reload=rload,
