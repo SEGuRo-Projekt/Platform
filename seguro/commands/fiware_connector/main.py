@@ -31,6 +31,8 @@ CONNECTOR_ID = env.str("CONNECTOR_ID", "fiware-connector")
 
 ID_MAPPING_JSON = env.str("ID_MAPPING_JSON", None)
 
+HTTP_TIMEOUT = env.int("HTTP_TIMEOUT", 10)
+
 FORMAT_STRING = (
     "{timestamp}|"
     + "dateObservedFrom|{dateObservedFrom}|"
@@ -70,12 +72,17 @@ def post_sample(
         .encode()
     )
 
-    logging.debug("[%s] Sending message: %s", identifier, message)
+    logging.debug(
+        "[%s] Sending message: %s. (timeout=%d)",
+        identifier,
+        message,
+        HTTP_TIMEOUT,
+    )
     # return True
     return session.post(
         url,
         data=message,
-        timeout=5,
+        timeout=HTTP_TIMEOUT,
         cert=(FIWARE_TLS_CERT, FIWARE_TLS_KEY),
         params=[("k", API_KEY), ("i", identifier)],
     )
