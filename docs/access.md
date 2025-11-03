@@ -8,6 +8,7 @@ The components compromising the SEGuRo platform are accessible via various sub-d
 - [`ui.store.localhost`](https://ui.store.localhost) S3 Datastore Web-Interface
 - [`registry.localhost`](https://registry.localhost) Docker Image Registry ([distribution](https://distribution.github.io/distribution/about/))
 - [`ui.registry.localhost`](https://ui.registry.localhost) Docker Image Registry Web-Interface ([docker-registry-ui](https://github.com/Joxit/docker-registry-ui))
+- [`heartbeats.localhost`](https://heartbeats.localhost) Web-Interface for Gateway Heartbeats ([SEGuRo Gateway](https://github.com/SEGuRo-Projekt/Gateway))
 
 ```{note}
 Please substitute `localhost` with the `DOMAIN` from your [configuration](./configuration.md).
