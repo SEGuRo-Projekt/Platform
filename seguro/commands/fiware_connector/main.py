@@ -8,7 +8,7 @@ import json
 import logging
 import os
 import time
-from typing import Union
+from typing import Optional, Union
 
 import environ
 import requests  # type: ignore
@@ -52,7 +52,7 @@ def post_sample(
     current: str,
     power: str,
     freq: float,
-) -> requests.Response:
+) -> Optional[requests.Response]:
     def convert_timestamp(ts) -> str:
         dt = datetime.datetime(1970, 1, 1) + datetime.timedelta(
             seconds=ts.seconds, microseconds=ts.nanoseconds / 1000
@@ -79,13 +79,17 @@ def post_sample(
         HTTP_TIMEOUT,
     )
     # return True
-    return session.post(
-        url,
-        data=message,
-        timeout=HTTP_TIMEOUT,
-        cert=(FIWARE_TLS_CERT, FIWARE_TLS_KEY),
-        params=[("k", API_KEY), ("i", identifier)],
-    )
+    try:
+        return session.post(
+            url,
+            data=message,
+            timeout=HTTP_TIMEOUT,
+            cert=(FIWARE_TLS_CERT, FIWARE_TLS_KEY),
+            params=[("k", API_KEY), ("i", identifier)],
+        )
+    except requests.RequestException as e:
+        logging.error("Error sending data to FIWARE: %s", e)
+        return None
 
 
 def convert_complex(complexVal: complex) -> dict:
@@ -151,7 +155,6 @@ def main() -> int:
     )
 
     def callback(
-        session: requests.Session,
         identifier_map: Union[dict, None],
         b: broker.Client,
         topic: str,
@@ -178,67 +181,68 @@ def main() -> int:
         sample_end = len(samples[-1].data) - 1
         curr_end = sample_start + 6
 
-        while curr_end <= sample_end:
-            # Note: This currently does not send incomplete samples.
-            # I.e., at least 3 Currents and 3 Power values have to be present.
-            sample_range = list(range(sample_start, curr_end))
+        with requests.Session() as session:
+            while curr_end <= sample_end:
+                # Note: This currently does not send incomplete samples.
+                # I.e., at least 3 Currents and 3 Power values have to be present.
+                sample_range = list(range(sample_start, curr_end))
 
-            ret = post_sample(
-                session,
-                URL,
-                substitute_identifier(topic, sample_index, identifier_map),
-                samples[-1].ts_origin,
-                json.dumps(  # Voltage
-                    {
-                        "L1": convert_complex(samples[-1].data[0]),
-                        "L2": convert_complex(samples[-1].data[1]),
-                        "L3": convert_complex(samples[-1].data[2]),
-                    },
-                    separators=(",", ":"),
-                ),
-                json.dumps(  # Current
-                    {
-                        "L1": convert_complex(
-                            samples[-1].data[sample_range[0]]
-                        ),
-                        "L2": convert_complex(
-                            samples[-1].data[sample_range[1]]
-                        ),
-                        "L3": convert_complex(
-                            samples[-1].data[sample_range[2]]
-                        ),
-                    },
-                    separators=(",", ":"),
-                ),
-                json.dumps(  # Power
-                    {
-                        "L1": convert_complex(
-                            samples[-1].data[sample_range[3]]
-                        ),
-                        "L2": convert_complex(
-                            samples[-1].data[sample_range[4]]
-                        ),
-                        "L3": convert_complex(
-                            samples[-1].data[sample_range[5]]
-                        ),
-                    },
-                    separators=(",", ":"),
-                ),
-                (  # Frequency
-                    samples[-1].data[-1]
-                    if isinstance(samples[-1].data[-1], float)
-                    else samples[-1].data[-1].real
-                ),
-            )
+                ret = post_sample(
+                    session,
+                    URL,
+                    substitute_identifier(topic, sample_index, identifier_map),
+                    samples[-1].ts_origin,
+                    json.dumps(  # Voltage
+                        {
+                            "L1": convert_complex(samples[-1].data[0]),
+                            "L2": convert_complex(samples[-1].data[1]),
+                            "L3": convert_complex(samples[-1].data[2]),
+                        },
+                        separators=(",", ":"),
+                    ),
+                    json.dumps(  # Current
+                        {
+                            "L1": convert_complex(
+                                samples[-1].data[sample_range[0]]
+                            ),
+                            "L2": convert_complex(
+                                samples[-1].data[sample_range[1]]
+                            ),
+                            "L3": convert_complex(
+                                samples[-1].data[sample_range[2]]
+                            ),
+                        },
+                        separators=(",", ":"),
+                    ),
+                    json.dumps(  # Power
+                        {
+                            "L1": convert_complex(
+                                samples[-1].data[sample_range[3]]
+                            ),
+                            "L2": convert_complex(
+                                samples[-1].data[sample_range[4]]
+                            ),
+                            "L3": convert_complex(
+                                samples[-1].data[sample_range[5]]
+                            ),
+                        },
+                        separators=(",", ":"),
+                    ),
+                    (  # Frequency
+                        samples[-1].data[-1]
+                        if isinstance(samples[-1].data[-1], float)
+                        else samples[-1].data[-1].real
+                    ),
+                )
 
-            sample_start = curr_end
-            curr_end += 6
-            sample_index += 1
+                sample_start = curr_end
+                curr_end += 6
+                sample_index += 1
 
-            logging.debug(ret.text)
+                if ret is not None:
+                    logging.debug(ret.text)
 
     b = broker.Client(CONNECTOR_ID)
-    session = requests.Session()
     identifier_map = (
         None
         if ID_MAPPING_JSON is None
@@ -246,7 +250,7 @@ def main() -> int:
     )
 
     for topic in TOPIC.split(","):
-        b.subscribe_samples(topic, partial(callback, session, identifier_map))
+        b.subscribe_samples(topic, partial(callback, identifier_map))
 
     logging.info("Subscribed to %s", TOPIC)
     logging.info("FIWARE URL: %s/?k=%s&i=%s", URL, API_KEY, "<identifier>")
