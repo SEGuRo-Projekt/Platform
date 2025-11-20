@@ -184,7 +184,7 @@ def main() -> int:
         with requests.Session() as session:
             while curr_end <= sample_end:
                 # Note: This currently does not send incomplete samples.
-                # I.e., at least 3 Currents and 3 Power values have to be present.
+                # I.e., at least 3 Currents + 3 Power values have to be there.
                 sample_range = list(range(sample_start, curr_end))
 
                 ret = post_sample(
