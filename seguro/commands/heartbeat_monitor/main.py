@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2025 Jones Chakkalakkal, RWTH Aachen University
 # SPDX-License-Identifier: Apache-2.0
-
+import uuid
 import argparse
 import json
 import logging
@@ -15,7 +15,9 @@ from fastapi.responses import RedirectResponse
 from nicegui import app, events, ui
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from seguro.common import broker, config
+from seguro.common import broker, config, store
+from seguro.common.notify import notify  # RawAttachment
+
 
 env = environ.Env()
 PORT = env.int("HB_MON_PORT", 9099)
@@ -37,6 +39,7 @@ class Severity(IntEnum):
     OK = 0
     WARNING = 1
     CRITICAL = 2
+    OFFLINE = 3
 
 
 class DevStatus(str, Enum):
@@ -58,25 +61,26 @@ class Device(TypedDict):
     uptime: str
     id: str
     last_ping: str
-    state: str
     remark: str
-    ping_status: str
     state_colour: str
     hb_interval: float
+    notified_lvl: Severity
+    state_lvl: Severity
+    archived: bool
+    state: str
 
 
 devices: list[Device] = []
 devices_unarchived: list[Device] = []
 devices_archived: list[Device] = []
 show_archived = False
-device_hb_json_dict = {}
+device_hb_json_dict: Dict[str, Dict[str, str]] = {}
 
 device_table = None
 reauth_time = 0
 
 state_colours = ["🟢", "🟠", "🔴"]
-severity = ["OK", "Warning", "Critical"]
-
+severity = ["OK", "Warning", "Critical", "Offline"]
 
 ################################
 # Helper functions
@@ -104,7 +108,8 @@ app.add_middleware(AuthMiddleware)
 
 
 def update_device_state():
-    if device_table:
+    logger = logging.getLogger()
+    if devices:
         time_now = datetime.now()
 
         for d in devices:
@@ -112,39 +117,68 @@ def update_device_state():
             time_diff = (time_now - last_ping).total_seconds()
 
             if time_diff > d["hb_interval"]:
-                d["ping_status"] = (
-                    DevStatus.OFFLINE
-                    if d["ping_status"] != DevStatus.ARCHIVED
-                    else DevStatus.ARCHIVED
-                )
+                if not d["archived"]:
+                    d["state_lvl"] = Severity.OFFLINE
+
                 if d["remark"]:
                     if "Offline" not in d["remark"]:
-                        if d["state"] == severity[Severity.WARNING]:
+                        if d["state_lvl"] == Severity.WARNING:
                             d["remark"] = "Offline and Warnings"
                         else:
                             d["remark"] = d["remark"] + ", Offline"
                 else:
                     d["remark"] = "Offline"
 
-                d["state"] = severity[Severity.CRITICAL]
                 d["state_colour"] = state_colours[Severity.CRITICAL]
+                d["state_lvl"] = Severity.OFFLINE
+                d["state"] = severity[Severity.CRITICAL]
 
             if (
                 time_diff > (auto_archive["interval"] + d["hb_interval"])
                 and auto_archive["enable"]
             ):
-                d["ping_status"] = DevStatus.ARCHIVED
+                d["archived"] = True
 
-        if show_archived:
-            device_table.rows = [
-                x for x in devices if x["ping_status"] == DevStatus.ARCHIVED
-            ]
-        else:
-            device_table.rows = [
-                x for x in devices if x["ping_status"] != DevStatus.ARCHIVED
-            ]
+        if device_table is not None:
+            if show_archived:
+                device_table.rows = [x for x in devices if x["archived"]]
+            else:
+                device_table.rows = [x for x in devices if not x["archived"]]
+            device_table.update()
+        # Notification system
+        for x in devices:
+            if x["notified_lvl"] < x["state_lvl"] and not x["archived"]:
+                logger.debug(
+                    f"Notify id:{x['id']} before:{x['notified_lvl']},",
+                    f"state_level:{x['state_lvl']}",
+                )
+                notify(
+                    body=f"Device {x['id']} alerts: {x['remark']}",
+                    title="Heartbeat Monitor notification",
+                    notify_type="info",
+                    body_format="text",
+                    attachments=[
+                        # RawAttachment(
+                        #     inline=True,
+                        #     name="hb_json_" + x["id"] + ".json",
+                        #     contents=json.dumps(device_hb_json_dict[x["id"]]),
+                        # )
+                    ],
+                    tag=[],
+                )
+                s = store.Client()
+                att_obj = (
+                    f"attachments/{uuid.uuid4()}/"
+                    + "hb_json_"
+                    + x["id"]
+                    + ".json"
+                )
+                s.put_file_contents(
+                    att_obj, json.dumps(device_hb_json_dict[x["id"]]).encode()
+                )
+                # Notify for a particular severity level, just once
+                x["notified_lvl"] = x["state_lvl"]
 
-        device_table.update()
         show_summary_card.refresh()
 
 
@@ -158,7 +192,6 @@ def state_calculator(curr_vals: dict):
     be displayed per device on the web-ui.
     """
     level = Severity.OK
-    state = "OK"
     remarks = ""
 
     for key, val in curr_vals.items():
@@ -169,19 +202,16 @@ def state_calculator(curr_vals: dict):
             else:
                 remarks = key
             level = Severity.CRITICAL
-            state = severity[Severity.CRITICAL]
         elif val >= WARNING_PCT and level >= Severity.OK:
             if level == Severity.WARNING:
                 remarks += ", " + key
             else:
                 remarks = key
             level = Severity.WARNING
-            state = severity[Severity.WARNING]
-
-    return state, level, remarks
+    return level, remarks
 
 
-def new_device_hb(logger: logging.Logger, broker: broker.Client, msg: Any):
+def new_hb(logger: logging.Logger, broker: broker.Client, msg: Any):
     """
     The callback fn triggered by the heartbeat to update the device params.
     """
@@ -200,11 +230,13 @@ def new_device_hb(logger: logging.Logger, broker: broker.Client, msg: Any):
             "uptime": "",
             "id": "",
             "last_ping": "",
-            "state": "",
             "remark": "",
-            "ping_status": "",
             "state_colour": "",
             "hb_interval": 0.0,
+            "notified_lvl": Severity.OK,
+            "state_lvl": Severity.OK,
+            "state": "",
+            "archived": False,
         }
         data = json.loads(msg.payload)
 
@@ -238,11 +270,12 @@ def new_device_hb(logger: logging.Logger, broker: broker.Client, msg: Any):
 
         last_ping = datetime.now().strftime("%H:%M:%S, %d/%m/%Y")
         new_hb_device["last_ping"] = last_ping
-        state, level, remark = state_calculator(device_cur_vals)
-        new_hb_device["state"] = state
+        level, remark = state_calculator(device_cur_vals)
+
         new_hb_device["remark"] = remark
-        new_hb_device["ping_status"] = DevStatus.ALIVE  # "alive"
         new_hb_device["state_colour"] = state_colours[level]
+        new_hb_device["state_lvl"] = level
+        new_hb_device["state"] = severity[level]  # For UI display
 
         tmp_dev = []
         custom_hb_interval = (
@@ -251,7 +284,10 @@ def new_device_hb(logger: logging.Logger, broker: broker.Client, msg: Any):
         for x in devices:
             if x["id"] == new_hb_device["id"] and not custom_hb_interval:
                 custom_hb_interval = x["hb_interval"]
-            elif x["id"] != new_hb_device["id"]:
+            # Check for old device entry to retain notified level
+            if x["id"] == new_hb_device["id"]:
+                new_hb_device["notified_lvl"] = x["notified_lvl"]
+            else:
                 tmp_dev.append(x)
 
         devices = tmp_dev
@@ -263,17 +299,9 @@ def new_device_hb(logger: logging.Logger, broker: broker.Client, msg: Any):
 
         if device_table is not None:
             if show_archived:
-                device_table.rows = [
-                    x
-                    for x in devices
-                    if x["ping_status"] == DevStatus.ARCHIVED
-                ]
+                device_table.rows = [x for x in devices if x["archived"]]
             else:
-                device_table.rows = [
-                    x
-                    for x in devices
-                    if x["ping_status"] != DevStatus.ARCHIVED
-                ]
+                device_table.rows = [x for x in devices if not x["archived"]]
             device_table.update()
             show_summary_card.refresh()
         logger.debug(f"New hb: {new_hb_device}")
@@ -328,18 +356,16 @@ def show_summary_card():
     Refreshable function to update the summary card on top right.
     """
     with ui.row().classes("mx-8 w-full grid grid-cols-2 gap-2"):
-        cnt = len([d for d in devices if d["ping_status"] == DevStatus.ALIVE])
+        cnt = len([d for d in devices if d["state_lvl"] < Severity.OFFLINE])
         ui.label(f"Online: {cnt}")
-        cnt = len(
-            [d for d in devices if d["ping_status"] == DevStatus.OFFLINE]
-        )
+
+        cnt = len([d for d in devices if d["state_lvl"] == Severity.OFFLINE])
         ui.label(f"Offline: {cnt}")
         cnt = len(
             [
                 d
                 for d in devices
-                if d["state"] == "Warning"
-                and d["ping_status"] != DevStatus.ARCHIVED
+                if d["state_lvl"] == Severity.WARNING and not d["archived"]
             ]
         )
         ui.label(f"Warnings: {cnt}")
@@ -347,8 +373,7 @@ def show_summary_card():
             [
                 d
                 for d in devices
-                if d["state"] == "Critical"
-                and d["ping_status"] != DevStatus.ARCHIVED
+                if d["state_lvl"] == Severity.CRITICAL and not d["archived"]
             ]
         )
         ui.label(f"Critical: {cnt}")
@@ -366,7 +391,7 @@ def handle_archive(event: events.GenericEventArguments):
     ui.notify(f"Archiving device: {event.args}")
     for d in devices:
         if d["id"] == event.args:
-            d["ping_status"] = DevStatus.ARCHIVED
+            d["archived"] = True
     update_device_state()
 
 
@@ -580,17 +605,9 @@ def web_ui():
         global devices
         if devices:
             if show_archived:
-                device_table.rows = [
-                    x
-                    for x in devices
-                    if x["ping_status"] == DevStatus.ARCHIVED
-                ]
+                device_table.rows = [x for x in devices if x["archived"]]
             else:
-                device_table.rows = [
-                    x
-                    for x in devices
-                    if x["ping_status"] != DevStatus.ARCHIVED
-                ]
+                device_table.rows = [x for x in devices if not x["archived"]]
 
         device_table.add_slot(
             "body",
@@ -685,7 +702,7 @@ def main(rload=False):
         )
 
         client_broker = broker.Client("heartbeat-monitor")
-        client_broker.subscribe(args.topic, partial(new_device_hb, logger))
+        client_broker.subscribe(args.topic, partial(new_hb, logger))
         ui.run(
             reload=rload,
             port=PORT,
@@ -696,11 +713,9 @@ def main(rload=False):
 
     except KeyboardInterrupt:
         logger.info("Shutting down the app...")
-        app.shutdown()
         return 0
     except Exception as e:
         logger.error(f"Error in main: {e}")
-        app.shutdown()
         return -1
 
 
