@@ -8,4 +8,4 @@ container:
   # We require access to the MQTT_* and S3_* env vars
   env_file: .env
 
-  command: ["recorder"]
+  command: ["recorder", "--prefix", "data/measurements"]
