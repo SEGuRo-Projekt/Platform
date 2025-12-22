@@ -28,6 +28,7 @@ demo-data = "seguro.commands.demo_data.main:main"
 protobuf-subscriber = "seguro.commands.protobuf_subscriber.main:main"
 fiware-connector = "seguro.commands.fiware_connector.main:main"
 heartbeat-monitor = "seguro.commands.heartbeat_monitor.main:main"
+sample-aggregator = "seguro.commands.sample_aggregator.main:main"
 
 [tool.poetry.urls]
 "Homepage" = "https://github.com/SEGuRo-Projekt/Platform"
