@@ -2,16 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import argparse
-import datetime
 from functools import partial
-import json
 import logging
-import os
 import time
-from typing import Union
 
 import environ
-import requests  # type: ignore
 
 from villas.node.formats import Sample
 
@@ -19,13 +14,8 @@ from seguro.common import broker, config
 
 
 env = environ.Env()
-
-URL = env.str("FIWARE_URL", None)
-API_KEY = env.str("API_KEY", None)
-TOPIC = env.str("TOPIC", None)
-
+TOPIC = env.str("TOPIC", "data/measurements/+/+/+")
 CONNECTOR_ID = env.str("CONNECTOR_ID", "sample-aggregator")
-
 
 def main() -> int:
 
