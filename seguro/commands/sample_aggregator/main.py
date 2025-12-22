@@ -17,6 +17,7 @@ env = environ.Env()
 TOPIC = env.str("TOPIC", "data/measurements/+/+/+")
 CONNECTOR_ID = env.str("CONNECTOR_ID", "sample-aggregator")
 
+
 def main() -> int:
 
     parser = argparse.ArgumentParser()
@@ -86,7 +87,7 @@ def main() -> int:
 
         logging.debug("Aggregated sample data: %s", samples[-1].data)
 
-        b.publish_samples(topic+"/aggregated", [samples[-1]])
+        b.publish_samples(topic + "/aggregated", [samples[-1]])
 
     b = broker.Client(CONNECTOR_ID)
 
