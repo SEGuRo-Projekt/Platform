@@ -97,8 +97,8 @@ The SEGuRo platform is developed collaboratively by the participants of the SEGu
 
 ## Acknowlegements
 
-We are grateful for the financial support of the [BMWK (Federal Ministry of Economics and Climate Protection)](https://www.bmwk.de/), funding reference [03El6085](https://www.enargus.de/pub/bscw.cgi/?op=enargus.eps2&q=%2201249617/1%22).
+We are grateful for the financial support of the [BMWE (Federal Ministry of Economic Affairs and Energy)](https://www.bundeswirtschaftsministerium.de/Navigation/EN/Home/home.html), funding reference [03El6085](https://www.enargus.de/pub/bscw.cgi/?op=enargus.eps2&q=%2201249617/1%22).
 
-```{image} _static/bmwk_funding.png
+```{image} _static/bmwe_funding.png
 :width: 250px
 ```
