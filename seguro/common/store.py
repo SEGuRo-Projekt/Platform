@@ -139,6 +139,7 @@ class Client:
                 endpoint=f"store.{config.DOMAIN}",
                 credentials=self.creds,
                 http_client=self.http_client,
+                region=self.client._base_url.region,
             )
         else:
             client = self.client
