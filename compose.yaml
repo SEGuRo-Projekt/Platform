@@ -412,7 +412,7 @@ services:
       REGISTRY_SECURED: "true"
 
   traefik:
-    image: "traefik:v2.10"
+    image: "traefik:v3.6.9"
     restart: unless-stopped
     ports:
     - "80:80"
