@@ -4,9 +4,6 @@
 log:
   level: DEBUG
 
-experimental:
-  http3: true
-
 api:
   insecure: true
 
