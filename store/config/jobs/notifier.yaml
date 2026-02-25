@@ -10,4 +10,6 @@ container:
   env_file:
     - .env
 
+  restart: unless-stopped
+
   command: ["notifier"]
