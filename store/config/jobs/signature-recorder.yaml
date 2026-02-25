@@ -8,4 +8,6 @@ container:
   # We require access to the MQTT_* and S3_* env vars
   env_file: .env
 
+  restart: unless-stopped
+
   command: ["signature-recorder"]
