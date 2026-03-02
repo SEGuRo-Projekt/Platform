@@ -76,7 +76,7 @@ def main() -> int:
     pb = Protobuf()
 
     last_block = datetime.now()
-    block_interval = timedelta(args.block_interval)
+    block_interval = timedelta(seconds = args.block_interval)
 
     while True:
 
