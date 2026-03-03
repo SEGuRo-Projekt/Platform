@@ -40,9 +40,17 @@ clients:
 
 groups:
   services:
-    roles: []
+    roles:
+      - store-defaults
 
 roles:
+  store-defaults:
+    store:
+      - object: "seguro"
+        actions:
+          - ListBucket
+          - GetBucketLocation
+
   scheduler:
     broker:
       - topic: "#"
