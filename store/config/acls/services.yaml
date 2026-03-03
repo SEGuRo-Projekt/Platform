@@ -75,7 +75,7 @@ roles:
           - Subscribe
 
     store:
-      - object: data/*
+      - object: seguro/data/*
         actions:
           - PutObject
 
@@ -86,13 +86,13 @@ roles:
           - Subscribe
 
     store:
-      - object: signatures/*
+      - object: seguro/signatures/*
         actions:
           - PutObject
 
   notebook-executor:
     store:
-      - object: "notebooks/#"
+      - object: "seguro/notebooks/#"
         actions:
           - GetObject
           - PutObject
