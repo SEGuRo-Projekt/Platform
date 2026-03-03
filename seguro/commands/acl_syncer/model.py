@@ -29,6 +29,8 @@ class BrokerAction(Enum):
 
 class StoreAction(Enum):
     ANY = "*"
+    LIST_BUCKET = "ListBucket"
+    GET_BUCKET_LOCATION = "GetBucketLocation"
     GET_OBJECT = "GetObject"
     DELETE_OBJECT = "DeleteObject"
     PUT_OBJECT = "PutObject"
