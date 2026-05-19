@@ -29,4 +29,4 @@ jobs:
         run: touch .env
 
       - name: Run pre-commit
-        uses: pre-commit/action@v3.0.1
+        run: uv run pre-commit run --all-files
