@@ -15,7 +15,7 @@ RUN apt-get update && \
     pkg-config && \
     rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml uv.lock /src/
+COPY pyproject.toml uv.lock README.md /src/
 
 RUN uv sync --group docs
 
