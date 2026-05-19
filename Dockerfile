@@ -8,8 +8,7 @@ ARG DOCKER_COMPOSE_VERSION=2.20.0
 
 COPY --from=ghcr.io/astral-sh/uv:0.11.15 /uv /usr/local/bin/uv
 
-ENV UV_SYSTEM_PYTHON=1 \
-    UV_NO_CACHE=1 \
+ENV UV_NO_CACHE=1 \
     PATH="/platform/.venv/bin:$PATH"
 
 # Install dependencies for nbconvert
@@ -18,6 +17,7 @@ RUN apt-get update && \
     texlive-xetex texlive-fonts-recommended texlive-plain-generic \
     pandoc \
     libgraphviz-dev && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Minio CLI client
@@ -40,12 +40,12 @@ WORKDIR /platform
 COPY README.md uv.lock pyproject.toml /platform/
 
 # Only install dependencies here to improve utilization of layer cache
-RUN uv sync --no-dev --no-install-project
+RUN uv sync --locked --no-dev --no-install-project
 
 COPY seguro /platform/seguro
 
 # Install the seguro package
-RUN uv sync --no-dev
+RUN uv sync --locked --no-dev
 
 FROM debian:bookworm AS setup
 
