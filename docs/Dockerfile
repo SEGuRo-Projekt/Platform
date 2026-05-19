@@ -3,7 +3,7 @@
 
 FROM python:3.11-bookworm AS builder
 
-RUN pip install --no-cache-dir poetry==1.7.1
+COPY --from=ghcr.io/astral-sh/uv:0.11.15 /uv /usr/local/bin/uv
 
 RUN mkdir /src
 WORKDIR /src
@@ -15,15 +15,15 @@ RUN apt-get update && \
     pkg-config && \
     rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml poetry.lock /src/
+COPY pyproject.toml uv.lock /src/
 
-RUN poetry install --with=docs
+RUN uv sync --group docs
 
 COPY seguro /src/seguro
 COPY docs /src/docs
 COPY .env.example /src
 
-RUN poetry run sphinx-build -T -b html docs /build
+RUN uv run sphinx-build -T -b html docs /build
 
 FROM nginx:1.25.4
 
