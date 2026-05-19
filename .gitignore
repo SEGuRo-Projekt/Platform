@@ -11,4 +11,5 @@ docs/_autosummary/
 .env
 *.pyc
 *.egg-info/
+.mypy_cache/
 /venv/
