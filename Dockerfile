@@ -5,12 +5,11 @@ FROM python:3.11-bookworm AS python
 
 ARG DOCKER_VERSION=24.0.2
 ARG DOCKER_COMPOSE_VERSION=2.20.0
-ARG POETRY_VERSION=1.7.1
 
-ENV POETRY_NO_INTERACTION=1 \
-    POETRY_VIRTUALENVS_CREATE=false \
-    POETRY_CACHE_DIR='/var/cache/pypoetry' \
-    POETRY_HOME='/usr/local'
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+ENV UV_SYSTEM_PYTHON=1 \
+    UV_NO_CACHE=1
 
 # Install dependencies for nbconvert
 RUN apt-get update && \
@@ -35,20 +34,17 @@ RUN mkdir -p /root/.docker/cli-plugins && \
     curl --create-dirs -fsSL https://github.com/docker/compose/releases/download/v${DOCKER_COMPOSE_VERSION}/docker-compose-linux-x86_64 -o /root/.docker/cli-plugins/docker-compose && \
     chmod +x /root/.docker/cli-plugins/docker-compose
 
-# Install Poetry
-RUN pip install --no-cache-dir poetry==${POETRY_VERSION}
-
 RUN mkdir /platform
 WORKDIR /platform
-COPY README.md poetry.lock pyproject.toml /platform/
+COPY README.md uv.lock pyproject.toml /platform/
 
 # Only install dependencies here to improve utilization of layer cache
-RUN poetry install --without docs --no-root
+RUN uv sync --no-dev --no-install-project
 
 COPY seguro /platform/seguro
 
 # Install the seguro package
-RUN poetry install
+RUN uv sync --no-dev
 
 FROM debian:bookworm AS setup
 

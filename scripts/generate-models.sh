@@ -15,6 +15,6 @@ cat > "${MODEL}" <<EOF
 
 EOF
 
-poetry run datamodel-codegen  \
+uv run datamodel-codegen  \
     --url https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json \
     --input-file-type jsonschema >> "${MODEL}"

@@ -4,7 +4,7 @@ SPDX-PackageSupplier = "Steffen Vogel <steffen.vogel@opal-rt.com>"
 SPDX-PackageDownloadLocation = "https://github.com/SEGuRo-Projekt/Platform"
 
 [[annotations]]
-path = ["**.drawio", "**.png", "store/**", "flake.lock", "poetry.lock", "docs/**.md", "docs/**.rst", "compose-cache.json"]
+path = ["**.drawio", "**.png", "store/**", "flake.lock", "uv.lock", "docs/**.md", "docs/**.rst", "compose-cache.json"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2023-2024 Steffen Vogel, OPAL-RT Germany GmbH"
 SPDX-License-Identifier = "Apache-2.0"
