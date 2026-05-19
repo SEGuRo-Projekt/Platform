@@ -37,8 +37,8 @@ Please visit the public documentation here:
 
 ## Authors & License
 
-- SPDX-FileCopyrightText: 2023-2024 Steffen Vogel, OPAL-RT Germany GmbH
-- SPDX-FileCopyrightText: 2023-2024 Felix Wege, EONERC-ACS, RWTH Aachen University
+- SPDX-FileCopyrightText: 2023-2026 Steffen Vogel, OPAL-RT Germany GmbH
+- SPDX-FileCopyrightText: 2023-2026 Felix Wege, EONERC-ACS, RWTH Aachen University
 - SPDX-License-Identifier: Apache-2.0
 
 
