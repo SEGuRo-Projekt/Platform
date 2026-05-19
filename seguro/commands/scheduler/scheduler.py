@@ -15,9 +15,7 @@ from seguro.commands.scheduler import job, compose, model
 
 
 class Scheduler(compose.Composer):
-    def __init__(
-        self, docker_client: docker.DockerClient, store_client: store.Client
-    ):
+    def __init__(self, docker_client: docker.DockerClient, store_client: store.Client):
         super().__init__("scheduler")
 
         self.docker = docker_client

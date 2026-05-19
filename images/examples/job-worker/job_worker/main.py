@@ -42,9 +42,7 @@ def main() -> int:
     frame = s.get_frame(job.info.trigger.object)
     frame *= 2
 
-    object_scaled = job.info.trigger.object.replace(
-        "measurements", "measurements_processed"
-    )
+    object_scaled = job.info.trigger.object.replace("measurements", "measurements_processed")
 
     s.put_frame(object_scaled, frame)
 

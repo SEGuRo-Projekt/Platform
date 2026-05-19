@@ -64,9 +64,7 @@ class Client:
         self.logger = logging.getLogger(__name__)
         self.bucket = bucket
 
-        self.http_client = urllib3.PoolManager(
-            cert_reqs="CERT_REQUIRED", ca_certs=tls_cacert
-        )
+        self.http_client = urllib3.PoolManager(cert_reqs="CERT_REQUIRED", ca_certs=tls_cacert)
 
         self.creds = minio.credentials.CertificateIdentityProvider(
             sts_endpoint=f"https://{host}:{port}",
@@ -100,15 +98,9 @@ class Client:
 
     def storage_options(self):
         creds = self.creds.retrieve()
-        self._storage_options["client_kwargs"][
-            "aws_access_key_id"
-        ] = creds.access_key  # type: ignore
-        self._storage_options["client_kwargs"][
-            "aws_secret_access_key"
-        ] = creds.secret_key  # type: ignore
-        self._storage_options["client_kwargs"][
-            "aws_session_token"
-        ] = creds.session_token  # type: ignore
+        self._storage_options["client_kwargs"]["aws_access_key_id"] = creds.access_key  # type: ignore
+        self._storage_options["client_kwargs"]["aws_secret_access_key"] = creds.secret_key  # type: ignore
+        self._storage_options["client_kwargs"]["aws_session_token"] = creds.session_token  # type: ignore
 
         return self._storage_options
 
@@ -144,9 +136,7 @@ class Client:
         else:
             client = self.client
 
-        return client.get_presigned_url(
-            "GET", self.bucket, filename, expires=expires
-        )
+        return client.get_presigned_url("GET", self.bucket, filename, expires=expires)
 
     def put_file(self, filename: str, file: str):
         """Upload local file and store it in the S3Storage.
@@ -265,9 +255,7 @@ class Client:
             s3_events.append("s3:ObjectRemoved:*")
 
         if initial and Event.CREATED in events:
-            objs = self.client.list_objects(
-                self.bucket, prefix=prefix, recursive=True
-            )
+            objs = self.client.list_objects(self.bucket, prefix=prefix, recursive=True)
             for obj in objs:
                 yield Event.CREATED, obj.object_name
 
@@ -327,9 +315,7 @@ class Watcher(threading.Thread):
             s3_events.append("s3:ObjectRemoved:*")
 
         if initial and Event.CREATED in events:
-            objs = self.client.client.list_objects(
-                self.client.bucket, prefix=prefix, recursive=True
-            )
+            objs = self.client.client.list_objects(self.client.bucket, prefix=prefix, recursive=True)
             for obj in objs:
                 cb(self.client, Event.CREATED, obj.object_name)
 

@@ -15,9 +15,7 @@ env = environ.Env()
 
 # Authentication
 TOPIC = env.str("TOPIC", "data/measurements/mp1")
-TOPIC_PROCESSED = env.str(
-    "TOPIC", "data/measurements/processed_by_streaming_worker/mp1"
-)
+TOPIC_PROCESSED = env.str("TOPIC", "data/measurements/processed_by_streaming_worker/mp1")
 RATE = env.float("RATE", 10.0)
 VALUES = env.int("VALUES", 6)
 BLOCK_INTERVAL = env.str("BLOCK_INTERVAL", "1m")
@@ -37,9 +35,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-t", "--topic", type=str, default=TOPIC)
-    parser.add_argument(
-        "-s", "--topic-processed", type=str, default=TOPIC_PROCESSED
-    )
+    parser.add_argument("-s", "--topic-processed", type=str, default=TOPIC_PROCESSED)
     parser.add_argument(
         "-l",
         "--log-level",

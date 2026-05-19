@@ -17,9 +17,7 @@ cfg1 = broker.Config(
     },
     roles={"r1": broker.Role(rolename="r1")},
 )
-cfg2 = broker.Config(
-    clients={"c2": broker.Client(username="peter")}, groups={}, roles={}
-)
+cfg2 = broker.Config(clients={"c2": broker.Client(username="peter")}, groups={}, roles={})
 
 
 def test_config_equal():

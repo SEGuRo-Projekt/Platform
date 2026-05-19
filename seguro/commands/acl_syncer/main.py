@@ -92,9 +92,7 @@ def main() -> int:
     s = cstore.Client()
     b = cbroker.Client()
 
-    http_client = urllib3.PoolManager(
-        cert_reqs="CERT_REQUIRED", ca_certs=config.TLS_CACERT
-    )
+    http_client = urllib3.PoolManager(cert_reqs="CERT_REQUIRED", ca_certs=config.TLS_CACERT)
 
     minio_endpoint = f"{config.S3_HOST}:{config.S3_PORT}"
     creds = minio.credentials.CertificateIdentityProvider(
@@ -103,9 +101,7 @@ def main() -> int:
         key_file=config.TLS_KEY,
         ca_certs=config.TLS_CACERT,
     )
-    mca = minio.MinioAdmin(
-        minio_endpoint, credentials=creds, http_client=http_client
-    )
+    mca = minio.MinioAdmin(minio_endpoint, credentials=creds, http_client=http_client)
 
     acls = get_acls(s, args.prefix)
     acl = merge_acls(acls)

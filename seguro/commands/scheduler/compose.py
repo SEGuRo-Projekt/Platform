@@ -107,9 +107,7 @@ class Composer:
     def services(self):
         return []
 
-    def compose(
-        self, *args, overlays: list[compose_model.ComposeSpecification] = []
-    ):
+    def compose(self, *args, overlays: list[compose_model.ComposeSpecification] = []):
         """
 
         Args:
@@ -131,10 +129,7 @@ class Composer:
             )
 
         with ExitStack() as stack:
-            compose_file_fds = [
-                stack.enter_context(self._temp_file_fd(spec))
-                for spec in specs_dict
-            ]
+            compose_file_fds = [stack.enter_context(self._temp_file_fd(spec)) for spec in specs_dict]
 
             args = tuple(
                 chain(
@@ -148,12 +143,7 @@ class Composer:
                         "--progress",
                         "plain",
                     ],
-                    chain.from_iterable(
-                        [
-                            ["--file", f"/proc/self/fd/{fd}"]
-                            for fd in compose_file_fds
-                        ]
-                    ),
+                    chain.from_iterable([["--file", f"/proc/self/fd/{fd}"] for fd in compose_file_fds]),
                     args,
                 )
             )
@@ -165,11 +155,7 @@ class Composer:
     def spec(self) -> compose_model.ComposeSpecification:
         return compose_model.ComposeSpecification(
             services={svc.name: svc.spec for svc in self.services},
-            networks={
-                "default": compose_model.Network(
-                    external=compose_model.External(name="platform_default")
-                )
-            },
+            networks={"default": compose_model.Network(external=compose_model.External(name="platform_default"))},
         )
 
     def run(self):
@@ -191,9 +177,7 @@ class Composer:
             ]
             self.logger.info(f"Running: {' '.join(args)}")
 
-            self.watch_proc = subprocess.Popen(
-                args, stdout=subprocess.PIPE, pass_fds=[fd]
-            )
+            self.watch_proc = subprocess.Popen(args, stdout=subprocess.PIPE, pass_fds=[fd])
 
             output = self.watch_proc.stdout
             if output is None:

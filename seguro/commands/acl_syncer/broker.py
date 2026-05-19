@@ -117,40 +117,16 @@ class Config:
 
     def not_in(self, other: "Config") -> "Config":
         return Config(
-            clients={
-                k: v
-                for k, v in self.clients.items()
-                if k not in other.clients.keys()
-            },
-            groups={
-                k: v
-                for k, v in self.groups.items()
-                if k not in other.groups.keys()
-            },
-            roles={
-                k: v
-                for k, v in self.roles.items()
-                if k not in other.roles.keys()
-            },
+            clients={k: v for k, v in self.clients.items() if k not in other.clients.keys()},
+            groups={k: v for k, v in self.groups.items() if k not in other.groups.keys()},
+            roles={k: v for k, v in self.roles.items() if k not in other.roles.keys()},
         )
 
     def also_in(self, other: "Config") -> "Config":
         return Config(
-            clients={
-                k: v
-                for k, v in self.clients.items()
-                if k in other.clients.keys() and k in self.clients.keys()
-            },
-            groups={
-                k: v
-                for k, v in self.groups.items()
-                if k in other.groups.keys() and k in self.groups.keys()
-            },
-            roles={
-                k: v
-                for k, v in self.roles.items()
-                if k in other.roles.keys() and k in self.roles.keys()
-            },
+            clients={k: v for k, v in self.clients.items() if k in other.clients.keys() and k in self.clients.keys()},
+            groups={k: v for k, v in self.groups.items() if k in other.groups.keys() and k in self.groups.keys()},
+            roles={k: v for k, v in self.roles.items() if k in other.roles.keys() and k in self.roles.keys()},
         )
 
     def belonging_to(self, client_names: set[str] = set()) -> "Config":
@@ -185,15 +161,9 @@ class Config:
 
     def equal_to(self, other: "Config") -> "Config":
         return Config(
-            clients={
-                k: v for k, v in (self.clients.items() & other.clients.items())
-            },
-            groups={
-                k: v for k, v in (self.groups.items() & other.groups.items())
-            },
-            roles={
-                k: v for k, v in (self.roles.items() & other.roles.items())
-            },
+            clients={k: v for k, v in (self.clients.items() & other.clients.items())},
+            groups={k: v for k, v in (self.groups.items() & other.groups.items())},
+            roles={k: v for k, v in (self.roles.items() & other.roles.items())},
         )
 
     @classmethod
@@ -202,24 +172,15 @@ class Config:
             clients={
                 name: Client(
                     username=name,
-                    groups=frozenset(
-                        {
-                            GroupEntry(groupname=group)
-                            for group in client.groups
-                        }
-                    ),
-                    roles=frozenset(
-                        {RoleEntry(rolename=role) for role in client.roles}
-                    ),
+                    groups=frozenset({GroupEntry(groupname=group) for group in client.groups}),
+                    roles=frozenset({RoleEntry(rolename=role) for role in client.roles}),
                 )
                 for name, client in acl.clients.items()
             },
             groups={
                 name: Group(
                     groupname=name,
-                    roles=frozenset(
-                        {RoleEntry(rolename=role) for role in group.roles}
-                    ),
+                    roles=frozenset({RoleEntry(rolename=role) for role in group.roles}),
                 )
                 for name, group in acl.groups.items()
             },
@@ -235,12 +196,9 @@ class Config:
                                             ACL(
                                                 acltype=acl_type,
                                                 topic=acl.topic,
-                                                allow=acl.effect
-                                                == model.Effect.ALLOW,
+                                                allow=acl.effect == model.Effect.ALLOW,
                                             )
-                                            for acl_type in ACLType.from_broker_action(  # noqa
-                                                act
-                                            )
+                                            for acl_type in ACLType.from_broker_action(act)  # noqa
                                         ]
                                         for act in acl.actions
                                     ]
@@ -267,9 +225,7 @@ class Command:
     def set_default_access(self, acls: dict[ACLType, bool]):
         return {
             "command": "setDefaultACLAccess",
-            "acls": [
-                {"acltype": k.value, "allow": v} for k, v in acls.items()
-            ],
+            "acls": [{"acltype": k.value, "allow": v} for k, v in acls.items()],
         }
 
     @classmethod
@@ -309,21 +265,15 @@ class Command:
         return cls("deleteRole", rolename=name)
 
     @classmethod
-    def list_clients(
-        cls, verbose: bool = True, count: int = -1, offset: int = 0
-    ):
+    def list_clients(cls, verbose: bool = True, count: int = -1, offset: int = 0):
         return cls("listClients", verbose=verbose, count=count, offset=offset)
 
     @classmethod
-    def list_groups(
-        cls, verbose: bool = True, count: int = -1, offset: int = 0
-    ):
+    def list_groups(cls, verbose: bool = True, count: int = -1, offset: int = 0):
         return cls("listGroups", verbose=verbose, count=count, offset=offset)
 
     @classmethod
-    def list_roles(
-        cls, verbose: bool = True, count: int = -1, offset: int = 0
-    ):
+    def list_roles(cls, verbose: bool = True, count: int = -1, offset: int = 0):
         return cls("listRoles", verbose=verbose, count=count, offset=offset)
 
 
@@ -331,9 +281,7 @@ class Plugin:
     def __init__(self, b: cbroker.Client):
         self.client = b
         self.queue: queue.Queue[cbroker.Message] = queue.Queue()
-        self.client.subscribe(
-            "$CONTROL/dynamic-security/v1/response", self._on_response
-        )
+        self.client.subscribe("$CONTROL/dynamic-security/v1/response", self._on_response)
 
     def get_current_config(self) -> Config:
         resps = self.execute(

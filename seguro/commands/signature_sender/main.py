@@ -114,9 +114,7 @@ def main() -> int:
 
                 b.publish(f"{args.topic_prefix}/tsr", der.encoder.encode(tsr))
             except Exception as err:
-                logging.error(
-                    f"Failed to produce TSR for {algorithm}:{digest_hex} {err}"  # noqa: E501
-                )
+                logging.error(f"Failed to produce TSR for {algorithm}:{digest_hex} {err}")  # noqa: E501
 
                 continue
 

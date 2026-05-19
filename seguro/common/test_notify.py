@@ -18,9 +18,7 @@ def test_notify():
         "Test message",
         notify_type="warning",
         body_format="text",
-        attachments=[
-            RawAttachment(name="test.txt", contents=b"Test Attachment")
-        ],
+        attachments=[RawAttachment(name="test.txt", contents=b"Test Attachment")],
         tag=["steffen-vogel", "zulip"],
     )
 
@@ -32,10 +30,6 @@ def test_notify_inline():
         "Test message",
         notify_type="warning",
         body_format="markdown",
-        attachments=[
-            RawAttachment(
-                inline=True, name="test.txt", contents=b"Test Attachment"
-            )
-        ],
+        attachments=[RawAttachment(inline=True, name="test.txt", contents=b"Test Attachment")],
         tag=["steffen-vogel", "zulip"],
     )
