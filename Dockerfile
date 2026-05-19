@@ -9,7 +9,8 @@ ARG DOCKER_COMPOSE_VERSION=2.20.0
 COPY --from=ghcr.io/astral-sh/uv:0.11.15 /uv /usr/local/bin/uv
 
 ENV UV_SYSTEM_PYTHON=1 \
-    UV_NO_CACHE=1
+    UV_NO_CACHE=1 \
+    PATH="/platform/.venv/bin:$PATH"
 
 # Install dependencies for nbconvert
 RUN apt-get update && \
