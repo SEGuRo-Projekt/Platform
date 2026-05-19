@@ -295,9 +295,7 @@ class ListOrDict1(RootModel[list[Any]]):
     root: list[Any]
 
 
-class ListOrDict(
-    RootModel[dict[str, str | float | bool | None] | ListOrDict1]
-):
+class ListOrDict(RootModel[dict[str, str | float | bool | None] | ListOrDict1]):
     root: dict[str, str | float | bool | None] | ListOrDict1
 
 

@@ -126,6 +126,4 @@ class AccessControlList(BaseModel):
             else:
                 new_roles[name] = other_role
 
-        return AccessControlList(
-            clients=new_clients, groups=new_groups, roles=new_roles
-        )
+        return AccessControlList(clients=new_clients, groups=new_groups, roles=new_roles)

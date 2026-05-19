@@ -55,9 +55,7 @@ class Job(compose.Service):
 
             cb = functools.partial(self._handle_trigger_event, id)
 
-            watcher = self.scheduler.store.watch_async(
-                trigger.prefix, cb, event, trigger.initial
-            )
+            watcher = self.scheduler.store.watch_async(trigger.prefix, cb, event, trigger.initial)
 
             self.watchers.append(watcher)
 
@@ -84,9 +82,7 @@ class Job(compose.Service):
         """
         self.start(trigger_id=trigger_id, event=evt, object=obj)
 
-    def _setup_schedule(
-        self, trigger_id: str, schedule: model.ScheduleTrigger
-    ):
+    def _setup_schedule(self, trigger_id: str, schedule: model.ScheduleTrigger):
         """
 
         Args:
@@ -173,9 +169,7 @@ class Job(compose.Service):
                 )
             },
             volumes={
-                vol: compose_model.Volume(
-                    name=f"platform_{vol}", external=compose_model.External()
-                )
+                vol: compose_model.Volume(name=f"platform_{vol}", external=compose_model.External())
                 for vol in ["key_clients", "certs"]
             },
         )

@@ -118,9 +118,7 @@ class Client:
 
         return self.client.publish(topic, message)
 
-    def subscribe_samples(
-        self, topic: str, cb: Callable[["Client", str, list[Sample]], None]
-    ):
+    def subscribe_samples(self, topic: str, cb: Callable[["Client", str, list[Sample]], None]):
         """Subscribe client to given topic and registering callback (optional).
 
         Args:
@@ -134,9 +132,7 @@ class Client:
 
         self.subscribe(topic, on_message)
 
-    def publish_samples(
-        self, topic, samples: Iterable[Sample]
-    ) -> MQTTMessageInfo:
+    def publish_samples(self, topic, samples: Iterable[Sample]) -> MQTTMessageInfo:
         """Publish sample to given topic.
 
         Args:

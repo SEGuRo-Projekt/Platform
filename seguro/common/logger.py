@@ -36,9 +36,7 @@ def file_logger(
         maxBytes=max_bytes,
         backupCount=backup_count,
     )
-    fileformatter = logging.Formatter(
-        "%(asctime)s - %(levelname)s - %(message)s"
-    )
+    fileformatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
     filehandler.setFormatter(fileformatter)
     filehandler.setLevel(log_level)
     logger.addHandler(filehandler)
@@ -93,9 +91,7 @@ def store_logger(
         encryption_options={},
     )
 
-    storeformatter = logging.Formatter(
-        "%(asctime)s - %(levelname)s - %(message)s"
-    )
+    storeformatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
     store_handler.setFormatter(storeformatter)
     store_handler.setLevel(log_level)
     logger.addHandler(store_handler)
@@ -110,9 +106,7 @@ def error_handler():
     """Return a streaming handler logging warnings and errors to stderr."""
 
     streamhandler = logging.StreamHandler()
-    streamformatter = logging.Formatter(
-        "\033[31;1m%(levelname)s:\033[0m %(message)s"
-    )
+    streamformatter = logging.Formatter("\033[31;1m%(levelname)s:\033[0m %(message)s")
     streamhandler.setFormatter(streamformatter)
     streamhandler.setLevel(logging.WARNING)
 

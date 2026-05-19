@@ -51,10 +51,7 @@ class Recorder:
         )
 
         index = [
-            pd.Timestamp(
-                sample.ts_origin.seconds * 1000000000
-                + sample.ts_origin.nanoseconds
-            )
+            pd.Timestamp(sample.ts_origin.seconds * 1000000000 + sample.ts_origin.nanoseconds)
             for sample in self.samples
         ]
         data = {"sequence": [sample.sequence for sample in self.samples]}
@@ -64,25 +61,16 @@ class Recorder:
                 data.update(
                     {
                         f"signal{i}.real": [
-                            smp.data[i].real if i < len(smp.data) else math.nan
-                            for smp in self.samples
+                            smp.data[i].real if i < len(smp.data) else math.nan for smp in self.samples
                         ],
                         f"signal{i}.imag": [
-                            smp.data[i].imag if i < len(smp.data) else math.nan
-                            for smp in self.samples
+                            smp.data[i].imag if i < len(smp.data) else math.nan for smp in self.samples
                         ],
                     }
                 )
 
             else:
-                data.update(
-                    {
-                        f"signal{i}": [
-                            smp.data[i] if i < len(smp.data) else math.nan
-                            for smp in self.samples
-                        ]
-                    }
-                )
+                data.update({f"signal{i}": [smp.data[i] if i < len(smp.data) else math.nan for smp in self.samples]})
 
         df = pd.DataFrame(data, index)
 

@@ -54,9 +54,7 @@ def post_sample(
     freq: float,
 ) -> Optional[requests.Response]:
     def convert_timestamp(ts) -> str:
-        dt = datetime.datetime(1970, 1, 1) + datetime.timedelta(
-            seconds=ts.seconds, microseconds=ts.nanoseconds / 1000
-        )
+        dt = datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds=ts.seconds, microseconds=ts.nanoseconds / 1000)
         return dt.isoformat()
 
     message = (
@@ -99,13 +97,8 @@ def convert_complex(complexVal: complex) -> dict:
     }
 
 
-def substitute_identifier(
-    topic: str, sample_index: int, identifier_map: Union[dict, None]
-) -> str:
-    if (
-        identifier_map is not None
-        and f"{topic}/currentgroup{sample_index}" in identifier_map
-    ):
+def substitute_identifier(topic: str, sample_index: int, identifier_map: Union[dict, None]) -> str:
+    if identifier_map is not None and f"{topic}/currentgroup{sample_index}" in identifier_map:
         return identifier_map[f"{topic}/currentgroup{sample_index}"]
     return f"{topic}/currentgroup{sample_index}"
 
@@ -202,36 +195,22 @@ def main() -> int:
                     ),
                     json.dumps(  # Current
                         {
-                            "L1": convert_complex(
-                                samples[-1].data[sample_range[0]]
-                            ),
-                            "L2": convert_complex(
-                                samples[-1].data[sample_range[1]]
-                            ),
-                            "L3": convert_complex(
-                                samples[-1].data[sample_range[2]]
-                            ),
+                            "L1": convert_complex(samples[-1].data[sample_range[0]]),
+                            "L2": convert_complex(samples[-1].data[sample_range[1]]),
+                            "L3": convert_complex(samples[-1].data[sample_range[2]]),
                         },
                         separators=(",", ":"),
                     ),
                     json.dumps(  # Power
                         {
-                            "L1": convert_complex(
-                                samples[-1].data[sample_range[3]]
-                            ),
-                            "L2": convert_complex(
-                                samples[-1].data[sample_range[4]]
-                            ),
-                            "L3": convert_complex(
-                                samples[-1].data[sample_range[5]]
-                            ),
+                            "L1": convert_complex(samples[-1].data[sample_range[3]]),
+                            "L2": convert_complex(samples[-1].data[sample_range[4]]),
+                            "L3": convert_complex(samples[-1].data[sample_range[5]]),
                         },
                         separators=(",", ":"),
                     ),
                     (  # Frequency
-                        samples[-1].data[-1]
-                        if isinstance(samples[-1].data[-1], float)
-                        else samples[-1].data[-1].real
+                        samples[-1].data[-1] if isinstance(samples[-1].data[-1], float) else samples[-1].data[-1].real
                     ),
                 )
 
@@ -243,11 +222,7 @@ def main() -> int:
                     logging.debug(ret.text)
 
     b = broker.Client(CONNECTOR_ID)
-    identifier_map = (
-        None
-        if ID_MAPPING_JSON is None
-        else parse_identfier_map(ID_MAPPING_JSON)
-    )
+    identifier_map = None if ID_MAPPING_JSON is None else parse_identfier_map(ID_MAPPING_JSON)
 
     for topic in TOPIC.split(","):
         b.subscribe_samples(topic, partial(callback, identifier_map))

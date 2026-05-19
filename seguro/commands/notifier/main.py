@@ -94,11 +94,7 @@ class Notifier:
 
             if config_path.startswith("s3://"):
                 config_content = (
-                    s.client.get_object(
-                        config.S3_BUCKET, config_path.removeprefix("s3://")
-                    )
-                    .read()
-                    .decode("utf-8")
+                    s.client.get_object(config.S3_BUCKET, config_path.removeprefix("s3://")).read().decode("utf-8")
                 )
 
             else:

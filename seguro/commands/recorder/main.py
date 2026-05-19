@@ -14,9 +14,7 @@ from seguro.commands.recorder.recorder import Recorder
 recorders: dict[str, Recorder] = {}
 
 
-def on_samples(
-    s: store.Client, _b: broker.Client, topic: str, samples: list[Sample]
-):
+def on_samples(s: store.Client, _b: broker.Client, topic: str, samples: list[Sample]):
     """Callback for each received block of received samples.
 
     Args:

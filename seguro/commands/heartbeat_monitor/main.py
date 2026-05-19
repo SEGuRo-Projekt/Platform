@@ -27,9 +27,7 @@ WARNING_PCT = env.int("WARNING_RESOURCE_PCT", 75)
 # Login credentials.
 ENV_PASSWORD = env.str("HBMON_PSWD", env.str("ADMIN_PASSWORD", "pass1"))
 ENV_USERNAME = env.str("HBMON_UNAME", env.str("ADMIN_USERNAME", "user1"))
-ENV_APPSECRET = env.str(
-    "HBMON_APPSECRET", env.str("SECRET", "fdc8d08ab5c839582aa9")
-)
+ENV_APPSECRET = env.str("HBMON_APPSECRET", env.str("SECRET", "fdc8d08ab5c839582aa9"))
 EXPIRY_SECONDS = env.int("SESSION_EXPIRY_SEC", 200)
 
 
@@ -92,9 +90,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         if not app.storage.user.get("authenticated", False):
             if request.url.path.split("/")[1] not in unrestricted_page_routes:
-                return RedirectResponse(
-                    f"/login?redirect_to={request.url.path}"
-                )
+                return RedirectResponse(f"/login?redirect_to={request.url.path}")
 
         return await call_next(request)
 
@@ -112,11 +108,7 @@ def update_device_state():
             time_diff = (time_now - last_ping).total_seconds()
 
             if time_diff > d["hb_interval"]:
-                d["ping_status"] = (
-                    DevStatus.OFFLINE
-                    if d["ping_status"] != DevStatus.ARCHIVED
-                    else DevStatus.ARCHIVED
-                )
+                d["ping_status"] = DevStatus.OFFLINE if d["ping_status"] != DevStatus.ARCHIVED else DevStatus.ARCHIVED
                 if d["remark"]:
                     if "Offline" not in d["remark"]:
                         if d["state"] == severity[Severity.WARNING]:
@@ -129,20 +121,13 @@ def update_device_state():
                 d["state"] = severity[Severity.CRITICAL]
                 d["state_colour"] = state_colours[Severity.CRITICAL]
 
-            if (
-                time_diff > (auto_archive["interval"] + d["hb_interval"])
-                and auto_archive["enable"]
-            ):
+            if time_diff > (auto_archive["interval"] + d["hb_interval"]) and auto_archive["enable"]:
                 d["ping_status"] = DevStatus.ARCHIVED
 
         if show_archived:
-            device_table.rows = [
-                x for x in devices if x["ping_status"] == DevStatus.ARCHIVED
-            ]
+            device_table.rows = [x for x in devices if x["ping_status"] == DevStatus.ARCHIVED]
         else:
-            device_table.rows = [
-                x for x in devices if x["ping_status"] != DevStatus.ARCHIVED
-            ]
+            device_table.rows = [x for x in devices if x["ping_status"] != DevStatus.ARCHIVED]
 
         device_table.update()
         show_summary_card.refresh()
@@ -218,9 +203,7 @@ def new_device_hb(logger: logging.Logger, broker: broker.Client, msg: Any):
                 new_hb_device["cpu_thermal"] = temp_data
                 # Scaling the current temp to % to apply the logic uniformly.
                 scaled_temp_pct = (
-                    100
-                    * new_hb_device["cpu_thermal"]["current"]
-                    / (new_hb_device["cpu_thermal"]["critical"])
+                    100 * new_hb_device["cpu_thermal"]["current"] / (new_hb_device["cpu_thermal"]["critical"])
                 )
                 device_cur_vals["CPU Temperature"] = scaled_temp_pct
         if "disks" in data and data["disks"] != []:
@@ -245,9 +228,7 @@ def new_device_hb(logger: logging.Logger, broker: broker.Client, msg: Any):
         new_hb_device["state_colour"] = state_colours[level]
 
         tmp_dev = []
-        custom_hb_interval = (
-            0 if "hb_interval" not in data else data["hb_interval"]
-        )
+        custom_hb_interval = 0 if "hb_interval" not in data else data["hb_interval"]
         for x in devices:
             if x["id"] == new_hb_device["id"] and not custom_hb_interval:
                 custom_hb_interval = x["hb_interval"]
@@ -255,25 +236,15 @@ def new_device_hb(logger: logging.Logger, broker: broker.Client, msg: Any):
                 tmp_dev.append(x)
 
         devices = tmp_dev
-        new_hb_device["hb_interval"] = (
-            custom_hb_interval if custom_hb_interval else HB_INTERVAL
-        )
+        new_hb_device["hb_interval"] = custom_hb_interval if custom_hb_interval else HB_INTERVAL
         devices.append(new_hb_device)
         device_hb_json_dict[new_hb_device["id"]] = data
 
         if device_table is not None:
             if show_archived:
-                device_table.rows = [
-                    x
-                    for x in devices
-                    if x["ping_status"] == DevStatus.ARCHIVED
-                ]
+                device_table.rows = [x for x in devices if x["ping_status"] == DevStatus.ARCHIVED]
             else:
-                device_table.rows = [
-                    x
-                    for x in devices
-                    if x["ping_status"] != DevStatus.ARCHIVED
-                ]
+                device_table.rows = [x for x in devices if x["ping_status"] != DevStatus.ARCHIVED]
             device_table.update()
             show_summary_card.refresh()
         logger.debug(f"New hb: {new_hb_device}")
@@ -288,9 +259,7 @@ def new_device_hb(logger: logging.Logger, broker: broker.Client, msg: Any):
 def login(redirect_to: str = "/") -> Optional[RedirectResponse]:
     def try_login() -> None:
         if password.value == ENV_PASSWORD and username.value == ENV_USERNAME:
-            app.storage.user.update(
-                {"username": username.value, "authenticated": True}
-            )
+            app.storage.user.update({"username": username.value, "authenticated": True})
             ui.navigate.to(redirect_to)
         else:
             ui.notify("Wrong username or password!")
@@ -298,25 +267,13 @@ def login(redirect_to: str = "/") -> Optional[RedirectResponse]:
     if app.storage.user.get("authenticated", False):
         return RedirectResponse("/")
 
-    with ui.card().classes("w-1/4 absolute-center").props(
-        "flat rounded bordered"
-    ):
+    with ui.card().classes("w-1/4 absolute-center").props("flat rounded bordered"):
         with ui.column().classes("w-full gap-1 items-center"):
             ui.label("SEGuRo Platform").classes("text-2xl font-light")
-            ui.label("Heartbeat Monitor Dashboard").classes(
-                "text-2xl font-light"
-            )
+            ui.label("Heartbeat Monitor Dashboard").classes("text-2xl font-light")
         with ui.column().classes("w-full items-center gap-4"):
-            username = (
-                ui.input("Username")
-                .classes("w-3/4")
-                .on("keydown.enter", try_login)
-            )
-            password = (
-                ui.input("Password", password=True)
-                .classes("w-3/4")
-                .on("keydown.enter", try_login)
-            )
+            username = ui.input("Username").classes("w-3/4").on("keydown.enter", try_login)
+            password = ui.input("Password", password=True).classes("w-3/4").on("keydown.enter", try_login)
         with ui.row().classes("w-full justify-center"):
             ui.button("Log in", on_click=try_login).props("flat bordered")
     return None
@@ -330,27 +287,11 @@ def show_summary_card():
     with ui.row().classes("mx-8 w-full grid grid-cols-2 gap-2"):
         cnt = len([d for d in devices if d["ping_status"] == DevStatus.ALIVE])
         ui.label(f"Online: {cnt}")
-        cnt = len(
-            [d for d in devices if d["ping_status"] == DevStatus.OFFLINE]
-        )
+        cnt = len([d for d in devices if d["ping_status"] == DevStatus.OFFLINE])
         ui.label(f"Offline: {cnt}")
-        cnt = len(
-            [
-                d
-                for d in devices
-                if d["state"] == "Warning"
-                and d["ping_status"] != DevStatus.ARCHIVED
-            ]
-        )
+        cnt = len([d for d in devices if d["state"] == "Warning" and d["ping_status"] != DevStatus.ARCHIVED])
         ui.label(f"Warnings: {cnt}")
-        cnt = len(
-            [
-                d
-                for d in devices
-                if d["state"] == "Critical"
-                and d["ping_status"] != DevStatus.ARCHIVED
-            ]
-        )
+        cnt = len([d for d in devices if d["state"] == "Critical" and d["ping_status"] != DevStatus.ARCHIVED])
         ui.label(f"Critical: {cnt}")
 
 
@@ -382,9 +323,7 @@ def handle_view_json(event: events.GenericEventArguments):
 def render_json(id: str):
     ui.label(f"HB for device: {id}").classes("text-h6")
     pretty_json = json.dumps(device_hb_json_dict[id], indent=2)
-    ui.code(pretty_json, language="json").style(
-        "width: 100%; height: auto; overflow: visible; white-space: pre-wrap;"
-    )
+    ui.code(pretty_json, language="json").style("width: 100%; height: auto; overflow: visible; white-space: pre-wrap;")
 
 
 @ui.page("/")
@@ -411,9 +350,9 @@ def web_ui():
     with ui.dialog().props() as dialog_del, ui.card():
         ui.label("Are you sure you want to delete the entry?")
         with ui.row().classes("w-full justify-end"):
-            ui.button(
-                "Delete", color="red", on_click=lambda: dialog_del.submit(True)
-            ).classes("font-bold").props("flat bordered red")
+            ui.button("Delete", color="red", on_click=lambda: dialog_del.submit(True)).classes("font-bold").props(
+                "flat bordered red"
+            )
 
     def set_show_archived(value: bool):
         global show_archived
@@ -429,10 +368,7 @@ def web_ui():
                 auto_archive["enable"] = True
                 global HB_INTERVAL
                 HB_INTERVAL = min(HB_INTERVAL, auto_archive["interval"])
-                ui.notify(
-                    f"""You chose {auto_archive["interval"]} sec(s)"""
-                    """to archive inactive devices"""
-                )
+                ui.notify(f"""You chose {auto_archive["interval"]} sec(s)""" """to archive inactive devices""")
                 auto_archive_cb.value = True
             else:
                 auto_archive_cb.value = False
@@ -442,10 +378,7 @@ def web_ui():
         auto_archive_cb.update()
 
     with ui.dialog().props() as dialog_archive, ui.card():
-        ui.label(
-            """Enter the time (secs) after which an inactive device"""
-            """should be auto archived:  """
-        )
+        ui.label("""Enter the time (secs) after which an inactive device""" """should be auto archived:  """)
         with ui.row().classes("w-full justify-end mb-3"):
             input_time = ui.number()
             with ui.column().classes("mt-3"):
@@ -454,10 +387,7 @@ def web_ui():
                     on_click=lambda: (
                         dialog_archive.submit((input_time.value))
                         if isinstance(input_time.value, float)
-                        else ui.notify(
-                            f"""Enter integer value for interval"""
-                            f""" {type(input_time.value)}"""
-                        )
+                        else ui.notify(f"""Enter integer value for interval""" f""" {type(input_time.value)}""")
                     ),
                 ).props("flat bordered").classes("font-bold")
 
@@ -483,10 +413,7 @@ def web_ui():
                     on_click=lambda: (
                         dialog_hb_interval.submit((interval_input.value))
                         if isinstance(interval_input.value, float)
-                        else ui.notify(
-                            f"""Enter integer value for interval"""
-                            f"""{type(interval_input.value)}"""
-                        )
+                        else ui.notify(f"""Enter integer value for interval""" f"""{type(interval_input.value)}""")
                     ),
                 ).props("flat bordered").classes("font-bold")
 
@@ -503,21 +430,13 @@ def web_ui():
     with ui.column().classes("w-full max-w-4xl mx-auto"):
         with ui.row().classes("w-full items-center"):  # Header
             with ui.column().classes("flex-grow"):
-                ui.label("Heartbeat Monitor").style(
-                    "font-size: 45px;" "font-weight: 350;"
-                )
+                ui.label("Heartbeat Monitor").style("font-size: 45px;" "font-weight: 350;")
             with ui.column().classes("mt-5"):
-                ui.button(icon="logout", on_click=logout).props(
-                    "flat rounded color=black"
-                )
+                ui.button(icon="logout", on_click=logout).props("flat rounded color=black")
         with ui.row().classes("w-full justify-start mt-1 grid grid-cols-7"):
             with ui.column().classes("col-span-4 mt-5"):
                 with ui.row().classes("w-full"):
-                    search = (
-                        ui.input(placeholder="Search term")
-                        .classes("w-3/4")
-                        .props("rounded outlined dense")
-                    )
+                    search = ui.input(placeholder="Search term").classes("w-3/4").props("rounded outlined dense")
                 with ui.row():
                     auto_archive_cb = ui.checkbox(
                         "Auto Archive",
@@ -531,15 +450,9 @@ def web_ui():
                     )
 
             with ui.column().classes("col-span-3"):
-                summary_card = (
-                    ui.card()
-                    .classes("summary-box ml-auto w-3/4 ")
-                    .props("flat")
-                )
+                summary_card = ui.card().classes("summary-box ml-auto w-3/4 ").props("flat")
                 with summary_card:
-                    ui.label("Summary").classes(
-                        "w-full text-center text-l font-bold"
-                    )
+                    ui.label("Summary").classes("w-full text-center text-l font-bold")
                     show_summary_card()
 
         global device_table
@@ -580,17 +493,9 @@ def web_ui():
         global devices
         if devices:
             if show_archived:
-                device_table.rows = [
-                    x
-                    for x in devices
-                    if x["ping_status"] == DevStatus.ARCHIVED
-                ]
+                device_table.rows = [x for x in devices if x["ping_status"] == DevStatus.ARCHIVED]
             else:
-                device_table.rows = [
-                    x
-                    for x in devices
-                    if x["ping_status"] != DevStatus.ARCHIVED
-                ]
+                device_table.rows = [x for x in devices if x["ping_status"] != DevStatus.ARCHIVED]
 
         device_table.add_slot(
             "body",
@@ -678,9 +583,7 @@ def main(rload=False):
         logger = logging.getLogger()
         logging.basicConfig(
             level=args.log_level.upper(),
-            format=(
-                "%(asctime)s.%(msecs)03d " "%(levelname)s %(name)s %(message)s"
-            ),
+            format=("%(asctime)s.%(msecs)03d " "%(levelname)s %(name)s %(message)s"),
             datefmt="%H:%M:%S",
         )
 

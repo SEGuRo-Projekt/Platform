@@ -88,19 +88,9 @@ def main() -> int:
             # Add random values within realistic measurement boundaries
             data = [
                 # Voltage: 227.0 - 235.0 V
-                *[
-                    complex(
-                        random.uniform(227.0, 235.0), random.uniform(0.0, 11.5)
-                    )
-                    for _ in range(3)
-                ],
+                *[complex(random.uniform(227.0, 235.0), random.uniform(0.0, 11.5)) for _ in range(3)],
                 # Current: 0.0 - 1.15 A
-                *[
-                    complex(
-                        random.uniform(22.7, 23.5), random.uniform(0.0, 1.5)
-                    )
-                    for _ in range(3)
-                ],
+                *[complex(random.uniform(22.7, 23.5), random.uniform(0.0, 1.5)) for _ in range(3)],
                 # Power: 0.95 - 1.0
                 *[
                     complex(
@@ -113,15 +103,11 @@ def main() -> int:
                 random.uniform(49.9, 50.1),
             ]
         else:
-            raise ValueError(
-                f"Unknown type of sample data: {args.sample_type}"
-            )
+            raise ValueError(f"Unknown type of sample data: {args.sample_type}")
 
         smp = Sample(data=data)
         epoch_time = time.time_ns()
-        smp.ts_origin = Timestamp(
-            seconds=int(epoch_time // 1e9), nanoseconds=int(epoch_time % 1e9)
-        )
+        smp.ts_origin = Timestamp(seconds=int(epoch_time // 1e9), nanoseconds=int(epoch_time % 1e9))
 
         if datetime.now() - last_block > block_interval:
             smp.new_frame = True

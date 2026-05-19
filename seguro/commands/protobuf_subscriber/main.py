@@ -19,9 +19,7 @@ def main() -> int:
     parser.add_argument("-C", "--cert", type=str, default=config.TLS_CERT)
     parser.add_argument("-k", "--key", type=str, default=config.TLS_KEY)
     parser.add_argument("-t", "--topic", type=str, default=None)
-    parser.add_argument(
-        "-i", "--id", type=str, default=socket.gethostname() + "-sub"
-    )
+    parser.add_argument("-i", "--id", type=str, default=socket.gethostname() + "-sub")
     args = parser.parse_args()
 
     b = Client(

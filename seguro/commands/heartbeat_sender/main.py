@@ -88,9 +88,7 @@ def get_nics() -> dict:
         stats["flags"] = stats["flags"].split(",")
 
         nics[name]["statistics"] = stats
-        nics[name]["addresses"] = [
-            strip_none(a._asdict()) for a in nic_addrs[name]
-        ]
+        nics[name]["addresses"] = [strip_none(a._asdict()) for a in nic_addrs[name]]
 
     return nics
 
@@ -99,22 +97,13 @@ def get_sensors() -> dict:
     sensors = {}
 
     if fans := psutil.sensors_fans():
-        sensors["fan"] = {
-            name: [strip_none(fan._asdict()) for fan in fans]
-            for name, fans in fans.items()
-        }
+        sensors["fan"] = {name: [strip_none(fan._asdict()) for fan in fans] for name, fans in fans.items()}
 
     if temps := psutil.sensors_temperatures():
-        sensors["temp"] = {
-            name: [strip_none(temp._asdict()) for temp in temps]
-            for name, temps in temps.items()
-        }
+        sensors["temp"] = {name: [strip_none(temp._asdict()) for temp in temps] for name, temps in temps.items()}
 
     if batts := psutil.sensors_battery():
-        sensors["battery"] = {
-            name: [strip_none(batt._asdict()) for batt in batts]
-            for name, batts in batts.items()
-        }
+        sensors["battery"] = {name: [strip_none(batt._asdict()) for batt in batts] for name, batts in batts.items()}
 
     return sensors
 
@@ -179,8 +168,7 @@ def main() -> int:
         "--static",
         "-s",
         type=str,
-        help="Path to YAML/JSON file containing static information which will "
-        + "be merged into the status message",
+        help="Path to YAML/JSON file containing static information which will " + "be merged into the status message",
     )
 
     args = parser.parse_args()

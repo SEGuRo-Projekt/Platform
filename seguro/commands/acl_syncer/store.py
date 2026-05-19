@@ -10,15 +10,10 @@ from seguro.commands.acl_syncer import model
 
 
 def policies_from_acl(acl: model.AccessControlList) -> dict:
-    return {
-        name: policy_from_acl(acl, client)
-        for name, client in acl.clients.items()
-    }
+    return {name: policy_from_acl(acl, client) for name, client in acl.clients.items()}
 
 
-def policy_from_acl(
-    acl: model.AccessControlList, client: model.Client
-) -> dict:
+def policy_from_acl(acl: model.AccessControlList, client: model.Client) -> dict:
     roles_names: list[str] = []
 
     if client.roles is not None:
@@ -67,17 +62,11 @@ def reconcile(
 
     new_policies = policies_from_acl(acl)
 
-    removed_policies = (
-        frozenset(existing_policies.keys())
-        - frozenset(new_policies.keys())
-        - frozenset(ignored_clients)
-    )
+    removed_policies = frozenset(existing_policies.keys()) - frozenset(new_policies.keys()) - frozenset(ignored_clients)
 
     # Remove empty policies
     removed_policies |= {
-        name
-        for name, p in new_policies.items()
-        if len(p.get("Statement", [])) == 0 and name in existing_policies
+        name for name, p in new_policies.items() if len(p.get("Statement", [])) == 0 and name in existing_policies
     }
 
     for name in removed_policies:
@@ -86,9 +75,7 @@ def reconcile(
 
     for name, policy in new_policies.items():
         if len(policy.get("Statement", [])) == 0:
-            logging.warn(
-                "Ignoring store policy without any statements: %s", name
-            )
+            logging.warn("Ignoring store policy without any statements: %s", name)
             continue
 
         with tempfile.NamedTemporaryFile("w+t") as tf:
