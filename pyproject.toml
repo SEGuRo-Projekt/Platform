@@ -118,5 +118,8 @@ use-double-quotes = true
 field-constraints = true
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "editables"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["seguro"]
