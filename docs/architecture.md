@@ -26,7 +26,7 @@ Most communication between the platform and the gateway is performed via TLS-enc
 
 The SEGuRo platform strictly encrypts and authenticates all communication between the platform and gateway as well as all internal communication using Mutual Transport Layer Security (mTLS).
 
-Mutual TLS authentication, also known as client certificate authentication or two-way TLS authentication, is a secure communication protocol through which both client and server authenticate each other before sharing data. This is achieved using digital certificates, a fundamental concept in a system called [Public Key Infrastructure (PKI)](platoform.md#Public Key Infrastructure (PKI)).
+Mutual TLS authentication, also known as client certificate authentication or two-way TLS authentication, is a secure communication protocol through which both client and server authenticate each other before sharing data. This is achieved using digital certificates, a fundamental concept in a system called [Public Key Infrastructure (PKI)](platform.md#Public Key Infrastructure (PKI)).
 
 A digital certificate, simply put, is a verified digital ID card for a device or a server. It confirms the identity, helping ensure that communication only occurs between verified, trusted entities. This certificate is created, issued, and verified by a Certificate Authority (CA), which acts like a trusted third party. The certificate contains the entity's public key, and the CA guarantees the association between the identity of the entity and this public key.
 

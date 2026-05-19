@@ -1,6 +1,6 @@
 # Examples
 
-We provide a couple of examples of _application services_ and , Jupyter Notebooks and configuration files for getting started quickly:
+We provide a couple of examples of _application services_ and Jupyter Notebooks and configuration files for getting started quickly:
 
 ## Configuration Files
 
@@ -12,7 +12,7 @@ These files include general configuration files, like scheduler specifications, 
 
 We provide simple [Jupyter Notebooks](https://jupyter-notebook.readthedocs.io/en/stable/notebook.html) inside [`/store/notebooks`](https://github.com/SEGuRo-Projekt/Platform/tree/main/store/notebooks) which are evaluated by the [_notebook executor_](architecture.md#Notebook Executor).
 
-The evaluation of these notebooks is usually triggered by the [_scheduler_](architecture.md#Scheduler) whenever new sample data has been added to the sore by the [_sample recorder_](architecture.md#Sample Recorder) or at regular intervals (e.g. daily).
+The evaluation of these notebooks is usually triggered by the [_scheduler_](architecture.md#Scheduler) whenever new sample data has been added to the store by the [_sample recorder_](architecture.md#Sample Recorder) or at regular intervals (e.g. daily).
 
 ## Application Services
 
@@ -74,7 +74,7 @@ To deploy your application services, follow these steps:
 
 The [example job worker](../images/examples/job-worker/job_worker/main.py) is a script that processes store data triggered by the creation of specific store objects. When triggered, it retrieves a data frame from the created object, doubles its values, and saves the processed frame to a new location in the store (`measurements_processed`).
 
-For accesing the store, it uses the [store helper class](https://github.com/SEGuRo-Projekt/Platform/blob/main/seguro/common/store.py).
+For accessing the store, it uses the [store helper class](https://github.com/SEGuRo-Projekt/Platform/blob/main/seguro/common/store.py).
 
 **Dockerfile:**
 ```{literalinclude} ../images/examples/job-worker/Dockerfile
