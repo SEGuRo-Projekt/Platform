@@ -6,7 +6,7 @@ FROM python:3.11-bookworm AS python
 ARG DOCKER_VERSION=24.0.2
 ARG DOCKER_COMPOSE_VERSION=2.20.0
 
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.11.15 /uv /usr/local/bin/uv
 
 ENV UV_SYSTEM_PYTHON=1 \
     UV_NO_CACHE=1
