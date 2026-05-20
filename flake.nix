@@ -33,11 +33,63 @@
       pyproject-build-systems,
     }:
     let
+      inherit (nixpkgs) lib;
+
       workspace = uv2nix.lib.workspace.loadWorkspace { workspaceRoot = ./.; };
 
-      overlay = workspace.mkPyprojectOverlay {
+      overlayPyproject = workspace.mkPyprojectOverlay {
         sourcePreference = "wheel";
       };
+
+      overlayPyprojectEditable = workspace.mkEditablePyprojectOverlay {
+        root = "$REPO_ROOT";
+      };
+
+      defaultOverlay =
+        final: prev:
+        let
+          python = final.python313;
+
+          overlayAddMissingBuildInputs =
+            pythonFinal: pythonPrev:
+            let
+              addSetuptools =
+                pkg:
+                pkg.overrideAttrs (old: {
+                  nativeBuildInputs = old.nativeBuildInputs ++ pythonFinal.resolveBuildSystem { setuptools = [ ]; };
+                });
+            in
+            {
+              linuxfd = addSetuptools pythonPrev.linuxfd;
+              villas-node = addSetuptools pythonPrev.villas-node;
+              aws-logging-handlers = addSetuptools pythonPrev.aws-logging-handlers;
+              odfpy = addSetuptools pythonPrev.odfpy;
+              pygraphviz = pythonPrev.pygraphviz.overrideAttrs (old: {
+                nativeBuildInputs = old.nativeBuildInputs ++ pythonFinal.resolveBuildSystem { setuptools = [ ]; };
+                buildInputs = (old.buildInputs or [ ]) ++ [ final.graphviz ];
+              });
+            };
+
+          pythonSet =
+            (final.callPackage pyproject-nix.build.packages {
+              inherit python;
+            }).overrideScope
+              (
+                lib.composeManyExtensions [
+                  pyproject-build-systems.overlays.wheel
+                  overlayPyproject
+                  overlayAddMissingBuildInputs
+                ]
+              );
+
+          pythonSetEditable = pythonSet.overrideScope overlayPyprojectEditable;
+        in
+        {
+          seguro-platform = pythonSet.mkVirtualEnv "seguro-platform-env" workspace.deps.default;
+          seguro-platform-editable = pythonSetEditable.mkVirtualEnv "seguro-platform-dev-env" workspace.deps.all;
+
+          uv = uv2nix.packages.${final.system}.uv-bin;
+        };
     in
     flake-utils.lib.eachDefaultSystem (
       system:
@@ -45,68 +97,30 @@
         pkgs = import nixpkgs {
           inherit system;
           overlays = [
-            (final: prev: {
-              uv = uv2nix.packages.${system}.uv-bin;
-            })
+            defaultOverlay
           ];
         };
-
-        inherit (pkgs) lib;
-
-        python = pkgs.python313;
-
-        pythonSet =
-          (pkgs.callPackage pyproject-nix.build.packages {
-            inherit python;
-          }).overrideScope
-            (
-              lib.composeManyExtensions [
-                pyproject-build-systems.overlays.wheel
-                overlay
-                (
-                  final: prev:
-                  let
-                    addSetuptools =
-                      pkg:
-                      pkg.overrideAttrs (old: {
-                        nativeBuildInputs = old.nativeBuildInputs ++ final.resolveBuildSystem { setuptools = [ ]; };
-                      });
-                  in
-                  {
-                    linuxfd = addSetuptools prev.linuxfd;
-                    villas-node = addSetuptools prev.villas-node;
-                    aws-logging-handlers = addSetuptools prev.aws-logging-handlers;
-                    odfpy = addSetuptools prev.odfpy;
-                    pygraphviz = prev.pygraphviz.overrideAttrs (old: {
-                      nativeBuildInputs = old.nativeBuildInputs ++ final.resolveBuildSystem { setuptools = [ ]; };
-                      buildInputs = (old.buildInputs or [ ]) ++ [ pkgs.graphviz ];
-                    });
-                  }
-                )
-              ]
-            );
-
-        editableOverlay = workspace.mkEditablePyprojectOverlay {
-          root = "$REPO_ROOT";
-        };
-
-        editablePythonSet = pythonSet.overrideScope editableOverlay;
-
-        devEnv = editablePythonSet.mkVirtualEnv "seguro-platform-dev-env" workspace.deps.all;
       in
       {
-        packages = rec {
-          seguro-platform = pythonSet.mkVirtualEnv "seguro-platform-env" workspace.deps.default;
-          default = seguro-platform;
+        packages = {
+          default = self.packages.${system}.seguro-platform;
+
+          inherit (pkgs)
+            seguro-platform
+            seguro-platform-editable
+            ;
         };
 
-        devShells = rec {
+        devShells = {
+          default = self.devShells.${system}.seguro-platform;
+
           seguro-platform = pkgs.mkShell {
             packages = with pkgs; [
               uv
-              devEnv
               mosquitto
               graphviz
+
+              seguro-platform-editable
 
               # For notebook_executor
               # See: https://github.com/jupyter/nbconvert/issues/1328#issuecomment-1768665936
@@ -153,7 +167,7 @@
 
             env = {
               UV_NO_SYNC = "1";
-              UV_PYTHON = editablePythonSet.python.interpreter;
+              UV_PYTHON = pkgs.python313.interpreter;
               UV_PYTHON_DOWNLOADS = "never";
             };
 
@@ -162,9 +176,12 @@
               export REPO_ROOT=$(git rev-parse --show-toplevel)
             '';
           };
-
-          default = seguro-platform;
         };
       }
-    );
+    )
+    // {
+      overlays = {
+        default = defaultOverlay;
+      };
+    };
 }
