@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import io
+import ssl
 import threading
 import enum
 import logging
@@ -64,13 +65,22 @@ class Client:
         self.logger = logging.getLogger(__name__)
         self.bucket = bucket
 
-        self.http_client = urllib3.PoolManager(cert_reqs="CERT_REQUIRED", ca_certs=tls_cacert)
+        ssl_context = ssl.create_default_context(cafile=tls_cacert)
+        ssl_context.load_cert_chain(tls_cert, tls_key)
+        # Python 3.13 enables VERIFY_X509_STRICT by default, which requires CA
+        # certificates to carry a keyUsage extension.  Relax this check so that
+        # existing CA certs without that extension continue to work.
+        if hasattr(ssl, "VERIFY_X509_STRICT"):
+            ssl_context.verify_flags &= ~ssl.VERIFY_X509_STRICT
+
+        self.http_client = urllib3.PoolManager(ssl_context=ssl_context)
 
         self.creds = minio.credentials.CertificateIdentityProvider(
             sts_endpoint=f"https://{host}:{port}",
             cert_file=tls_cert,
             key_file=tls_key,
             ca_certs=tls_cacert,
+            http_client=urllib3.PoolManager(ssl_context=ssl_context),
         )
         self.client = minio.Minio(
             endpoint=f"{host}:{port}",
