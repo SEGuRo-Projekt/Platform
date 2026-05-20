@@ -7,7 +7,7 @@ version = "0.1.0"
 description = "Common Python helpers for accessing the SEGuRo platform"
 license = "Apache-2.0"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.13.12"
 authors = [
 	{ name = "Steffen Vogel", email = "steffen.vogel@opal-rt.com" },
 	{ name = "Felix Wege", email = "felix.wege@eonerc.rwth-aachen.de" },
@@ -34,7 +34,7 @@ dependencies = [
 	"nicegui>=2.21.1",
 
 	# Pinning versions due to weird missing Content-type header bug
-	"pandas[excel,parquet,fss,aws]==2.2.2",
+	"pandas[excel,parquet,fss,aws]==2.3.3",
 	"boto3==1.34.69",
 	"fsspec==2024.3.1",
 	"s3fs==2024.3.1",
@@ -111,7 +111,7 @@ warn_required_dynamic_aliases = true
 output-model-type = "pydantic_v2.BaseModel"
 use-standard-collections = true
 use-union-operator = true
-target-python-version = "3.11"
+target-python-version = "3.13"
 enum-field-as-literal = "one"
 capitalise-enum-members = true
 use-field-description = true

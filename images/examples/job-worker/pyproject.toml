@@ -8,7 +8,7 @@ dependencies = [
     "seguro-platform@git+https://github.com/SEGurO-Projekt/Platform"
 ]
 
-requires-python = ">= 3.11"
+requires-python = ">= 3.13.12"
 
 [project.scripts]
 job-worker = "job_worker.main:main"

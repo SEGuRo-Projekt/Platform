@@ -53,7 +53,7 @@
 
         inherit (pkgs) lib;
 
-        python = pkgs.python311;
+        python = pkgs.python313;
 
         pythonSet =
           (pkgs.callPackage pyproject-nix.build.packages {
