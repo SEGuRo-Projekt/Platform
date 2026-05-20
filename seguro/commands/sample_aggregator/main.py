@@ -12,7 +12,6 @@ from villas.node.formats import Sample
 
 from seguro.common import broker, config
 
-
 env = environ.Env()
 TOPIC = env.str("TOPIC", "data/measurements/+/+/+")
 CONNECTOR_ID = env.str("CONNECTOR_ID", "sample-aggregator")
