@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023-2026 Steffen Vogel, OPAL-RT Germany GmbH
 # SPDX-License-Identifier: Apache-2.0
 
-FROM python:3.11-bookworm AS builder
+FROM python:3.13.12-bookworm AS builder
 
 COPY --from=ghcr.io/astral-sh/uv:0.11.15 /uv /usr/local/bin/uv
 

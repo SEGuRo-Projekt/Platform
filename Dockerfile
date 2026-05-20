@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023-2026 Steffen Vogel, OPAL-RT Germany GmbH
 # SPDX-License-Identifier: Apache-2.0
 
-FROM python:3.11-bookworm AS python
+FROM python:3.13.12-bookworm AS python
 
 ARG DOCKER_VERSION=24.0.2
 ARG DOCKER_COMPOSE_VERSION=2.20.0
