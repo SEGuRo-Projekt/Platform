@@ -50,6 +50,7 @@ jobs:
         run: docker buildx bake
           --file compose.yaml
           --file compose-cache.json
+          --set docs.cache-to= # Fix broken CI (2026-05-20)
 
       - name: Start containers
         run: docker compose up --detach --quiet-pull
