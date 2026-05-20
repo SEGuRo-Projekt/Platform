@@ -67,7 +67,7 @@ devices: list[Device] = []
 devices_unarchived: list[Device] = []
 devices_archived: list[Device] = []
 show_archived = False
-device_hb_json_dict = {}
+device_hb_json_dict: dict[str, dict] = {}
 
 device_table = None
 reauth_time = 0
@@ -331,8 +331,6 @@ def web_ui():
     """
     Landing page of the heartbeat monitor dashboard
     """
-    global auto_archive
-    global show_archived
 
     def logout() -> None:
         app.storage.user.clear()
@@ -360,7 +358,6 @@ def web_ui():
         update_device_state()
 
     async def get_archive_interval(value: bool):
-        global auto_archive
         if value:
             interval = await dialog_archive
             if isinstance(interval, float):
@@ -392,7 +389,6 @@ def web_ui():
                 ).props("flat bordered").classes("font-bold")
 
     async def handle_custom_interval(event: events.GenericEventArguments):
-        global devices
         device_id = event.args
         hb_interval = await dialog_hb_interval
         if isinstance(hb_interval, float):
@@ -417,15 +413,13 @@ def web_ui():
                     ),
                 ).props("flat bordered").classes("font-bold")
 
-    ui.add_css(
-        """
+    ui.add_css("""
         .health-table th { background-color: #e0e0e0;
                             font-weight: bold; text-align: center;}
         .health-table td { border: 1px solid #ddd; text-align: center;}
         .summary-box { background-color: #ffe6b3; padding: 10px;
                         margin-bottom: 10px; border: 1px solid #ccc; }
-    """
-    )
+    """)
 
     with ui.column().classes("w-full max-w-4xl mx-auto"):
         with ui.row().classes("w-full items-center"):  # Header
@@ -490,7 +484,6 @@ def web_ui():
             .classes("health-table w-full text-center")
             .props("flat hoverable striped bordered ")
         )
-        global devices
         if devices:
             if show_archived:
                 device_table.rows = [x for x in devices if x["ping_status"] == DevStatus.ARCHIVED]
