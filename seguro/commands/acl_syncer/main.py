@@ -101,7 +101,7 @@ def main() -> int:
         key_file=config.TLS_KEY,
         ca_certs=config.TLS_CACERT,
     )
-    mca = minio.MinioAdmin(minio_endpoint, credentials=creds, http_client=http_client)
+    mca = minio.MinioAdmin(endpoint=minio_endpoint, credentials=creds, http_client=http_client)
 
     acls = get_acls(s, args.prefix)
     acl = merge_acls(acls)
