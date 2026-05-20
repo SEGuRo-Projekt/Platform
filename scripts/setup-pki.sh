@@ -32,7 +32,10 @@ function create_pki_ca() {
     -newkey "${PKI_KEY_TYPE}:${PKI_KEY_BITS}" \
     -keyout "/keys/ca/ca.key" \
     -out "/certs/ca.crt" \
-    -subj "${PKI_SUBJECT}/CN=SEGuRo Certificate Authority" 2> /dev/null
+    -subj "${PKI_SUBJECT}/CN=SEGuRo Certificate Authority" \
+    -addext "basicConstraints=critical,CA:TRUE" \
+    -addext "keyUsage=critical,keyCertSign,cRLSign" \
+    -addext "subjectKeyIdentifier=hash" 2> /dev/null
 }
 
 function create_pki_server() {
