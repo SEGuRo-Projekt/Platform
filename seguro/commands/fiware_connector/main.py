@@ -17,7 +17,6 @@ from villas.node.formats import Sample
 
 from seguro.common import broker, config
 
-
 env = environ.Env()
 
 URL = env.str("FIWARE_URL", None)
