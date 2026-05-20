@@ -4,7 +4,7 @@
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.3.0
+    rev: v6.0.0
     hooks:
       - id: check-yaml
       - id: check-json
@@ -17,13 +17,13 @@ repos:
       - id: check-added-large-files
 
   - repo: https://github.com/psf/black
-    rev: 22.10.0
+    rev: 26.5.1
     hooks:
       - id: black
       - id: black-jupyter
 
   - repo: https://github.com/PyCQA/flake8
-    rev: 6.0.0
+    rev: 7.3.0
     hooks:
       - id: flake8
 
@@ -38,7 +38,7 @@ repos:
       - id: docker-compose-check
 
   - repo: https://github.com/hadolint/hadolint
-    rev: 024fd64
+    rev: v2.14.0
     hooks:
       - id: hadolint-docker
         args:
@@ -46,22 +46,22 @@ repos:
           - --ignore=DL3059
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.23.0
+    rev: 0.37.2
     hooks:
       - id: check-github-actions
       - id: check-github-workflows
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.9.0
+    rev: v2.1.0
     hooks:
       - id: mypy
         additional_dependencies:
-          - types-pyyaml==6.0.12.20240311
+          - types-pyyaml==6.0.12.20260518
           - types-python-slugify==8.0.2.20240310
-          - pandas-stubs==2.2.1.240316
-          - pydantic==2.7.0
+          - pandas-stubs==2.3.3.260113
+          - pydantic==2.13.4
 
   - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.10.0.1
+    rev: v0.11.0.1
     hooks:
       - id: shellcheck
