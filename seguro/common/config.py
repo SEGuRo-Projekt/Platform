@@ -24,11 +24,11 @@ DOMAIN = env.str("DOMAIN", "localhost")
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
-def resolve_from_project_root(p: str) -> Path:
+def resolve_from_project_root(p: str) -> str:
     path = Path(p).expanduser()
     if not path.is_absolute():
         path = PROJECT_ROOT / path
-    return path.resolve()
+    return str(path.resolve())
 
 
 # Authentication
