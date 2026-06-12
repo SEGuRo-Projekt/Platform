@@ -170,6 +170,33 @@ def put_file_content(s: store.Client, args):
     s.put_file_contents(args.file, content)
 
 
+def list_elements(s: store.Client, args):
+    if args.path == ".":  # list entire bucket
+        objects = s.client.list_objects(
+            bucket_name=s.bucket,
+            recursive=False,
+        )
+        for object in objects:
+            print(object.object_name)
+        return
+
+    if not args.path.endswith("/"):
+        args.path += "/"
+    remotebase = Path(args.path)
+
+    objects = s.client.list_objects(
+        bucket_name=s.bucket,
+        prefix=args.path,
+        recursive=False,
+    )
+
+    for object in objects:  # get all objects
+        element_in_dir = str(Path(object.object_name).relative_to(remotebase))
+        if object.object_name.endswith("/"):
+            element_in_dir += "/"
+        print(element_in_dir)
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="s3_tool", description="Tool to interact with S3 storage"
@@ -211,10 +238,16 @@ def main():
         "pull", help="Pull a local file from the storage"
     )
     pull_parser.add_argument(
-        "-rf", "--remotefile", type=str, help="Path in the storage"
+        "-rf",
+        "--remotefile",
+        type=str,
+        help="Path in the storage",
     )
     pull_parser.add_argument(
-        "-lf", "--localfile", type=str, help="Path to the local file"
+        "-lf",
+        "--localfile",
+        type=str,
+        help="Path to the local file",
     )
     pull_parser.set_defaults(func=pull)
 
@@ -224,7 +257,10 @@ def main():
     )
 
     get_file_parser.add_argument(
-        "-rf", "--remotefile", type=str, help="Path in the storage"
+        "-rf",
+        "--remotefile",
+        type=str,
+        help="Path in the storage",
     )
 
     get_file_parser.add_argument(
@@ -318,6 +354,21 @@ def main():
     )
 
     get_frame_parser.set_defaults(func=get_frame)
+
+    list_parser = subparsers.add_parser(
+        "ls",
+        help="List file of selected directory of the store",
+    )
+
+    list_parser.add_argument(
+        "-p",
+        "--path",
+        type=str,
+        help="Path of directory in store to list",
+        # default=".",
+    )
+
+    list_parser.set_defaults(func=list_elements)
 
     # put file
 
