@@ -26,29 +26,8 @@ def push(s: store.Client, args):
         print("pushing a file")
         print(f"remote: {args.remotefile} local: {args.localfile}")
         s.put_file(args.remotefile, args.localfile)  # pushing a file
-    # elif localpath.is_dir():
-    #     for element in localpath.iterdir():  # pushing a directory
-    #         args.remotefile = Path(element).relative_to(localpath)
-    #         if element.is_dir():
-    #             args.remotefile = (
-    #                 str(element) + "/"
-    #             )  # create directory in S3 store
-    #             print(args.remotefile)
-    #         else:
-    #             args.remotefile = str(element)
-    #         args.localfile = str(element)
-    #         push(s, args)
 
     elif localpath.is_dir():
-        # functionality that is missing:
-        # - push empty directory --> does not work
-        # - deal with . as localfile
-        # --> issue with environment variables and keys/
-
-        # creating empty directories does not work
-        # empty subdirectories will not be pushed
-        # * functionality
-
         for element in localpath.iterdir():
             if element.is_dir():
                 args.remotefile = (
@@ -369,13 +348,6 @@ def main():
     )
 
     list_parser.set_defaults(func=list_elements)
-
-    # put file
-
-    # put file contents
-    # get file contents
-    # put frame
-    # get frame
 
     args = parser.parse_args()
 
