@@ -16,36 +16,73 @@ def checkPath(path: str):
         raise FileNotFoundError(f"Local path not found: {path}")
 
 
-# push file/directory to S3 store
 def push(s: store.Client, args):
-
-    localpath = Path(args.localfile).resolve()
     remotepath = Path(args.remotefile)
+    for localfile in args.localfile:
+        localpath = Path(localfile).resolve()
+        if len(args.localfile) > 1:
+            new_remote = str(
+                remotepath.joinpath(
+                    localpath.relative_to(localpath.parents[0])
+                )
+            )
+            print(f"new remote {new_remote}")
+        else:
+            new_remote = args.remotefile
+        push_one(s, localfile, new_remote)
+
+
+# push file/directory to S3 store
+def push_one(s: store.Client, localfile: str, remotefile: str):
+
+    # localpath = Path(args.localfile).resolve()
+    # remotepath = Path(args.remotefile)
+
+    # if localpath.is_file():
+    #     print("pushing a file")
+    #     print(f"remote: {args.remotefile} local: {args.localfile}")
+    #     s.put_file(args.remotefile, args.localfile)  # pushing a file
+
+    # elif localpath.is_dir():
+    #     for element in localpath.iterdir():
+    #         if element.is_dir():
+    #             args.remotefile = (
+    #                 str(remotepath.joinpath(element.relative_to(localpath)))
+    #                 + "/"
+    #             )
+    #             print(f"remote file: {args.remotefile}")
+    #         else:
+    #             args.remotefile = str(
+    #                 remotepath.joinpath(element.relative_to(localpath))
+    #             )
+    #         args.localfile = str(element)
+    #         print(f"this is before calling push on file: {args.localfile}")
+    #         push(s, args)
+
+    # else:
+    #     raise FileNotFoundError(f"Local object not found: {args.localfile}")
+    # return 0
+
+    localpath = Path(localfile).resolve()
+    remotepath = Path(remotefile)
 
     if localpath.is_file():
-        print("pushing a file")
-        print(f"remote: {args.remotefile} local: {args.localfile}")
-        s.put_file(args.remotefile, args.localfile)  # pushing a file
-
+        s.put_file(remotefile, localfile)  # pushing a file
     elif localpath.is_dir():
         for element in localpath.iterdir():
             if element.is_dir():
-                args.remotefile = (
+                new_remote = (
                     str(remotepath.joinpath(element.relative_to(localpath)))
                     + "/"
                 )
-                print(f"remote file: {args.remotefile}")
+                print(f"remote file: {new_remote}")
             else:
-                args.remotefile = str(
+                new_remote = str(
                     remotepath.joinpath(element.relative_to(localpath))
                 )
-            args.localfile = str(element)
-            print(f"this is before calling push on file: {args.localfile}")
-            push(s, args)
 
-    else:
-        raise FileNotFoundError(f"Local object not found: {args.localfile}")
-    return 0
+            push_one(s, str(element), new_remote)
+    return
 
 
 # pull file/directory from S3 store
@@ -205,7 +242,11 @@ def main():
         "push", help="Push a local file to the storage"
     )
     push_parser.add_argument(
-        "-lf", "--localfile", type=str, help="Path to the local file"
+        "-lf",
+        "--localfile",
+        type=str,
+        help="Path to the local file",
+        nargs="*",
     )
     push_parser.add_argument(
         "-rf", "--remotefile", type=str, help="Path in the storage"
