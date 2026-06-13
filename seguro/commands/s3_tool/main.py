@@ -16,6 +16,7 @@ def checkPath(path: str):
         raise FileNotFoundError(f"Local path not found: {path}")
 
 
+# push file/directory to S3 store
 def push(s: store.Client, args):
     remotepath = Path(args.remotefile)
     for localfile in args.localfile:
@@ -32,36 +33,7 @@ def push(s: store.Client, args):
         push_one(s, localfile, new_remote)
 
 
-# push file/directory to S3 store
 def push_one(s: store.Client, localfile: str, remotefile: str):
-
-    # localpath = Path(args.localfile).resolve()
-    # remotepath = Path(args.remotefile)
-
-    # if localpath.is_file():
-    #     print("pushing a file")
-    #     print(f"remote: {args.remotefile} local: {args.localfile}")
-    #     s.put_file(args.remotefile, args.localfile)  # pushing a file
-
-    # elif localpath.is_dir():
-    #     for element in localpath.iterdir():
-    #         if element.is_dir():
-    #             args.remotefile = (
-    #                 str(remotepath.joinpath(element.relative_to(localpath)))
-    #                 + "/"
-    #             )
-    #             print(f"remote file: {args.remotefile}")
-    #         else:
-    #             args.remotefile = str(
-    #                 remotepath.joinpath(element.relative_to(localpath))
-    #             )
-    #         args.localfile = str(element)
-    #         print(f"this is before calling push on file: {args.localfile}")
-    #         push(s, args)
-
-    # else:
-    #     raise FileNotFoundError(f"Local object not found: {args.localfile}")
-    # return 0
 
     localpath = Path(localfile).resolve()
     remotepath = Path(remotefile)
@@ -109,6 +81,11 @@ def pull(s: store.Client, args):
 
         localbase = Path(args.localfile).absolute()
         remotebase = Path(args.remotefile)  # base of "directory" in store
+
+        if localbase.is_file() or localbase.suffix != "":
+            raise NotADirectoryError(
+                f"Localpath is a file, not a directory {localbase}"
+            )
 
         print(f"local path: {args.localfile}")
         print(f"remote base path: {args.remotefile}")
