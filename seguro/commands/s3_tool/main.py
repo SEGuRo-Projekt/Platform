@@ -52,10 +52,15 @@ def push_one(s: store.Client, localfile: str, remotefile: str):
 def pull(s: store.Client, args):
     objects = list(
         s.client.list_objects(  # get all objects in bucket with this prefix
-            bucket_name=s.bucket, prefix=args.remotefile, recursive=True
+            bucket_name=s.bucket,
+            prefix=args.remotefile,
+            recursive=True,
         )
     )
-
+    print(f"remote path {args.remotefile}")
+    for object in objects:
+        print(object.object_name)
+    print("end")
     if len(objects) == 0:
         raise FileNotFoundError(f"Remote object not found: {args.remotefile}")
     elif len(objects) == 1:  # pull single file
@@ -76,10 +81,18 @@ def pull(s: store.Client, args):
             )
 
         for object in objects:  # get all objects
+            if "/" not in object.object_name:
+                # make sure only directory gets pulled
+                # avoid files that have directory name as prefix
+                continue
+            print(f"objectname: {object.object_name}")
+            print(f"remotebase: {remotebase}")
+            relative_remotepath = Path(object.object_name).relative_to(
+                remotebase
+            )
 
-            relativepath = Path(object.object_name).relative_to(remotebase)
             new_localpath = localbase.joinpath(remotebase).joinpath(
-                relativepath
+                relative_remotepath
             )
 
             localfile = str(new_localpath)
