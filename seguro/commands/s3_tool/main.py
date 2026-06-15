@@ -114,13 +114,29 @@ def remove(s: store.Client, args):
         )
     )
 
+    removed_object_flag = 0
+
     if len(objects) == 0:
         raise FileNotFoundError(
             f"Remote object not found: {args.file}, nothing was removed"
         )
+    elif (
+        len(objects) == 1 and objects[0].object_name == args.file
+    ):  # remove single file
+        s.remove_file(objects[0].object_name)
+        removed_object_flag = 1
+    else:  # remove entire directory
+        if not args.file.endswith("/"):
+            remotepath = args.file + "/"
+        else:
+            remotepath = args.file
+        for object in objects:
+            if object.object_name.startswith(remotepath):
+                s.remove_file(object.object_name)
+                removed_object_flag = 1
 
-    for object in objects:
-        s.remove_file(object.object_name)
+    if removed_object_flag == 0:
+        print(f"Remote object not found: {args.file}, nothing was removed")
     return 0
 
 
