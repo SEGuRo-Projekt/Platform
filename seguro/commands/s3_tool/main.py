@@ -99,16 +99,11 @@ def pull(s: store.Client, args):
                         f"Localpath is a file, not a directory {localbase}"
                     )
 
-        for object in objects:  # get all objects
-            if "/" not in object.object_name:
-                # make sure only directory gets pulled
-                # avoid files that have directory name as prefix
-                continue
-            print(f"objectname: {object.object_name}")
-            print(f"remotebase: {remotebase}")
-            relative_remotepath = Path(object.object_name).relative_to(
-                remotebase
-            )
+                # Constructing localpath:
+                # remotepath of element relative to remotebase
+                relative_remotepath = Path(object.object_name).relative_to(
+                    remotebase
+                )
 
                 # localpath localbase/remotebasename/relative remotepath
                 new_localpath = localbase.joinpath(remotebase.name).joinpath(
