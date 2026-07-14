@@ -52,7 +52,7 @@ def pull(s: store.Client, args):
     if len(objects) == 0:
         raise FileNotFoundError(f"Remote object not found: {args.remotefile}")
     elif len(objects) == 1:  # pull single file
-        if objects[0].name != args.remotefile:
+        if objects[0].object_name != args.remotefile:
             raise FileNotFoundError(f"Remote object not found: {args.remotefile}")
         localpath = Path(args.localfile).absolute()
         remotepath = Path(args.remotefile)
