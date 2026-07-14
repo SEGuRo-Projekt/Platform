@@ -95,7 +95,7 @@ jupyter = [
 line-length = 120
 
 [tool.pytest.ini_options]
-markers = ["broker", "store", "logger", "config", "notify"]
+markers = ["broker", "store", "logger", "config", "notify", "s3_tool"]
 
 [tool.mypy]
 plugins = ["pydantic.mypy"]
