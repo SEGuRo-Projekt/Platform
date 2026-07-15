@@ -25,7 +25,7 @@ FILES = {
 }
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(autouse=True)
 def create_test_tree(base: str = BASE_DIR):
 
     for string, content in FILES.items():
@@ -35,8 +35,18 @@ def create_test_tree(base: str = BASE_DIR):
 
     yield
 
-    remove_args = argparse.Namespace(file=REMOTE_DIR)
-    remove(Client(), remove_args)
+    s = Client()
+
+    objects = list(
+        s.client.list_objects(
+            bucket_name=s.bucket,
+            prefix=REMOTE_DIR + "/",
+            recursive=True,
+        )
+    )
+
+    for obj in objects:
+        s.remove_file(obj.object_name)
 
     try:
         shutil.rmtree(Path(BASE_DIR))
