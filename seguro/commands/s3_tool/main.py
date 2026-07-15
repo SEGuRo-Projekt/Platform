@@ -114,25 +114,28 @@ def pull(s: store.Client, args):
 def remove(s: store.Client, args):
     objects = list(s.client.list_objects(bucket_name=s.bucket, prefix=args.file, recursive=True))
 
-    removed_object_flag = 0
-
-    if len(objects) == 0:
+    if not objects:
         raise FileNotFoundError(f"Remote object not found: {args.file}, nothing was removed")
-    elif len(objects) == 1 and objects[0].object_name == args.file:  # remove single file
-        s.remove_file(objects[0].object_name)
-        removed_object_flag = 1
-    else:  # remove entire directory
-        if not args.file.endswith("/"):
-            remotepath = args.file + "/"
-        else:
-            remotepath = args.file
-        for object in objects:
-            if object.object_name.startswith(remotepath):
-                s.remove_file(object.object_name)
-                removed_object_flag = 1
 
-    if removed_object_flag == 0:
+    removed = False
+    exact_match_removed = False
+
+    for obj in objects:
+        if obj.object_name == args.file and not exact_match_removed:
+            s.remove_file(args.file)
+            removed = True
+            exact_match_removed = True
+            return 0
+        elif args.file.endswith("/") and obj.object_name.startswith(args.file):  # file: "test/""
+            s.remove_file(obj.object_name)
+            removed = True
+        elif not args.file.endswith("/") and obj.object_name.startswith(args.file + "/"):  # file: "test" + "/"
+            s.remove_file(obj.object_name)
+            removed = True
+
+    if not removed:
         print(f"Remote object not found: {args.file}, nothing was removed")
+
     return 0
 
 
