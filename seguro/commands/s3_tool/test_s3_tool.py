@@ -211,3 +211,73 @@ def test_pull_directory():
             continue
         elif path.startswith(BASE_DIR + "/testdir"):
             assert not Path(path).is_file()
+
+
+@pytest.mark.s3_tool
+def test_remove_single_file():  # check if "__tmp_test/test" will be removed and nothing else
+    s = Client()
+
+    args = argparse.Namespace(localfile=[BASE_DIR], remotefile=REMOTE_DIR)
+
+    push(s, args)
+
+    args = argparse.Namespace(file=REMOTE_DIR + "/test")
+
+    remove(s, args)
+
+    objects = list(
+        s.client.list_objects(
+            bucket_name=s.bucket,
+            prefix=REMOTE_DIR + "/test",
+            recursive=True,
+        )
+    )
+
+    object_names = []
+    for object in objects:
+        object_names.append(object.object_name)
+
+    for path, _ in FILES.items():
+        if path != BASE_DIR + "/test":
+            file = REMOTE_DIR + str(path).removeprefix(BASE_DIR)
+            assert file in object_names
+            continue
+        else:
+            file = REMOTE_DIR + str(path).removeprefix(BASE_DIR)
+            assert file not in object_names
+
+
+@pytest.mark.s3_tool
+def test_remove_directory():
+    s = Client()
+
+    args = argparse.Namespace(localfile=[BASE_DIR], remotefile=REMOTE_DIR)
+
+    assert Path(BASE_DIR + "/test").is_file()
+
+    push(s, args)
+
+    args = argparse.Namespace(file=REMOTE_DIR + "/testdir")
+
+    remove(s, args)
+
+    objects = list(
+        s.client.list_objects(
+            bucket_name=s.bucket,
+            prefix=REMOTE_DIR,
+            recursive=True,
+        )
+    )
+
+    object_names = []
+    for object in objects:
+        object_names.append(object.object_name)
+    print(object_names)
+
+    for path, _ in FILES.items():
+        if not path.startswith(BASE_DIR + "/testdir/"):
+            file = REMOTE_DIR + str(path).removeprefix(BASE_DIR)
+            assert file in object_names
+        elif path.startswith(BASE_DIR + "/testdir/"):
+            file = REMOTE_DIR + str(path).removeprefix(BASE_DIR)
+            assert file not in object_names
