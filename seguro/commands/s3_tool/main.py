@@ -41,72 +41,55 @@ def push_one(s: store.Client, localfile: str, remotefile: str):
 
 # pull file/directory from S3 store
 def pull(s: store.Client, args):
-    objects = list(
-        s.client.list_objects(  # get all objects in bucket with this prefix
-            bucket_name=s.bucket,
-            prefix=args.remotefile,
-            recursive=True,
-        )
-    )
-    pull_flag = 0
-    if len(objects) == 0:
-        raise FileNotFoundError(f"Remote object not found: {args.remotefile}")
-    elif len(objects) == 1:  # pull single file
-        if objects[0].object_name != args.remotefile:
-            raise FileNotFoundError(f"Remote object not found: {args.remotefile}")
-        localpath = Path(args.localfile).absolute()
-        remotepath = Path(args.remotefile)
-        if localpath.is_dir():  # also covers the "." case
-            args.localfile = str(localpath.joinpath(remotepath.name))
-        s.get_file(args.localfile, objects[0].object_name)
-        pull_flag = 1
+    objects = list(s.client.list_objects(bucket_name=s.bucket, prefix=args.remotefile, recursive=True))
 
-    else:  # pull directory
+    if not objects:
+        raise FileNotFoundError(f"Remote object not found: {args.file}, nothing was found to be pulled")
 
-        localbase = Path(args.localfile).absolute()
-        remotebase = Path(args.remotefile)  # base of "directory" in store
+    pulled = False
+    exact_match_pulled = False
 
-        for object in objects:  # get all objects
-            if (
-                args.remotefile == object.object_name and pull_flag == 0
-            ):  # multiple prefix found but only one element matches
-                if localbase.is_dir():
-                    localfile = str(localbase) + "/" + object.object_name
-                else:
-                    localfile = str(localbase)
-                s.get_file(localfile, args.remotefile)
-                pull_flag = 1
-                break
+    localbase = Path(args.localfile).absolute()
+    remotebase = Path(args.remotefile)
 
-            if object.object_name.startswith(str(remotebase) + "/"):
-                # object is inside remotebase
-                # pulling entire directory
+    for obj in objects:
 
-                # check if localpath is file
-                if localbase.is_file() or localbase.suffix != "":
-                    raise NotADirectoryError(f"Localpath is a file, not a directory {localbase}")
+        if obj.object_name == args.remotefile and not exact_match_pulled:
+            if localbase.is_dir():  # also covers the "." case
+                localfile = str(localbase.joinpath(remotebase.name))
+            else:
+                localfile = str(localbase)
+            s.get_file(localfile, args.remotefile)
+            pulled = True
+            exact_match_pulled = True
+            return 0
 
-                # Constructing localpath:
-                # remotepath of element relative to remotebase
-                relative_remotepath = Path(object.object_name).relative_to(remotebase)
+        if args.remotefile.endswith("/") and obj.object_name.startswith(args.remotefile):  # file: "test/""
 
-                # localpath localbase/remotebasename/relative remotepath
-                new_localpath = localbase.joinpath(remotebase.name).joinpath(relative_remotepath)
-                localfile = str(new_localpath)
-                remotefile = object.object_name
+            # set up localpath
+            relative_remotepath = Path(obj.object_name).relative_to(remotebase)
+            new_localpath = localbase.joinpath(remotebase.name).joinpath(relative_remotepath)
+            localfile = str(new_localpath)
+            remotefile = obj.object_name
 
-                logging.debug(f"Store objectname: {object.object_name}")
-                logging.debug(f"Remotepath base: {remotebase}")
-                logging.debug(f"Remotepath relative to base: {relative_remotepath}")
-                logging.debug(f"New localpath: {new_localpath}")
-                try:
-                    s.get_file(localfile, remotefile)
-                    pull_flag = 1
-                except Exception as e:
-                    print(f"Failed to pull {remotefile}: {e}")
+            s.get_file(localfile, remotefile)
+            pulled = True
+        elif not args.remotefile.endswith("/") and obj.object_name.startswith(
+            args.remotefile + "/"
+        ):  # file: "test" + "/"
 
-        if pull_flag == 0:
-            raise FileNotFoundError(f"Remote object not found: {args.remotefile}")
+            # set up localpath
+            relative_remotepath = Path(obj.object_name).relative_to(remotebase)
+            new_localpath = localbase.joinpath(remotebase.name).joinpath(relative_remotepath)
+            localfile = str(new_localpath)
+            remotefile = obj.object_name
+
+            s.get_file(localfile, remotefile)
+            pulled = True
+
+    if not pulled:
+        print(f"Remote object not found: {args.remotefile}, nothing was removed")
+
     return 0
 
 
