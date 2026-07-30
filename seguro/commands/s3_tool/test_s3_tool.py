@@ -272,7 +272,6 @@ def test_remove_directory():
     object_names = []
     for object in objects:
         object_names.append(object.object_name)
-    print(object_names)
 
     for path, _ in FILES.items():
         if not path.startswith(BASE_DIR + "/testdir/"):
