@@ -64,19 +64,11 @@ def pull(s: store.Client, args):
             exact_match_pulled = True
             return 0
 
-        if args.remotefile.endswith("/") and obj.object_name.startswith(args.remotefile):  # file: "test/""
+        # check if user inteded to pull dir but forgot /
+        if not args.remotefile.endswith("/"):
+            remotefile = args.remotefile + "/"
 
-            # set up localpath
-            relative_remotepath = Path(obj.object_name).relative_to(remotebase)
-            new_localpath = localbase.joinpath(remotebase.name).joinpath(relative_remotepath)
-            localfile = str(new_localpath)
-            remotefile = obj.object_name
-
-            s.get_file(localfile, remotefile)
-            pulled = True
-        elif not args.remotefile.endswith("/") and obj.object_name.startswith(
-            args.remotefile + "/"
-        ):  # file: "test" + "/"
+        if obj.object_name.startswith(remotefile):
 
             # set up localpath
             relative_remotepath = Path(obj.object_name).relative_to(remotebase)
