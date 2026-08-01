@@ -93,7 +93,7 @@ def pull(s: store.Client, args):
             pulled = True
 
     if not pulled:
-        print(f"Remote object not found: {args.remotefile}, nothing was removed")
+        print(f"Remote object not found: {args.remotefile}, nothing was pulled")
 
     return 0
 
