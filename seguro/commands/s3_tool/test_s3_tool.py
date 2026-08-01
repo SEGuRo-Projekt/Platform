@@ -214,6 +214,33 @@ def test_pull_directory():
 
 
 @pytest.mark.s3_tool
+def test_pull_globbing():
+    s = Client()
+    args = argparse.Namespace(localfile=[BASE_DIR], remotefile=REMOTE_DIR)
+
+    push(s, args)
+
+    shutil.rmtree(Path(BASE_DIR))
+
+    assert not Path(BASE_DIR + "/testdir").is_dir()
+    assert not Path(BASE_DIR + "/testdirprefix").is_dir()
+
+    args = argparse.Namespace(localfile=BASE_DIR, remotefile=REMOTE_DIR + "/testdir", globbing="store_true")
+
+    pull(s, args)
+
+    assert Path(BASE_DIR + "/testdir").is_dir()
+    assert Path(BASE_DIR + "/testdirprefix").is_dir()
+
+    for path, _ in FILES.items():
+        if path.startswith(BASE_DIR + "/testdir"):
+            assert Path(path).is_file()
+            continue
+        elif not path.startswith(BASE_DIR + "/testdir"):
+            assert not Path(path).is_file()
+
+
+@pytest.mark.s3_tool
 def test_remove_single_file():  # check if "__tmp_test/test" will be removed and nothing else
     s = Client()
 

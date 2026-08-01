@@ -54,6 +54,19 @@ def pull(s: store.Client, args):
 
     for obj in objects:
 
+        if args.globbing:
+
+            # set up localpath
+            new_remotebase = remotebase.parents[0]
+            relative_remotepath = Path(obj.object_name).relative_to(new_remotebase)
+            new_localpath = localbase.joinpath(relative_remotepath)
+            localfile = str(new_localpath)
+            remotefile = obj.object_name
+
+            s.get_file(localfile, obj.object_name)
+            pulled = True
+            continue
+
         if obj.object_name == args.remotefile and not exact_match_pulled:
             if localbase.is_dir():  # also covers the "." case
                 localfile = str(localbase.joinpath(remotebase.name))
@@ -224,6 +237,14 @@ def main():
         type=str,
         help="Path to the local file",
     )
+
+    pull_parser.add_argument(
+        "-g",
+        "--globbing",
+        action="store_true",
+        help="Pull all objects that have remotepath as prefix",
+    )
+
     pull_parser.set_defaults(func=pull)
 
     get_file_parser = subparsers.add_parser("get-file", help="Get a file from the storage")
