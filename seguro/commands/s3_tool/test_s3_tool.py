@@ -25,16 +25,21 @@ FILES = {
 }
 
 
-@pytest.fixture(autouse=True)
-def create_test_tree(base: str = BASE_DIR):
+@pytest.fixture()
+def test_tree(base: str = BASE_DIR):
+    setup_test_environment()
+    yield
+    clean_up_test_environment()
 
+
+def setup_test_environment():
     for string, content in FILES.items():
         path = Path(string)
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content, encoding="utf-8")
 
-    yield
 
+def clean_up_test_environment():
     s = Client()
 
     objects = list(
@@ -53,11 +58,40 @@ def create_test_tree(base: str = BASE_DIR):
     except FileNotFoundError:
         pass
 
-    return
+
+@pytest.fixture
+def persistent_test_tree():
+    setup_test_environment()
+
+
+@pytest.mark.s3_tool_debug
+def test_debug_environment(persistent_test_tree):
+    assert Path(BASE_DIR).exists()
+
+    s = Client()
+
+    args = argparse.Namespace(localfile=[BASE_DIR], remotefile=REMOTE_DIR)
+
+    push(s, args)
+
+    objects = list(
+        s.client.list_objects(
+            bucket_name=s.bucket,
+            prefix=REMOTE_DIR,
+            recursive=True,
+        )
+    )
+
+    assert objects
+
+
+@pytest.mark.s3_tool_debug_cleanup
+def test_cleanup_debug_environment():
+    clean_up_test_environment()
 
 
 @pytest.mark.s3_tool
-def test_push_single_file():
+def test_push_single_file(test_tree):
     s = Client()
 
     args = argparse.Namespace(localfile=[BASE_DIR + "/test"], remotefile=REMOTE_DIR + "/test")
@@ -79,7 +113,7 @@ def test_push_single_file():
 
 
 @pytest.mark.s3_tool
-def test_push_directory():
+def test_push_directory(test_tree):
     s = Client()
 
     args = argparse.Namespace(localfile=[BASE_DIR + "/testdir"], remotefile=REMOTE_DIR + "/testdir")
@@ -108,7 +142,7 @@ def test_push_directory():
 
 
 @pytest.mark.s3_tool
-def test_push_multiple_objects_nested_prefix():  # push multiple files/directories with globbing
+def test_push_multiple_objects_nested_prefix(test_tree):  # push multiple files/directories with globbing
     s = Client()
 
     paths = Path(BASE_DIR).glob("testdir/nested*")
@@ -137,7 +171,7 @@ def test_push_multiple_objects_nested_prefix():  # push multiple files/directori
 
 
 @pytest.mark.s3_tool
-def test_push_multiple_files():  # push multiple localfiles with globbing
+def test_push_multiple_files(test_tree):  # push multiple localfiles with globbing
     s = Client()
 
     paths = Path(BASE_DIR).glob("test*")
@@ -166,7 +200,7 @@ def test_push_multiple_files():  # push multiple localfiles with globbing
 
 
 @pytest.mark.s3_tool
-def test_pull_single_object():
+def test_pull_single_object(test_tree):
     s = Client()
 
     args = argparse.Namespace(localfile=[BASE_DIR + "/test", BASE_DIR + "/test1"], remotefile=REMOTE_DIR)
@@ -188,7 +222,7 @@ def test_pull_single_object():
 
 
 @pytest.mark.s3_tool
-def test_pull_directory():
+def test_pull_directory(test_tree):
     s = Client()
 
     args = argparse.Namespace(localfile=[BASE_DIR], remotefile=REMOTE_DIR)
@@ -214,7 +248,7 @@ def test_pull_directory():
 
 
 @pytest.mark.s3_tool
-def test_pull_globbing():
+def test_pull_globbing(test_tree):
     s = Client()
     args = argparse.Namespace(localfile=[BASE_DIR], remotefile=REMOTE_DIR)
 
@@ -241,7 +275,7 @@ def test_pull_globbing():
 
 
 @pytest.mark.s3_tool
-def test_remove_single_file():  # check if "__tmp_test/test" will be removed and nothing else
+def test_remove_single_file(test_tree):  # check if "__tmp_test/test" will be removed and nothing else
     s = Client()
 
     args = argparse.Namespace(localfile=[BASE_DIR], remotefile=REMOTE_DIR)
@@ -275,7 +309,7 @@ def test_remove_single_file():  # check if "__tmp_test/test" will be removed and
 
 
 @pytest.mark.s3_tool
-def test_remove_directory():
+def test_remove_directory(test_tree):
     s = Client()
 
     args = argparse.Namespace(localfile=[BASE_DIR], remotefile=REMOTE_DIR)
@@ -310,7 +344,7 @@ def test_remove_directory():
 
 
 @pytest.mark.s3_tools
-def test_remove_globbing():
+def test_remove_globbing(test_tree):
     s = Client()
 
     args = argparse.Namespace(localfile=[BASE_DIR], remotefile=REMOTE_DIR)
