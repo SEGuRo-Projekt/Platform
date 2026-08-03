@@ -48,7 +48,7 @@ def pull(s: store.Client, args):
     objects = list(s.client.list_objects(bucket_name=s.bucket, prefix=remotebase, recursive=True))
 
     if not objects:
-        raise FileNotFoundError(f"Remote object not found: {args.file}, nothing was found to be pulled")
+        raise FileNotFoundError(f"Remote object not found: {args.remotefile}, nothing was found to be pulled")
 
     pulled = False
     exact_match_pulled = False
