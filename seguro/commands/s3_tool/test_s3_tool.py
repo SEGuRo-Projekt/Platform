@@ -179,7 +179,7 @@ def test_pull_single_object():
     assert not Path(BASE_DIR + "/test").is_file()  # local files removed
     assert not Path(BASE_DIR + "/test1").is_file()  # local files removed
 
-    args = argparse.Namespace(localfile=BASE_DIR + "/test", remotefile=REMOTE_DIR + "/test")
+    args = argparse.Namespace(localfile=BASE_DIR + "/test", remotefile=REMOTE_DIR + "/test", globbing=False)
 
     pull(s, args)
 
@@ -199,7 +199,7 @@ def test_pull_directory():
 
     assert not Path(BASE_DIR + "/testdir").is_dir()  # local dir removed
 
-    args = argparse.Namespace(localfile=BASE_DIR, remotefile=REMOTE_DIR + "/testdir")
+    args = argparse.Namespace(localfile=BASE_DIR, remotefile=REMOTE_DIR + "/testdir", globbing=False)
 
     pull(s, args)
 
@@ -225,7 +225,7 @@ def test_pull_globbing():
     assert not Path(BASE_DIR + "/testdir").is_dir()
     assert not Path(BASE_DIR + "/testdirprefix").is_dir()
 
-    args = argparse.Namespace(localfile=BASE_DIR, remotefile=REMOTE_DIR + "/testdir", globbing="store_true")
+    args = argparse.Namespace(localfile=BASE_DIR, remotefile=REMOTE_DIR + "/testdir", globbing=True)
 
     pull(s, args)
 
@@ -248,7 +248,7 @@ def test_remove_single_file():  # check if "__tmp_test/test" will be removed and
 
     push(s, args)
 
-    args = argparse.Namespace(file=REMOTE_DIR + "/test")
+    args = argparse.Namespace(file=REMOTE_DIR + "/test", globbing=False)
 
     remove(s, args)
 
@@ -284,7 +284,7 @@ def test_remove_directory():
 
     push(s, args)
 
-    args = argparse.Namespace(file=REMOTE_DIR + "/testdir")
+    args = argparse.Namespace(file=REMOTE_DIR + "/testdir", globbing=False)
 
     remove(s, args)
 
@@ -305,5 +305,40 @@ def test_remove_directory():
             file = REMOTE_DIR + str(path).removeprefix(BASE_DIR)
             assert file in object_names
         elif path.startswith(BASE_DIR + "/testdir/"):
+            file = REMOTE_DIR + str(path).removeprefix(BASE_DIR)
+            assert file not in object_names
+
+
+@pytest.mark.s3_tools
+def test_remove_globbing():
+    s = Client()
+
+    args = argparse.Namespace(localfile=[BASE_DIR], remotefile=REMOTE_DIR)
+
+    assert Path(BASE_DIR + "/test").is_file()
+
+    push(s, args)
+
+    args = argparse.Namespace(file=REMOTE_DIR + "/testdir", globbing=True)
+
+    remove(s, args)
+
+    objects = list(
+        s.client.list_objects(
+            bucket_name=s.bucket,
+            prefix=REMOTE_DIR,
+            recursive=True,
+        )
+    )
+
+    object_names = []
+    for object in objects:
+        object_names.append(object.object_name)
+
+    for path, _ in FILES.items():
+        if not path.startswith(BASE_DIR + "/testdir"):
+            file = REMOTE_DIR + str(path).removeprefix(BASE_DIR)
+            assert file in object_names
+        elif path.startswith(BASE_DIR + "/testdir"):
             file = REMOTE_DIR + str(path).removeprefix(BASE_DIR)
             assert file not in object_names
