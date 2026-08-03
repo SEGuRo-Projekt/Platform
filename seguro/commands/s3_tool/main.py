@@ -54,6 +54,7 @@ def pull(s: store.Client, args):
 
     for obj in objects:
 
+        # pull with globbing
         if args.globbing:
 
             # set up localpath
@@ -67,6 +68,7 @@ def pull(s: store.Client, args):
             pulled = True
             continue
 
+        # pull exactly one object
         if obj.object_name == args.remotefile and not exact_match_pulled:
             if localbase.is_dir():  # also covers the "." case
                 localfile = str(localbase.joinpath(remotebase.name))
@@ -77,11 +79,15 @@ def pull(s: store.Client, args):
             exact_match_pulled = True
             return 0
 
+        # pull entire directory
+
         # check if user inteded to pull dir but forgot /
         if not args.remotefile.endswith("/"):
-            remotefile = args.remotefile + "/"
+            remotepath_as_dir = args.remotefile + "/"
+        else:
+            remotepath_as_dir = args.remotefile
 
-        if obj.object_name.startswith(remotefile):
+        if obj.object_name.startswith(remotepath_as_dir):
 
             # set up localpath
             relative_remotepath = Path(obj.object_name).relative_to(remotebase)
@@ -109,19 +115,27 @@ def remove(s: store.Client, args):
     exact_match_removed = False
 
     for obj in objects:
+        # remove with globbing
         if args.globbing:
             s.remove_file(obj.object_name)
             removed = True
             continue
+
+        # remove exactly one object
         if obj.object_name == args.file and not exact_match_removed:
             s.remove_file(args.file)
             removed = True
             exact_match_removed = True
             return 0
-        elif args.file.endswith("/") and obj.object_name.startswith(args.file):  # file: "test/""
-            s.remove_file(obj.object_name)
-            removed = True
-        elif not args.file.endswith("/") and obj.object_name.startswith(args.file + "/"):  # file: "test" + "/"
+
+        # remove directory
+        # check if user intended to remove dir but forgot /
+        if not args.file.endswith("/"):
+            path_as_dir = args.file + "/"
+        else:
+            path_as_dir = args.file
+
+        if obj.object_name.startswith(path_as_dir):
             s.remove_file(obj.object_name)
             removed = True
 
