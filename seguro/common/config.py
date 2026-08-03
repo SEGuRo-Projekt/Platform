@@ -33,16 +33,8 @@ def resolve_from_project_root(p: str) -> str:
 
 # Authentication
 TLS_CACERT = env.str("TLS_CACERT", resolve_from_project_root("keys/ca.crt"))
-TLS_CERT = env.str(
-    "TLS_CERT", resolve_from_project_root("keys/clients/admin.crt")
-)
-TLS_KEY = env.str(
-    "TLS_KEY", resolve_from_project_root("keys/clients/admin.key")
-)
-
-# TLS_CACERT = env.str("TLS_CACERT", "keys/ca.crt")
-# TLS_CERT = env.str("TLS_CERT", "keys/clients/admin.crt")
-# TLS_KEY = env.str("TLS_KEY", "keys/clients/admin.key")
+TLS_CERT = env.str("TLS_CERT", resolve_from_project_root("keys/clients/admin.crt"))
+TLS_KEY = env.str("TLS_KEY", resolve_from_project_root("keys/clients/admin.key"))
 
 # Object storage
 S3_HOST = env.str("S3_HOST", "localhost")
