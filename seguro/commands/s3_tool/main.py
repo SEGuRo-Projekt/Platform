@@ -15,11 +15,7 @@ def push(s: store.Client, args):
     for localfile in args.localfile:
         localpath = Path(localfile).resolve()
         if len(args.localfile) > 1:
-            new_remote = str(
-                remotepath.joinpath(
-                    localpath.relative_to(localpath.parents[0])
-                )
-            )
+            new_remote = str(remotepath.joinpath(localpath.relative_to(localpath.parents[0])))
         else:
             new_remote = args.remotefile
         push_one(s, localfile, new_remote)
@@ -35,14 +31,9 @@ def push_one(s: store.Client, localfile: str, remotefile: str):
     elif localpath.is_dir():
         for element in localpath.iterdir():
             if element.is_dir():
-                new_remote = (
-                    str(remotepath.joinpath(element.relative_to(localpath)))
-                    + "/"
-                )
+                new_remote = str(remotepath.joinpath(element.relative_to(localpath))) + "/"
             else:
-                new_remote = str(
-                    remotepath.joinpath(element.relative_to(localpath))
-                )
+                new_remote = str(remotepath.joinpath(element.relative_to(localpath)))
 
             push_one(s, str(element), new_remote)
     return
@@ -62,9 +53,7 @@ def pull(s: store.Client, args):
         raise FileNotFoundError(f"Remote object not found: {args.remotefile}")
     elif len(objects) == 1:  # pull single file
         if objects[0].name != args.remotefile:
-            raise FileNotFoundError(
-                f"Remote object not found: {args.remotefile}"
-            )
+            raise FileNotFoundError(f"Remote object not found: {args.remotefile}")
         localpath = Path(args.localfile).absolute()
         remotepath = Path(args.remotefile)
         if localpath.is_dir():  # also covers the "." case
@@ -95,28 +84,20 @@ def pull(s: store.Client, args):
 
                 # check if localpath is file
                 if localbase.is_file() or localbase.suffix != "":
-                    raise NotADirectoryError(
-                        f"Localpath is a file, not a directory {localbase}"
-                    )
+                    raise NotADirectoryError(f"Localpath is a file, not a directory {localbase}")
 
                 # Constructing localpath:
                 # remotepath of element relative to remotebase
-                relative_remotepath = Path(object.object_name).relative_to(
-                    remotebase
-                )
+                relative_remotepath = Path(object.object_name).relative_to(remotebase)
 
                 # localpath localbase/remotebasename/relative remotepath
-                new_localpath = localbase.joinpath(remotebase.name).joinpath(
-                    relative_remotepath
-                )
+                new_localpath = localbase.joinpath(remotebase.name).joinpath(relative_remotepath)
                 localfile = str(new_localpath)
                 remotefile = object.object_name
 
                 logging.debug(f"Store objectname: {object.object_name}")
                 logging.debug(f"Remotepath base: {remotebase}")
-                logging.debug(
-                    f"Remotepath relative to base: {relative_remotepath}"
-                )
+                logging.debug(f"Remotepath relative to base: {relative_remotepath}")
                 logging.debug(f"New localpath: {new_localpath}")
                 try:
                     s.get_file(localfile, remotefile)
@@ -125,29 +106,19 @@ def pull(s: store.Client, args):
                     print(f"Failed to pull {remotefile}: {e}")
 
         if pull_flag == 0:
-            raise FileNotFoundError(
-                f"Remote object not found: {args.remotefile}"
-            )
+            raise FileNotFoundError(f"Remote object not found: {args.remotefile}")
     return 0
 
 
 # remove file/directory from S3 store
 def remove(s: store.Client, args):
-    objects = list(
-        s.client.list_objects(
-            bucket_name=s.bucket, prefix=args.file, recursive=True
-        )
-    )
+    objects = list(s.client.list_objects(bucket_name=s.bucket, prefix=args.file, recursive=True))
 
     removed_object_flag = 0
 
     if len(objects) == 0:
-        raise FileNotFoundError(
-            f"Remote object not found: {args.file}, nothing was removed"
-        )
-    elif (
-        len(objects) == 1 and objects[0].object_name == args.file
-    ):  # remove single file
+        raise FileNotFoundError(f"Remote object not found: {args.file}, nothing was removed")
+    elif len(objects) == 1 and objects[0].object_name == args.file:  # remove single file
         s.remove_file(objects[0].object_name)
         removed_object_flag = 1
     else:  # remove entire directory
@@ -230,9 +201,7 @@ def list_elements(s: store.Client, args):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        prog="s3_tool", description="Tool to interact with S3 storage"
-    )
+    parser = argparse.ArgumentParser(prog="s3_tool", description="Tool to interact with S3 storage")
 
     parser.add_argument(
         "-l",
@@ -253,9 +222,7 @@ def main():
 
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    push_parser = subparsers.add_parser(
-        "push", help="Push a local file to the storage"
-    )
+    push_parser = subparsers.add_parser("push", help="Push a local file to the storage")
     push_parser.add_argument(
         "-lf",
         "--localfile",
@@ -263,14 +230,10 @@ def main():
         help="Path to the local file",
         nargs="*",
     )
-    push_parser.add_argument(
-        "-rf", "--remotefile", type=str, help="Path in the storage"
-    )
+    push_parser.add_argument("-rf", "--remotefile", type=str, help="Path in the storage")
     push_parser.set_defaults(func=push)
 
-    pull_parser = subparsers.add_parser(
-        "pull", help="Pull a local file from the storage"
-    )
+    pull_parser = subparsers.add_parser("pull", help="Pull a local file from the storage")
     pull_parser.add_argument(
         "-rf",
         "--remotefile",
@@ -285,9 +248,7 @@ def main():
     )
     pull_parser.set_defaults(func=pull)
 
-    get_file_parser = subparsers.add_parser(
-        "get-file", help="Get a file from the storage"
-    )
+    get_file_parser = subparsers.add_parser("get-file", help="Get a file from the storage")
 
     get_file_parser.add_argument(
         "-rf",
@@ -296,27 +257,17 @@ def main():
         help="Path in the storage",
     )
 
-    get_file_parser.add_argument(
-        "-lf", "--localfile", type=str, help="Path to the local file"
-    )
+    get_file_parser.add_argument("-lf", "--localfile", type=str, help="Path to the local file")
 
     get_file_parser.set_defaults(func=get_file)
 
-    remove_parser = subparsers.add_parser(
-        "remove", help="Remove a file/directory from the storage"
-    )
-    remove_parser.add_argument(
-        "-f", "--file", type=str, help="Path of file in storage"
-    )
+    remove_parser = subparsers.add_parser("remove", help="Remove a file/directory from the storage")
+    remove_parser.add_argument("-f", "--file", type=str, help="Path of file in storage")
     remove_parser.set_defaults(func=remove)
 
-    get_file_content_parser = subparsers.add_parser(
-        "get-file-content", help="Get file content into terminal"
-    )
+    get_file_content_parser = subparsers.add_parser("get-file-content", help="Get file content into terminal")
 
-    get_file_content_parser.add_argument(
-        "-f", "--file", type=str, help="Path of file in storage"
-    )
+    get_file_content_parser.add_argument("-f", "--file", type=str, help="Path of file in storage")
 
     get_file_content_parser.set_defaults(func=get_file_content)
 
@@ -324,9 +275,7 @@ def main():
         "put-file-content", help="Add filecontent as bytes into file in store"
     )
 
-    put_file_content_parser.add_argument(
-        "-f", "--file", type=str, help="Path to file in store"
-    )
+    put_file_content_parser.add_argument("-f", "--file", type=str, help="Path to file in store")
 
     put_file_content_parser.add_argument(
         "-c",
@@ -337,13 +286,9 @@ def main():
 
     put_file_content_parser.set_defaults(func=put_file_content)
 
-    get_file_url_parser = subparsers.add_parser(
-        "get-file-url", help="Get File URL"
-    )
+    get_file_url_parser = subparsers.add_parser("get-file-url", help="Get File URL")
 
-    get_file_url_parser.add_argument(
-        "-f", "--file", type=str, help="Path of file in storage"
-    )
+    get_file_url_parser.add_argument("-f", "--file", type=str, help="Path of file in storage")
 
     get_file_url_parser.set_defaults(func=get_file_url)
 
