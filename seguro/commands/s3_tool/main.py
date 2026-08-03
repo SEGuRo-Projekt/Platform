@@ -109,6 +109,10 @@ def remove(s: store.Client, args):
     exact_match_removed = False
 
     for obj in objects:
+        if args.globbing:
+            s.remove_file(obj.object_name)
+            removed = True
+            continue
         if obj.object_name == args.file and not exact_match_removed:
             s.remove_file(args.file)
             removed = True
@@ -262,6 +266,12 @@ def main():
 
     remove_parser = subparsers.add_parser("remove", help="Remove a file/directory from the storage")
     remove_parser.add_argument("-f", "--file", type=str, help="Path of file in storage")
+    remove_parser.add_argument(
+        "-g",
+        "--globbing",
+        action="store_true",
+        help="Remove all objects that have remotepath as prefix",
+    )
     remove_parser.set_defaults(func=remove)
 
     get_file_content_parser = subparsers.add_parser("get-file-content", help="Get file content into terminal")
