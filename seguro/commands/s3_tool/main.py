@@ -41,7 +41,11 @@ def push_one(s: store.Client, localfile: str, remotefile: str):
 
 # pull file/directory from S3 store
 def pull(s: store.Client, args):
-    objects = list(s.client.list_objects(bucket_name=s.bucket, prefix=args.remotefile, recursive=True))
+    if args.remotefile.endswith("*"):
+        remotebase = args.remotefile.split("*", 1)[0]
+    else:
+        remotebase = args.remotefile
+    objects = list(s.client.list_objects(bucket_name=s.bucket, prefix=remotebase, recursive=True))
 
     if not objects:
         raise FileNotFoundError(f"Remote object not found: {args.file}, nothing was found to be pulled")
@@ -55,10 +59,10 @@ def pull(s: store.Client, args):
     for obj in objects:
 
         # pull with globbing
-        if args.globbing:
+        if args.globbing or args.remotefile.endswith("*"):
+            new_remotebase = remotebase.parents[0]
 
             # set up localpath
-            new_remotebase = remotebase.parents[0]
             relative_remotepath = Path(obj.object_name).relative_to(new_remotebase)
             new_localpath = localbase.joinpath(relative_remotepath)
             localfile = str(new_localpath)
