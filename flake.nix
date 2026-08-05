@@ -68,6 +68,14 @@
                 nativeBuildInputs = old.nativeBuildInputs ++ pythonFinal.resolveBuildSystem { setuptools = [ ]; };
                 buildInputs = (old.buildInputs or [ ]) ++ [ final.graphviz ];
               });
+              pyusb = pythonPrev.pyusb.overrideAttrs (old: {
+                postInstall = (old.postInstall or "") + ''
+                  libusb="${final.lib.getLib final.libusb1}/lib/libusb-1.0${final.stdenv.hostPlatform.extensions.sharedLibrary}"
+                  test -f "$libusb" || { echo "ERROR: $libusb doesn't exist, please update/fix this build expression."; exit 1; }
+                  sed -i -e "s|find_library=None|find_library=lambda _:\"$libusb\"|" \
+                    "$out/${python.sitePackages}/usb/backend/libusb1.py"
+                '';
+              });
             };
 
           pythonSet =
