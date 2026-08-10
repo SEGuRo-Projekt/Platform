@@ -51,6 +51,7 @@ jobs:
           --file compose.yaml
           --file compose-cache.json
           --set docs.cache-to= # Fix broken CI (2026-05-20)
+          ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository && '--set *.cache-to=' || '' }}
 
       - name: Start containers
         run: docker compose up --detach --quiet-pull
