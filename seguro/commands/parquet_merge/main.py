@@ -39,8 +39,44 @@ def parse_duration(value: str) -> timedelta:
     return total
 
 
-def merge_files(args):
+def get_files(startdate: datetime, enddate: datetime):
+
     s = Client()
+
+    args = argparse.Namespace()
+
+    if enddate - startdate < timedelta(minutes=1):
+        # construct args to pull startdate minute and enddate minuts
+        startdate_prefix = startdate.strftime("%Y-%m-%dT%H:%M")
+        print(f"start: {startdate_prefix}")
+        start_args = argparse.Namespace(
+            localfile=LOCAL_TMP + ".", remotefile="data/measurements/demo-data/" + startdate_prefix + "*", globbing=True
+        )
+        pull(s, start_args)
+
+        enddate_prefix = enddate.strftime("%Y-%m-%dT%H:%M")
+        print(f"end: {enddate_prefix}")
+        end_args = argparse.Namespace(
+            localfile=LOCAL_TMP + ".", remotefile="data/measurements/demo-data/" + enddate_prefix + "*", globbing=True
+        )
+        pull(s, end_args)
+
+    elif enddate - startdate < timedelta(hours=1):
+        # construct args to pull startdate hour and enddate hour
+        ...
+    elif enddate - startdate < timedelta(days=1):
+        # construct args to pull startdate day and enddate day
+        ...
+    else:  # multiday
+        ...
+    # localfile=LOCAL_TMP + "demo1",
+    # remotefile="data/measurements/demo-data/" + startdate.isoformat() + ".parquet",
+    # globbing=False,
+
+    # pull(s, args)
+
+
+def merge_files(args):
 
     if args.end is not None and args.duration is None:
         enddate = datetime.fromisoformat(args.end)
@@ -50,13 +86,7 @@ def merge_files(args):
 
     startdate = datetime.fromisoformat(args.start)
 
-    pull_args = argparse.Namespace(
-        localfile=LOCAL_TMP + "demo1",
-        remotefile="data/measurements/demo-data/" + startdate.isoformat() + ".parquet",
-        globbing=False,
-    )
-
-    pull(s, pull_args)
+    get_files(startdate, enddate)
 
     return 0
 
