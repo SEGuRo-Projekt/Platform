@@ -235,30 +235,18 @@ def main():
 
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    push_parser = subparsers.add_parser("push", help="Push a local file to the storage")
+    push_parser = subparsers.add_parser("push", help="Push a local file/dir to store")
     push_parser.add_argument(
         "-lf",
         "--localfile",
         type=str,
-        help="Path to the local file",
+        help="Local file(s)/dir to be pushed",
         nargs="*",
     )
-    push_parser.add_argument("-rf", "--remotefile", type=str, help="Path in the storage")
+    push_parser.add_argument("-rf", "--remotefile", type=str, help="Path of file/dir in store")
     push_parser.set_defaults(func=push)
 
-    pull_parser = subparsers.add_parser("pull", help="Pull a local file from the storage")
-    pull_parser.add_argument(
-        "-rf",
-        "--remotefile",
-        type=str,
-        help="Path in the storage",
-    )
-    pull_parser.add_argument(
-        "-lf",
-        "--localfile",
-        type=str,
-        help="Path to the local file",
-    )
+    pull_parser = subparsers.add_parser("pull", help="Pull file/dir from store")
 
     pull_parser.add_argument(
         "-g",
@@ -267,7 +255,45 @@ def main():
         help="Pull all objects that have remotepath as prefix",
     )
 
+    pull_parser.add_argument(
+        "-rf",
+        "--remotefile",
+        type=str,
+        help="Path of file/dir to be pulled from store",
+    )
+    pull_parser.add_argument(
+        "-lf",
+        "--localfile",
+        type=str,
+        help="Local path where file(s)/dir will be stored",
+    )
+
     pull_parser.set_defaults(func=pull)
+
+    remove_parser = subparsers.add_parser("remove", help="Remove a file/dir from  store")
+    remove_parser.add_argument("-f", "--file", type=str, help="Path of file/dir in store")
+    remove_parser.add_argument(
+        "-g",
+        "--globbing",
+        action="store_true",
+        help="Remove all objects that have remotepath as prefix",
+    )
+    remove_parser.set_defaults(func=remove)
+
+    list_parser = subparsers.add_parser(
+        "ls",
+        help="List file of selected directory in store",
+    )
+
+    list_parser.add_argument(
+        "-p",
+        "--path",
+        type=str,
+        help="Path of directory in store to list",
+        default=".",
+    )
+
+    list_parser.set_defaults(func=list_elements)
 
     get_file_parser = subparsers.add_parser("get-file", help="Get a file from the storage")
 
@@ -281,16 +307,6 @@ def main():
     get_file_parser.add_argument("-lf", "--localfile", type=str, help="Path to the local file")
 
     get_file_parser.set_defaults(func=get_file)
-
-    remove_parser = subparsers.add_parser("remove", help="Remove a file/directory from the storage")
-    remove_parser.add_argument("-f", "--file", type=str, help="Path of file in storage")
-    remove_parser.add_argument(
-        "-g",
-        "--globbing",
-        action="store_true",
-        help="Remove all objects that have remotepath as prefix",
-    )
-    remove_parser.set_defaults(func=remove)
 
     get_file_content_parser = subparsers.add_parser("get-file-content", help="Get file content into terminal")
 
@@ -353,21 +369,6 @@ def main():
     )
 
     get_frame_parser.set_defaults(func=get_frame)
-
-    list_parser = subparsers.add_parser(
-        "ls",
-        help="List file of selected directory of the store",
-    )
-
-    list_parser.add_argument(
-        "-p",
-        "--path",
-        type=str,
-        help="Path of directory in store to list",
-        default=".",
-    )
-
-    list_parser.set_defaults(func=list_elements)
 
     args = parser.parse_args()
 
