@@ -110,17 +110,21 @@ def pull(s: store.Client, args):
 
 # remove file/directory from S3 store
 def remove(s: store.Client, args):
-    objects = list(s.client.list_objects(bucket_name=s.bucket, prefix=args.file, recursive=True))
+    if args.file.endswith("*"):
+        remotebase = args.file.split("*", 1)[0]
+    else:
+        remotebase = args.remotefile
+    objects = list(s.client.list_objects(bucket_name=s.bucket, prefix=remotebase, recursive=True))
 
     if not objects:
-        raise FileNotFoundError(f"Remote object not found: {args.file}, nothing was removed")
+        raise FileNotFoundError(f"Remote object not found: {remotebase}, nothing was removed")
 
     removed = False
     exact_match_removed = False
 
     for obj in objects:
         # remove with globbing
-        if args.globbing:
+        if args.globbing or args.file.endswith("*"):
             s.remove_file(obj.object_name)
             removed = True
             continue
@@ -187,29 +191,37 @@ def put_file_content(s: store.Client, args):
 
 
 def list_elements(s: store.Client, args):
+
     if args.path == ".":  # list entire bucket
         objects = s.client.list_objects(
             bucket_name=s.bucket,
-            recursive=False,
+            recursive=args.recursive,
         )
         for object in objects:
             print(object.object_name)
         return
 
-    if not args.path.endswith("/"):
-        args.path += "/"
-    remotebase = Path(args.path)
-
-    objects = s.client.list_objects(
-        bucket_name=s.bucket,
-        prefix=args.path,
-        recursive=False,
-    )
+    if args.path.endswith("*") or args.globbing:
+        pathprefix = Path(args.path.split("*", 1)[0])
+        objects = list(s.client.list_objects(bucket_name=s.bucket, prefix=str(pathprefix), recursive=args.recursive))
+    else:
+        remotebase = Path(args.path)
+        objects = list(
+            s.client.list_objects(bucket_name=s.bucket, prefix=(str(remotebase) + "/"), recursive=args.recursive)
+        )
 
     for object in objects:  # get all objects from Store
-        element_in_dir = str(Path(object.object_name).relative_to(remotebase))
-        if object.object_name.endswith("/"):
-            element_in_dir += "/"
+
+        if args.globbing or args.path.endswith("*"):
+            new_remotebase = pathprefix.parents[0]  # remove * from string
+            element_in_dir = str(Path(object.object_name).relative_to(new_remotebase))
+            if object.object_name.endswith("/"):
+                element_in_dir += "/"
+
+        else:
+            element_in_dir = str(Path(object.object_name).relative_to(remotebase))
+            if object.object_name.endswith("/"):
+                element_in_dir += "/"
         print(element_in_dir)
 
 
@@ -291,6 +303,18 @@ def main():
         type=str,
         help="Path of directory in store to list",
         default=".",
+    )
+    list_parser.add_argument(
+        "-g",
+        "--globbing",
+        action="store_true",
+        help="List all objects that have path as prefix",
+    )
+    list_parser.add_argument(
+        "-r",
+        "--recursive",
+        action="store_true",
+        help="List all objects and objects of subdirectories that have path as prefix",
     )
 
     list_parser.set_defaults(func=list_elements)
