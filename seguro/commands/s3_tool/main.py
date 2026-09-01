@@ -190,7 +190,9 @@ def put_file_content(s: store.Client, args):
     s.put_file_contents(args.file, content)
 
 
-def list_elements(s: store.Client, args):
+def list_elements(s: store.Client, args) -> list:
+
+    element_names = []
 
     if args.path == ".":  # list entire bucket
         objects = s.client.list_objects(
@@ -198,8 +200,8 @@ def list_elements(s: store.Client, args):
             recursive=args.recursive,
         )
         for object in objects:
-            print(object.object_name)
-        return
+            element_names.append(object.object_name)
+        return element_names
 
     if args.path.endswith("*") or args.globbing:
         pathprefix = Path(args.path.split("*", 1)[0])
@@ -222,7 +224,9 @@ def list_elements(s: store.Client, args):
             element_in_dir = str(Path(object.object_name).relative_to(remotebase))
             if object.object_name.endswith("/"):
                 element_in_dir += "/"
-        print(element_in_dir)
+
+        element_names.append(object.object_name)
+    return element_names
 
 
 def main():
@@ -404,4 +408,10 @@ def main():
 
     s = store.Client(bucket=args.bucket)
 
-    return args.func(s, args)
+    result = args.func(s, args)
+
+    if type(result) == list:
+        for element in result:
+            print(element)
+
+    return
