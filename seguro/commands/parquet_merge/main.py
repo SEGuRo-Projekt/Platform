@@ -2,19 +2,68 @@
 # SPDX-License-Identifier: Apache-2.0
 import argparse
 import re
-from datetime import datetime, date, time, timedelta
+from datetime import datetime, date, time, timedelta, timezone
 
 from seguro.common import store
 from seguro.common import config
-from seguro.commands.s3_tool.main import push, pull, remove
+from seguro.commands.s3_tool.main import push, pull, remove, list_elements
 from seguro.common.store import Client
 
 LOCAL_TMP = ".LOCAL/"
+REMOTE_FOLDER = "data/measurements/demo-data/"
 
 
 def get_time(args):
     print(datetime.fromisoformat(args.at))
     print(type(args.at))
+
+
+def resolve_timeframe(start_input: str, end_or_duration) -> tuple[datetime, datetime]:
+
+    start_dt = datetime.fromisoformat(start_input)
+
+    if start_dt.tzinfo is None:  # check for timezone information TODO: SO FAR ALL OBJECTS ARE UTC +00 ??
+        start_dt = start_dt.replace(tzinfo=timezone.utc)
+
+    if isinstance(end_or_duration, timedelta):
+        end_dt = start_dt + end_or_duration  # is duration
+    else:
+        end_dt = datetime.fromisoformat(end_or_duration)
+        if end_dt.tzinfo is None:
+            end_dt = end_dt.replace(tzinfo=timezone.utc)
+
+    return start_dt, end_dt
+
+
+def fetch_candidates(start_dt: datetime, end_dt: datetime) -> list[str]:
+    """
+    Fetches candidate object keys from MinIO within [start_dt, end_dt] lexicographical bounds.
+    Stops requesting additional pages as soon as an object key exceeds end_dt.
+    """
+
+    s = Client()
+
+    start_after_key = f"{REMOTE_FOLDER}{start_dt.isoformat()}.parquet"
+    end_key = f"{REMOTE_FOLDER}{end_dt.isoformat()}.parquet"
+
+    objects = s.client.list_objects(
+        bucket_name=s.bucket,
+        prefix=REMOTE_FOLDER,
+        start_after=start_after_key,
+    )
+
+    candidate_keys = []
+
+    for object in objects:
+        key = object.object_name
+        # EXIT LIMIT: Stop as soon as keys exceed end_dt
+        # Breaking out of this loop prevents MinIO from requesting further pages
+        if key > end_key:
+            break
+
+        candidate_keys.append(key)
+
+    return candidate_keys
 
 
 def parse_duration(value: str) -> timedelta:
@@ -39,54 +88,35 @@ def parse_duration(value: str) -> timedelta:
     return total
 
 
-def get_files(startdate: datetime, enddate: datetime):
+def get_files(candidates: list[str]):
 
     s = Client()
 
-    args = argparse.Namespace()
+    pull_args = argparse.Namespace(localfile=LOCAL_TMP, remotefile=candidates)
 
-    if enddate - startdate < timedelta(minutes=1):
-        # construct args to pull startdate minute and enddate minuts
-        startdate_prefix = startdate.strftime("%Y-%m-%dT%H:%M")
-        print(f"start: {startdate_prefix}")
-        start_args = argparse.Namespace(
-            localfile=LOCAL_TMP + ".", remotefile="data/measurements/demo-data/" + startdate_prefix + "*", globbing=True
-        )
-        pull(s, start_args)
-
-        enddate_prefix = enddate.strftime("%Y-%m-%dT%H:%M")
-        print(f"end: {enddate_prefix}")
-        end_args = argparse.Namespace(
-            localfile=LOCAL_TMP + ".", remotefile="data/measurements/demo-data/" + enddate_prefix + "*", globbing=True
-        )
-        pull(s, end_args)
-
-    elif enddate - startdate < timedelta(hours=1):
-        # construct args to pull startdate hour and enddate hour
-        ...
-    elif enddate - startdate < timedelta(days=1):
-        # construct args to pull startdate day and enddate day
-        ...
-    else:  # multiday
-        ...
-    # localfile=LOCAL_TMP + "demo1",
-    # remotefile="data/measurements/demo-data/" + startdate.isoformat() + ".parquet",
-    # globbing=False,
-
-    # pull(s, args)
+    pull(s, pull_args)
 
 
-def merge_files(args):
+def parquet_merger(args):
 
     if args.end is not None and args.duration is None:
-        enddate = datetime.fromisoformat(args.end)
+        start_dt, end_dt = resolve_timeframe(args.start, args.end)
 
     if args.end is None and args.duration is not None:
-        enddate = datetime.fromisoformat(args.start) + parse_duration(args.duration)
+        start_dt, end_dt = resolve_timeframe(args.start, parse_duration(args.duration))
 
-    startdate = datetime.fromisoformat(args.start)
+    print(f"start: {start_dt.isoformat()}, end: {end_dt.isoformat()}")
 
-    get_files(startdate, enddate)
+    candidates = fetch_candidates(start_dt, end_dt)
+
+    for candidate in candidates:
+        print(candidate)
+
+    # TODO pull candidates
+
+    get_files(candidates)
+
+    # TODO merge files
 
     return 0
 
@@ -110,7 +140,7 @@ def main():
     group.add_argument("-e", "--end", type=str, help="End-Timestamp in ISO 8601 format")
     group.add_argument("-d", "--duration", type=str, help="Duration starting from start-timestamp")
 
-    parser.set_defaults(func=merge_files)
+    parser.set_defaults(func=parquet_merger)
 
     args = parser.parse_args()
 
