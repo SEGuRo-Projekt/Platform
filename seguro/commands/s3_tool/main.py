@@ -225,7 +225,7 @@ def list_elements(s: store.Client, args) -> list:
             if object.object_name.endswith("/"):
                 element_in_dir += "/"
 
-        element_names.append(object.object_name)
+        element_names.append(element_in_dir)
     return element_names
 
 
@@ -410,7 +410,7 @@ def main():
 
     result = args.func(s, args)
 
-    if type(result) == list:
+    if type(result) is list:
         for element in result:
             print(element)
 
