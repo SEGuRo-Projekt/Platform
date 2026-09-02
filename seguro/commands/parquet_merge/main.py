@@ -3,6 +3,7 @@
 import argparse
 import re
 from datetime import datetime, date, time, timedelta, timezone
+from pathlib import Path
 
 from seguro.common import store
 from seguro.common import config
@@ -88,13 +89,21 @@ def parse_duration(value: str) -> timedelta:
     return total
 
 
-def get_files(candidates: list[str]):
+def get_files(candidates: list[str]):  # TODO: fix pull function to accept lists?
 
     s = Client()
+    if not Path(LOCAL_TMP).is_dir():  # TODO: remove probably, setup new everytime
+        Path(LOCAL_TMP).mkdir()
 
-    pull_args = argparse.Namespace(localfile=LOCAL_TMP, remotefile=candidates)
+    for candidate in candidates:
+        pull_args = argparse.Namespace(localfile=LOCAL_TMP, remotefile=candidate, globbing=False)
+        pull(s, pull_args)
 
-    pull(s, pull_args)
+
+def authenticate_files(): ...
+
+
+def merge_files(): ...
 
 
 def parquet_merger(args):
@@ -113,8 +122,9 @@ def parquet_merger(args):
         print(candidate)
 
     # TODO pull candidates
-
     get_files(candidates)
+
+    # TODO authenticate files
 
     # TODO merge files
 
