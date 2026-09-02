@@ -47,10 +47,12 @@ jobs:
         run: sed 's/PLEASE-CHANGE-ME/7418GOKUjD4npqnfBi3uDVsrIoqgiEJD/g' .env.example > .env
 
       - name: Build Docker Compose
-        run: docker buildx bake
-          --file compose.yaml
-          --file compose-cache.json
-          --set docs.cache-to= # Fix broken CI (2026-05-20)
+        run: |
+          docker buildx bake \
+            --file compose.yaml \
+            --file compose-cache.json \
+            --set docs.cache-to= \
+            ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository && '--set *.cache-to=' || '' }}
 
       - name: Start containers
         run: docker compose up --detach --quiet-pull
