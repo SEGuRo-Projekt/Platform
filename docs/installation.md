@@ -1,14 +1,16 @@
 # Installation
 
-1. Install SEGuRo project (and its dependencies) in editable mode
+1. Choose python version `3.13.12`
+
+2. Install SEGuRo project (and its dependencies) in editable mode
 ```bash
-pip install poetry
-poetry install
+pip install uv
+uv sync
 ```
-2. Create `.env` file including parameters for platform deployment. See: [Configuration](configuration.md).
-3. Start platform via Docker Compose
+3. Create `.env` file including parameters for platform deployment. See: [Configuration](configuration.md).
+4. Start platform via Docker Compose
 ```bash
 docker compose up --detach
 ```
 
-3. Open the [home page](https://localhost)
+5. Open the [home page](https://localhost)
